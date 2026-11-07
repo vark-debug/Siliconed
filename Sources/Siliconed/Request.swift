@@ -52,6 +52,15 @@ package struct Request: Sendable, Equatable {
     /// `nil`: the denoiser's default (`ModelCard.defaultSteps`). At least 1, otherwise the render
     /// throws `EngineError.invalidSteps` before any computation.
     package var steps: Int?
+    /// **A schedule a caller supplies** (the engine's API; `silicontrol` reaches a graph's
+    /// `ManualSigmas` through `--steps 9`): `steps + 1` σ, the last 0, strictly decreasing — rather
+    /// than the artifact's published `sample_sigmas`. `nil`: the family's own schedule, the product's
+    /// path (to the bit).
+    ///
+    /// Only the denoisers whose `check(sigmas:startImage:)` accepts one read it (Qwen-Image-2.1's
+    /// Turbo does — 9 steps and the extra 0.150000 of a ComfyUI graph, for one); the others refuse
+    /// it before any computation. When it is set, `steps` follows its length: `steps + 1` values.
+    package var sigmas: [Float]? = nil
     package var loras: [LoRAEntry]
     /// **The img2img starting image.** Set at any size, it is **immediately** filled and
     /// center-cropped to the request's format (`ImageRGB.fitted`): a request never keeps a
@@ -129,6 +138,10 @@ package struct Request: Sendable, Equatable {
         case detail(model: String)
         /// A prompt longer than its encoder reads, counted without the template (`admitPrompt`).
         case promptTooLong(tokens: Int, max: Int)
+        /// A σ table the engine cannot walk (`admit(sigmas:)`): what is wrong with it.
+        case schedule(String)
+        /// A σ table given to a denoiser that reads its artifact's schedule only.
+        case noCustomSchedule(model: String)
         package var description: String {
             switch self {
             case let .references(n, max) where max == 0:
@@ -141,6 +154,10 @@ package struct Request: Sendable, Equatable {
             case .detail(let model): return "\(model) does not offer Detail"
             case let .promptTooLong(tokens, max):
                 return "the prompt is \(tokens) tokens long, this model reads at most \(max): shorten it"
+            case .schedule(let why):
+                return "the σ table is refused: \(why)"
+            case .noCustomSchedule(let model):
+                return "\(model) walks the schedule of its artifact: it takes no σ table"
             }
         }
     }
@@ -158,6 +175,33 @@ package struct Request: Sendable, Equatable {
     /// out: what the user can shorten.
     package static func admitPrompt(tokens: Int, max: Int) throws {
         guard tokens <= max else { throw Failure.promptTooLong(tokens: tokens, max: max) }
+    }
+
+    /// **A σ table the request supplies is walkable**: at least two σ, finite, strictly decreasing, and
+    /// ending in 0 — the sampler divides by the gaps between σ, so any other table would divide by zero
+    /// or walk backwards. Returns the step count the table's length gives (`sigmas.count - 1`), so that
+    /// `Admission` can hold it against `Request.steps` when both are given.
+    ///
+    /// The shape is all this method judges: whether a *denoiser* walks this particular table is
+    /// `DenoisingModule.check(sigmas:startImage:)`'s (Qwen-Image-2.1's Turbo does — the ComfyUI graph's
+    /// nine, among others).
+    package static func admit(sigmas: [Float]) throws -> Int {
+        guard sigmas.count >= 2 else {
+            throw Failure.schedule("\(sigmas.count) σ: a schedule needs at least two, the last 0")
+        }
+        guard sigmas.count - 1 <= maximumSteps else {
+            throw Failure.schedule("\(sigmas.count) σ: a render takes at most \(maximumSteps) steps")
+        }
+        guard sigmas.allSatisfy({ $0.isFinite }) else {
+            throw Failure.schedule("a σ is not a finite number")
+        }
+        guard let last = sigmas.last, last == 0 else {
+            throw Failure.schedule("the last σ must be 0, not \(sigmas.last.map { String($0) } ?? "none")")
+        }
+        for (i, (σ, next)) in zip(sigmas, sigmas.dropFirst()).enumerated() where σ <= next {
+            throw Failure.schedule("the σ do not decrease strictly: #\(i) is \(σ), #\(i + 1) is \(next)")
+        }
+        return sigmas.count - 1
     }
 
     package init(_ prompt: String, width: Int, height: Int, seed: UInt64 = 42, steps: Int? = nil,

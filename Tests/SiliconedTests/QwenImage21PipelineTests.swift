@@ -35,13 +35,38 @@ final class QwenImage21PipelineTests: XCTestCase {
                        [0xbcb08360, 0xbcc6d820, 0xbce1b8e0, 0xbd013670, 0xbd4c8570, 0xbe0ffd20, 0xbe94766c, 0xbed44242])
         // The round trip the pipeline makes, `(σ·1000)/1000`, gives σ back to the bit for these nodes.
         for x in σ.dropLast() { XCTAssertEqual((x * 1000 / 1000).bitPattern, x.bitPattern) }
-        // The module: the published schedule, 8 steps only.
+        // The module: the published schedule at 8, the graph's ManualSigmas at 9.
         let module = QwenImage21DenoisingModule(map: "", scheduler: s)
         XCTAssertEqual(module.defaultSteps, 8)
         XCTAssertEqual(bits(module.sigmas(steps: 8)), bits(σ))
-        XCTAssertEqual(QwenImage21Pipeline.acceptedSteps, [8])
+        XCTAssertEqual(QwenImage21Pipeline.acceptedSteps, [8, 9])
         XCTAssertNoThrow(try QwenImage21Pipeline.check(steps: 8))
-        for n in [5, 6, 7, 9] { XCTAssertThrowsError(try QwenImage21Pipeline.check(steps: n), "\(n)") }
+        for n in [5, 6, 7, 10] { XCTAssertThrowsError(try QwenImage21Pipeline.check(steps: n), "\(n)") }
+    }
+
+    /// **The 9-step ManualSigmas of a ComfyUI graph** (`#271` of the « 移除、局部重绘 » workflow):
+    /// the published eight, then 0.150000, then 0 — to the bit; the first eight are the published
+    /// ones, unchanged. And the shape a σ table must have for the sampler to walk it
+    /// (`Request.admit(sigmas:)`, through `QwenImage21Pipeline.check(sigmas:)`).
+    func testTheManualSigmasScheduleAndTheSigmaChecks() throws {
+        let module = QwenImage21DenoisingModule(map: "", scheduler: QwenImage21Pipeline.Scheduler())
+        let σ = module.sigmas(steps: 9)
+        XCTAssertEqual(bits(σ), [0x3f800000, 0x3f7a7be5, 0x3f744524, 0x3f6d375d, 0x3f6523f6, 0x3f585b9f,
+                                 0x3f345c57, 0x3ed44242, 0x3e19999a, 0])
+        // The refinement only: the first eight do not move from the published schedule.
+        XCTAssertEqual(Array(σ.prefix(8)), Array(module.sigmas(steps: 8).prefix(8)))
+        XCTAssertNoThrow(try QwenImage21Pipeline.check(sigmas: σ))
+        XCTAssertNoThrow(try module.check(sigmas: σ, startImage: false))
+        XCTAssertThrowsError(try module.check(sigmas: σ, startImage: true))
+        // What the sampler divides by: a table that does not decrease strictly to 0, that starts at
+        // 0, that carries a non-finite σ, or that is one σ long, is refused before any computation.
+        let bad: [[Float]] = [[0.5, 1, 0], [1, 0.5, 0.5, 0], [1, 0.5, 0.6, 0], [1, 0.5, 0.2], [0, 0], [1], [1, .nan, 0]]
+        for σ in bad {
+            XCTAssertThrowsError(try QwenImage21Pipeline.check(sigmas: σ), "\(σ)")
+        }
+        // The two-step table the published schedule is, by the same door: the engine's σ path is
+        // general, the workflow's nine one table among the shapes it takes.
+        XCTAssertNoThrow(try QwenImage21Pipeline.check(sigmas: [1, 0.5, 0]))
     }
 
     /// The configs that would move the published σ are refused: the base model's dynamic shift and

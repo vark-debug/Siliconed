@@ -71,6 +71,9 @@ package enum EngineError: Error, Equatable, Sendable, Codable, LocalizedError, C
     case emptyPrompt
     /// A step count the model refuses. `allowed`: the counts it accepts, empty when any count ≥ 1 is.
     case invalidSteps(steps: Int, allowed: [Int])
+    /// A σ table the request supplied (`Request.sigmas`) that the engine, or the model, does not walk.
+    /// `reason` says what is wrong with it.
+    case invalidSchedule(reason: String)
     /// More reference images than the model reads (`max` 0: it does no reference editing).
     case tooManyReferences(count: Int, max: Int)
     /// A side under `Format.minimumSide` — the models are out of their domain below. `side`: the
@@ -242,6 +245,7 @@ package enum EngineError: Error, Equatable, Sendable, Codable, LocalizedError, C
         case .libraryRefused: return "library_refused"
         case .emptyPrompt: return "empty_prompt"
         case .invalidSteps: return "invalid_steps"
+        case .invalidSchedule: return "invalid_schedule"
         case .tooManyReferences: return "too_many_references"
         case .imageTooSmall: return "image_too_small"
         case .formatRefused: return "format_refused"
@@ -315,6 +319,8 @@ package enum EngineError: Error, Equatable, Sendable, Codable, LocalizedError, C
         case let .invalidSteps(steps, allowed):
             return allowed.isEmpty ? "\(steps) steps: a render takes between 1 and \(Request.maximumSteps)."
                 : "This model does not render in \(steps) steps."
+        case let .invalidSchedule(reason):
+            return "The σ table is refused: \(reason)."
         case let .tooManyReferences(count, max):
             return max == 0 ? "This model does not edit from reference images."
                 : "\(count) reference images: this model reads at most \(max)."
@@ -417,6 +423,8 @@ package enum EngineError: Error, Equatable, Sendable, Codable, LocalizedError, C
         case let .invalidSteps(_, allowed) where !allowed.isEmpty:
             return "Choose " + allowed.map(String.init).joined(separator: ", ") + " steps."
         case .invalidSteps: return "Leave the number of steps at the model's default."
+        case .invalidSchedule:
+            return "Leave the σ table out, or give the one this model walks (Qwen-Image-2.1-Turbo: its published 8 or the workflow's 9 steps)."
         case .tooManyReferences(_, let max) where max == 0:
             return "Choose a model that edits by reference (Qwen-Image-2.1)."
         case .tooManyReferences(_, let max): return "Keep at most \(max) reference images."
@@ -484,6 +492,9 @@ package enum EngineError: Error, Equatable, Sendable, Codable, LocalizedError, C
             case let .solver(solver, model): self = .solverUnsupported(solver: solver.rawValue, model: model)
             case .detail(let model): self = .detailUnsupported(model: model)
             case let .promptTooLong(tokens, max): self = .promptTooLong(tokens: tokens, max: max)
+            case .schedule(let why): self = .invalidSchedule(reason: why)
+            case .noCustomSchedule(let model):
+                self = .invalidSchedule(reason: "\(model) walks the schedule of its artifact and takes no σ table")
             }
         case let e as Strength.Failure:
             switch e {

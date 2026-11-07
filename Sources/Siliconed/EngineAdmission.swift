@@ -33,14 +33,25 @@ package struct Admission: Sendable {
         }
         let denoising = chain.denoising, space = denoising.space
         let height = request.height / space.factor, width = request.width / space.factor
-        let steps = request.steps ?? denoising.defaultSteps
+        var steps = request.steps ?? denoising.defaultSteps
+        // **A σ table the request supplies** (`Request.sigmas`): the steps follow it (`steps + 1`
+        // values, the shape checked — strictly decreasing, the last 0), and the denoiser's own
+        // `check(sigmas:)` judges it below: a count its published schedule does not have
+        // (Qwen-Image-2.1's 9) is its business, not this one's. A `steps` asked beside the table
+        // must be the table's length: the two would otherwise disagree on the render.
+        if let σ = request.sigmas {
+            steps = try Request.admit(sigmas: σ)
+            if let asked = request.steps, asked != steps {
+                throw Request.Failure.schedule("\(σ.count) σ: \(steps) steps, but \(asked) was asked")
+            }
+        }
         guard (1...Request.maximumSteps).contains(steps) else { throw Request.Failure.steps(steps) }
         // **img2img is judged before any computation, too**: an out-of-range strength, a chain
         // without an encoder, a strength that leaves no evaluation all throw here.
         var start = 0
         // The strength's N is the schedule's length as diffusers' `get_timesteps` reads it (`len(timesteps)`): the
         // steps asked, but fewer where a family's schedule merges σs (MOSS-Image's, snapped to its training grid).
-        let scheduled = denoising.sigmas(steps: steps).count - 1
+        let scheduled = request.sigmas.map { $0.count - 1 } ?? denoising.sigmas(steps: steps).count - 1
         if request.image != nil {
             guard chain.encoding != nil else { throw Strength.Failure.withoutEncoder(model: denoising.model) }
             guard request.strength > 0, request.strength <= 1 else { throw Strength.Failure.outOfBounds(request.strength) }
@@ -52,7 +63,11 @@ package struct Admission: Sendable {
                                                  max: chain.encoding == nil ? 0 : denoising.maxReferences)
             }
         }
-        try denoising.check(steps: steps, startImage: request.image != nil)
+        if let σ = request.sigmas {
+            try denoising.check(sigmas: σ, startImage: request.image != nil)
+        } else {
+            try denoising.check(steps: steps, startImage: request.image != nil)
+        }
         guard denoising.solvers.contains(request.solver) else {
             throw Request.Failure.solver(request.solver, model: denoising.model)
         }

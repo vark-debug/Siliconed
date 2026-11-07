@@ -61,9 +61,12 @@ package struct QwenImage21DenoisingModule: DenoisingModule {
         self.map = map; self.scheduler = scheduler; self.resolution = resolution
     }
 
-    /// The published schedule, the same at every size. An unsupported count gives it too:
+    /// The published schedule, the same at every size — or a ComfyUI graph's ManualSigmas at 9 steps
+    /// (`QwenImage21Pipeline.manualSigmas`). An unsupported count gives the published one too:
     /// `check(steps:)` has refused that count before.
-    package func sigmas(steps: Int) -> [Float] { scheduler.sigmas }
+    package func sigmas(steps: Int) -> [Float] {
+        steps == QwenImage21Pipeline.manualSteps ? QwenImage21Pipeline.manualSigmas : scheduler.sigmas
+    }
 
     /// **By default every evaluation at full size** (since 0.10): the published recipe as it stands —
     /// a half-size phase changes the image.
@@ -105,6 +108,14 @@ package struct QwenImage21DenoisingModule: DenoisingModule {
         if startImage { throw QwenImage21Pipeline.Failure.imageToImage }
     }
 
+    /// A σ table the request supplies (`Request.sigmas`): any shape `Request.admit(sigmas:)`
+    /// accepts — the published 8 and the graph's ManualSigmas 9 among them —, and no img2img,
+    /// like the steps.
+    package func check(sigmas: [Float], startImage: Bool) throws {
+        try QwenImage21Pipeline.check(sigmas: sigmas)
+        if startImage { throw QwenImage21Pipeline.Failure.imageToImage }
+    }
+
     /// Its pipeline has no img2img: the image encoder serves the references only.
     package var acceptsStartImage: Bool { false }
     /// Every `Solver`: its sampler walks them all (`SolverWalk`), Euler in its own loop.
@@ -133,7 +144,11 @@ package struct QwenImage21DenoisingModule: DenoisingModule {
         guard text.format == entry, text.imageSlots.count == text.rows else {
             throw Chain.Failure.incompatibleText(output: text.format, entry: entry)
         }
-        try check(steps: steps, startImage: start > 0)
+        if let σ = context.sigmas {
+            try check(sigmas: σ, startImage: start > 0)
+        } else {
+            try check(steps: steps, startImage: start > 0)
+        }
         var sampler = QwenImage21Sampler(artifact: try Artifact(path: map), lora: lora)
         sampler.accelerators = context.accelerators
         sampler.cancellation = context.cancellation
@@ -166,7 +181,7 @@ package struct QwenImage21DenoisingModule: DenoisingModule {
                 sampler.keptReserve = cache.keptReserve
             }
         }
-        let σ = sigmas(steps: steps)
+        let σ = context.sigmas ?? sigmas(steps: steps)
         context.beginDenoising(evaluations: steps)
         try sampler.run(latent: &latent.values, height: height, width: width, hidden: text.values,
                         slots: text.imageSlots, references: references, sigmas: σ,

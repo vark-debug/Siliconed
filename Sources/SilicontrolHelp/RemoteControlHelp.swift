@@ -389,8 +389,9 @@ package enum RemoteControlHelp {
                               > 1 emphasizes; below 0 (a « slider » LoRA), with Experimental →
                               Negative LoRA Strengths on in the app's Settings.
           --steps N           number of steps, 1 to 50. Default: the model's "default_steps". A
-                              model may have a schedule for some counts only (Qwen-Image-2.1: 8
-                              only).
+                              model may have a schedule for some counts only (Qwen-Image-2.1: 8,
+                              and 9 — a ComfyUI graph's ManualSigmas: the published eight, then
+                              one more node at 0.150000).
           --detail more|most  the rack's Detail: finer texture and small details, same time;
                               most can over-sharpen. Default: normal (the image as the model
                               makes it). Not on Anima nor Krea 2. Jobs and images say
@@ -1701,7 +1702,8 @@ package enum RemoteControlHelp {
                               > 1 appuie.
           --steps N           nombre de pas, de 1 à 50. Défaut : "default_steps" du modèle. Un
                               modèle peut n'avoir de calendrier que pour certains (Qwen-Image-2.1 :
-                              8 seulement).
+                              8, et 9 — le « ManualSigmas » d'un graphe ComfyUI : les huit publiés,
+                              puis un nœud de plus à 0.150000).
           --detail more|most  le Détail du rack : texture fine et petits détails, même durée ;
                               most peut trop accentuer. Défaut : normal (l'image telle que le
                               modèle la fait). Ni sur Anima ni sur Krea 2. Travaux et images

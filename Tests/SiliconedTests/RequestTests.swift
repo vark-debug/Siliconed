@@ -140,6 +140,18 @@ final class RequestTests: XCTestCase {
         XCTAssertEqual(reread.width, 2); XCTAssertEqual(reread.height, 1)
         for (a, b) in zip(reread.pixels, image.pixels) { XCTAssertEqual(a, b, accuracy: 1e-6) }
     }
+
+    /// **A σ table the request supplies** (`Request.admit(sigmas:)`): the step count is the table's
+    /// length, and only a table the sampler can walk passes — two σ at least, finite, strictly
+    /// decreasing, ending in 0, at most `maximumSteps` steps.
+    func testASigmaTableIsAdmittedByItsShape() throws {
+        XCTAssertEqual(try Request.admit(sigmas: [1, 0]), 1)
+        XCTAssertEqual(try Request.admit(sigmas: [1, 0.5, 0]), 2)
+        XCTAssertEqual(try Request.admit(sigmas: [0.5, 0.25, 0]), 2, "the shape does not require a start at 1")
+        let bad: [[Float]] = [[], [1], [1, 0.5], [1, 0.5, 0.5, 0], [1, 0.5, 0, -0.1], [1, .nan, 0],
+                              [1, .infinity, 0], [0.5, -0.1, 0], Array(repeating: 1, count: Request.maximumSteps + 2)]
+        for σ in bad { XCTAssertThrowsError(try Request.admit(sigmas: σ), "\(σ)") }
+    }
 }
 
 /// A counter that a `@Sendable` closure increments.

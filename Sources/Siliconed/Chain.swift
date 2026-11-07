@@ -183,6 +183,10 @@ package final class Context {
     /// **What the denoiser may compute on beyond fp32** (`Request.accelerators`, resolved against this Mac's map at render time):
     /// the Neural Engine where the map turned it on, the GPU's rounded operands; fp32 throughout when off. The encoders never do.
     package var accelerators = Accelerators.process
+    /// **The σ table the request supplied** (`Request.sigmas`), admitted by the engine before the render: the denoiser walks
+    /// this instead of its artifact's schedule when it is not `nil`. Only a denoiser whose `check(sigmas:startImage:)` accepts
+    /// one ever sees it (Qwen-Image-2.1's Turbo) — `Admission` has refused the others.
+    package var sigmas: [Float]?
     /// The render's token; the modules pass it to their DiTs and encoders (between layers).
     package let cancellation: Cancellation?
     /// Compute each step's preview (`Request.previews`).
@@ -322,6 +326,11 @@ package protocol DenoisingModule: Sendable {
     /// **What the denoiser refuses before any computation**: a step count it has no schedule for, a
     /// starting image (img2img) when its pipeline has none. By default, nothing.
     func check(steps: Int, startImage: Bool) throws
+    /// **What the denoiser refuses for a σ table the request supplies** (`Request.sigmas`, already
+    /// validated by `Request.admit(sigmas:)`): the step count follows the table's length, so `check(steps:)`
+    /// does not apply. By default **no family reads one** — the schedule is the artifact's; only
+    /// Qwen-Image-2.1's Turbo overrides this.
+    func check(sigmas: [Float], startImage: Bool) throws
     /// Whether the denoiser starts from an encoded image (img2img). By default yes; a pipeline
     /// without img2img (Qwen-Image-2.1) says no, and the chain then offers no image entry.
     var acceptsStartImage: Bool { get }
@@ -376,6 +385,9 @@ package extension DenoisingModule {
         return (w, h)
     }
     func check(steps: Int, startImage: Bool) throws {}
+    func check(sigmas: [Float], startImage: Bool) throws {
+        throw Request.Failure.noCustomSchedule(model: model)
+    }
     var acceptsStartImage: Bool { true }
     var solvers: [Solver] { [.euler] }
     var acceptsDetail: Bool { true }

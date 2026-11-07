@@ -113,6 +113,7 @@ extension Engine {
         context.detail = request.detail
         context.detailScale = Detail.scale(width: request.width, height: request.height)
         context.solver = request.solver
+        context.sigmas = request.sigmas
         // The library's warnings become events for the duration of the render (and go to
         // `Warnings.outsideRender` without `onProgress`: a "✗ step 3: the VELOCITY carries …" is not lost),
         // and memory is returned to the system on exit — **including on a cancellation**: the

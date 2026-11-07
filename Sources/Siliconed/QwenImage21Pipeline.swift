@@ -26,8 +26,9 @@ import Foundation
 ///     passes it, and the scheduler ignores it. No dependence on the size or on the references — a
 ///     generation and an edit at any size get the same eight σ. `max_image_seq_len`/`max_shift` are
 ///     still in the config and serve nothing;
-///   - `num_inference_steps` alone does not override the schedule: 8 is the only count published,
-///     any other is refused (`acceptedSteps`);
+///   - `num_inference_steps` alone does not override the schedule: the published count is 8, and the
+///     one schedule more the engine knows is 9 (a ComfyUI graph's `ManualSigmas`, `manualSigmas`);
+///     any other count is refused (`acceptedSteps`);
 ///   - the DiT is the turbo — a full distillation from the base (`time_text_embed` moved the most,
 ///     2.3·10⁻²), **not the base plus a LoRA**: no LoRA under the user's, the conditions' K/V depend on
 ///     the map (and on a user LoRA), one prefill per render;
@@ -124,12 +125,33 @@ package enum QwenImage21Pipeline {
         package var sigmas: [Float] { nodes + [0] }
     }
 
-    /// The step counts the Turbo has a schedule for.
-    package static let acceptedSteps = [defaultSteps]
+    /// The step counts the Turbo has a schedule for: the published 8, and a ComfyUI graph's
+    /// ManualSigmas 9.
+    package static let acceptedSteps = [defaultSteps, manualSteps]
 
-    /// Another count has no published schedule: refused (`QwenImage21Pipeline.Failure.steps`).
+    /// Another count has no schedule at all: refused (`QwenImage21Pipeline.Failure.steps`).
     package static func check(steps: Int) throws {
         guard acceptedSteps.contains(steps) else { throw Failure.steps(steps) }
+    }
+
+    /// **The 9-step schedule of a ComfyUI graph** (`ManualSigmas`, the « 移除、局部重绘 » workflow's
+    /// `#271`): the published eight, then one more node at 0.150000 before the final 0 — the graph
+    /// refines the last step the published schedule jumps (0.4146 → 0). Reached with `Request.steps`
+    /// (`--steps 9`); the default (8) walks the published schedule, to the bit.
+    package static let manualSteps = 9
+    /// `ManualSigmas` as the graph stores it: the published nodes, then 0.150000 — the `nodes`, the
+    /// final 0 left to `sigmas`.
+    package static let manualNodes: [Double] = Scheduler.publishedNodes + [0.15]
+    /// The manual schedule as the sampler walks it: each node a Python double made float32, then a
+    /// zero appended — the same two roundings as the published one.
+    package static let manualSigmas: [Float] = manualNodes.map { Float($0) } + [0]
+
+    /// **A σ table the request supplies** (`Request.sigmas`): the engine has admitted its shape
+    /// (`Request.admit(sigmas:)` — the sampler divides by the σ gaps, so a table that does not
+    /// decrease strictly to 0 never gets here); what is left is to accept it. The sampler walks it
+    /// as given: the DiT told `σ·1000`, Euler's `x += (σᵢ₊₁ − σᵢ)·v` — the same code, another table.
+    package static func check(sigmas: [Float]) throws {
+        try Request.admit(sigmas: sigmas)
     }
 
     /// `scheduler.timesteps`: `σ · 1000` in float32 — what the oracle records.
@@ -206,7 +228,8 @@ package enum QwenImage21Pipeline {
         package var description: String {
             switch self {
             case .steps(let n):
-                return "\(n) steps: Qwen-Image-2.1-Turbo publishes a schedule for \(QwenImage21Pipeline.defaultSteps) steps only"
+                return "\(n) steps: Qwen-Image-2.1-Turbo has a schedule for \(QwenImage21Pipeline.defaultSteps) steps "
+                    + "(the published one) and \(QwenImage21Pipeline.manualSteps) (a ComfyUI graph's ManualSigmas) only"
             case .imageToImage:
                 return "Qwen-Image-2.1 does no img2img (its pipeline has none): pass the image as a reference (--ref) "
                     + "and say what to change"

@@ -10,6 +10,11 @@ final class AdmissionTests: XCTestCase {
         text: ZImageTextModule(map: "", tokenizer: ""), denoising: ZImageDenoisingModule(map: ""),
         decoding: FluxDecodingModule(path: ""), encoding: FluxEncodingModule(path: ""))
 
+    private let qwen = try! Chain(
+        text: QwenImage21TextModule(map: "", tokenizer: ""),
+        denoising: QwenImage21DenoisingModule(map: "", scheduler: .init()),
+        decoding: QwenImage21DecodingModule(path: ""), encoding: QwenImage21EncodingModule(path: ""))
+
     private func judge(_ request: Request, usesANE: Bool = true) throws -> Admission {
         try Admission.judge(request, chain: zImage, usesANE: usesANE)
     }
@@ -86,5 +91,36 @@ final class AdmissionTests: XCTestCase {
         let plain = Infotext.text(prompt: "x", steps: 8, sampler: .euler, seed: 1, width: 1024, height: 1024, model: "m",
                                   strength: nil, loras: [], civitaiModelVersion: nil, version: nil)
         XCTAssertFalse(plain.contains("Faster rendering"))
+    }
+
+    /// **Qwen-Image-2.1-Turbo's 9-step workflow table** (C1): `--steps 9` is admitted and plans nine
+    /// evaluations (the module walks the graph's `ManualSigmas` — to the bit in
+    /// `QwenImage21PipelineTests`); a σ table the request supplies sets the steps from its length, and a
+    /// `steps` that disagrees with it is refused before any computation. Every other family refuses a
+    /// table: its schedule is the artifact's.
+    func testQwenNineStepsAndASigmaTableAreAdmitted() throws {
+        var nine = Request("x", resolution: 512); nine.steps = 9
+        let a = try Admission.judge(nine, chain: qwen, usesANE: false)
+        XCTAssertEqual(a.steps, 9)
+        XCTAssertEqual(a.plan.evaluations, 9)
+
+        var table = Request("x", resolution: 512)
+        table.sigmas = QwenImage21Pipeline.manualSigmas
+        let b = try Admission.judge(table, chain: qwen, usesANE: false)
+        XCTAssertEqual(b.steps, 9)
+        XCTAssertEqual(b.plan.evaluations, 9)
+
+        var mismatch = table; mismatch.steps = 8
+        XCTAssertThrowsError(try Admission.judge(mismatch, chain: qwen, usesANE: false)) {
+            guard let failure = $0 as? Request.Failure, case .schedule = failure else { return XCTFail("\($0)") }
+        }
+        var bad = Request("x", resolution: 512); bad.sigmas = [1, 0.5, 0.6, 0]
+        XCTAssertThrowsError(try Admission.judge(bad, chain: qwen, usesANE: false)) {
+            guard let failure = $0 as? Request.Failure, case .schedule = failure else { return XCTFail("\($0)") }
+        }
+        var onZImage = Request("x", resolution: 512); onZImage.sigmas = [1, 0.5, 0]
+        XCTAssertThrowsError(try judge(onZImage)) {
+            XCTAssertEqual($0 as? Request.Failure, .noCustomSchedule(model: zImage.denoising.model))
+        }
     }
 }
