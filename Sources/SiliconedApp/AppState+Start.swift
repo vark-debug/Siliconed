@@ -36,7 +36,11 @@ extension AppState {
 
     /// The images the next render encodes: the edit's references, or the starting image — what its memory need counts
     /// (`MemoryNeed.Request.references`: a start at the render's format).
-    var sentImages: Int { references.count + (usedStart == nil ? 0 : 1) }
+    var sentImages: Int {
+        // A mask's render reads image 1 alone, as its crop — whatever the rack counted otherwise.
+        if attachedMaskFormat != nil { return 1 }
+        return references.count + (usedStart == nil ? 0 : 1)
+    }
 
     /// **The steps the strength leaves to the render**, of all those of the schedule — the plain words under the slider.
     /// `nil` without a starting image, or before the model is read.

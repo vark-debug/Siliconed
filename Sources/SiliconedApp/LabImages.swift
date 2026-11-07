@@ -45,6 +45,7 @@ struct LabImages: View {
                     ForEach(model.pictures) { picture in
                         PictureTile(model: model, picture: picture, number: numbers.plain[picture.id])
                     }
+                    if model.showsMaskTile { MaskTile(model: model) }
                     ForEach(model.subjects.all) { subject in
                         SubjectTile(model: model, subject: subject, numbers: numbers.subjects[subject.id] ?? [])
                     }
@@ -107,6 +108,74 @@ enum LabTile {
         } else {
             shape.strokeBorder(Color.secondary.opacity(0.6), style: StrokeStyle(lineWidth: 1.5, dash: [4, 3]))
         }
+    }
+}
+
+/// **The mask attached to image 1** — the minimal entry to the 「移除」 path (`AppState+Mask.swift`). A tile beside
+/// the images: « Attach Mask… » opens a PNG picker; once attached it shows the file's thumbnail, its name, the crop's
+/// plan size, and « Remove Mask ». With a mask attached, « Generate » edits image 1 through the workflow; the mask
+/// goes with that one click and the next is an ordinary render.
+private struct MaskTile: View {
+    let model: LabModel
+    private var rack: AppState { model.rack }
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 8) {
+            Group {
+                if let attached = rack.attachedMask {
+                    Image(nsImage: attached.mask.vignette).resizable().scaledToFill()
+                } else {
+                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                        .fill(Color.secondary.opacity(0.12))
+                        .overlay(Image(systemName: "rectangle.dashed").foregroundStyle(.secondary))
+                }
+            }
+            .frame(width: LabTile.picture.width, height: LabTile.picture.height)
+            .clipped()
+            .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+            .overlay { LabTile.edge(goes: rack.attachedMask != nil, main: false) }
+            VStack(alignment: .leading, spacing: 3) {
+                Text("Mask").font(.caption.weight(.semibold))
+                    .foregroundStyle(rack.attachedMask == nil ? Color.secondary : WireKind.image.color)
+                if let attached = rack.attachedMask {
+                    Text(attached.mask.name).font(.caption2).lineLimit(2)
+                        .help(attached.mask.name)
+                    Text(verbatim: "\(attached.mask.width) × \(attached.mask.height) → \(attached.plan.width) × \(attached.plan.height)")
+                        .font(.caption2).foregroundStyle(.secondary).lineLimit(1)
+                    Button("Remove Mask") { rack.removeMask() }
+                        .controlSize(.small)
+                        .help("The next render is an ordinary one again, at the format the form shows")
+                } else {
+                    Button("Attach Mask…") { rack.chooseMask() }
+                        .controlSize(.small)
+                        .disabled(!rack.canAttachMask)
+                    Text("PNG, image 1’s size: white changes, black stays.")
+                        .font(.caption2).foregroundStyle(.secondary).lineLimit(3)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .help(rack.canAttachMask
+                              ? Text("A mask the size of image 1: white is what changes, black what stays")
+                              : Text("A mask edits image 1 alone: one image in the lab, its size"))
+                }
+            }
+            .frame(width: LabTile.meta, alignment: .leading)
+        }
+        .contextMenu {
+            if rack.attachedMask == nil {
+                Button("Attach Mask…") { rack.chooseMask() }.disabled(!rack.canAttachMask)
+            } else {
+                Button("Remove Mask", role: .destructive) { rack.removeMask() }
+            }
+        }
+    }
+}
+
+private extension LabModel {
+    /// **When the mask's tile is drawn**: where the model edits by reference and an image is there to edit — or
+    /// while a mask is still attached and must be removable (the model changed under it, an image was removed).
+    var showsMaskTile: Bool {
+        // A mask still attached must stay removable, even when the image it was sized to is gone.
+        if rack.attachedMask != nil { return true }
+        return !pictures.isEmpty && rack.canPatchMask
     }
 }
 
@@ -216,6 +285,14 @@ private struct PictureTile: View {
         }
         if let bytes = picture.bytes, AppState.isRecipe(bytes) {
             Button("Reuse These Settings") { _ = rack.restoreSettings(fromPNG: bytes, file: picture.shown.name) }
+        }
+        // Image 1's mask, beside the image it edits (`AppState+Mask.swift`).
+        if rack.canPatchMask, rack.editInputs.first?.id == picture.id {
+            if rack.attachedMask == nil {
+                Button("Attach Mask…") { rack.chooseMask() }.disabled(!rack.canAttachMask)
+            } else {
+                Button("Remove Mask") { rack.removeMask() }
+            }
         }
         Divider()
         Button("Remove", role: .destructive) { model.remove(picture) }

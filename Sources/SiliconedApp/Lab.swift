@@ -497,6 +497,8 @@ final class LabModel {
 
     func remove(_ picture: InputImage) {
         if describing == picture.id { stop() }
+        // **Image 1 leaving takes its mask with it**: a mask is that image's size, so nothing else can take it.
+        if rack.editInputs.first?.id == picture.id { rack.removeMask() }
         rack.removeInput(picture.id)
     }
 

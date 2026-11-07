@@ -36,6 +36,9 @@ extension AppState {
     /// (`DenoisingModule.editFormat`, the rule the developer's command line applies too), the chosen one
     /// otherwise.
     var outputFormat: RecommendedFormat {
+        // **A mask's render is its crop's plan** (`Patch.plan`), not image 1's editing size: the memory
+        // preflight and the job read the plan's crop, crop margins and all.
+        if let plan = attachedMaskFormat { return plan }
         // In a mirror, the other Mac's answer; the chosen format while it is asked (« Generate » waits).
         if let q = editQuote { return quoted(q).map { RecommendedFormat($0.width, $0.height) } ?? format }
         guard let first = references.first, let denoising = chain?.denoising else { return format }
@@ -79,6 +82,8 @@ extension AppState {
         if case .failure(let e) = alternatives { return Problem(e).text }
         // An unknown `@name`, too many images, a mention inside a group: said before the click (`LabInputs.carry`).
         if case .failure(let refusal) = carried { return refusal.sentence }
+        // **A mask edits image 1 alone** (`AppState+Mask.swift`): its crop is the request's only image.
+        if let reason = maskBlocker { return reason }
         // Three things varying, a bracket the library refuses (`Series.swift`).
         if let reason = seriesBlocker { return reason }
         if file.count >= Self.maxQueueLength { return String(localized: "The queue is full.") }

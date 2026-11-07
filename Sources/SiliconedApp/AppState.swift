@@ -256,6 +256,10 @@ final class AppState {
     /// or given a role. Brought by the Prompt Lab, a drop, « Edit This Image », ⌘V or the remote control; `references` and
     /// `startImage` read them.
     var inputs: [InputImage] = []
+    /// **The mask attached in the Prompt Lab, for the next render only** (`AppState+Mask.swift`): image 1's size,
+    /// the crop's plan beside it. Taken as `render` queues its jobs and cleared there — a mask never outlives the
+    /// click it was attached for (`a08e33f`). A redo reads its entry's own mask (`Entry.mask`), not this.
+    var attachedMask: AttachedMask?
     /// **The start's strength** (diffusers' `strength`, `StartImage`): how far the render moves from the image — retouched in the rack
     /// between two renders. In hundredths. The family's default (`StartImage.defaultStrength`) until one is chosen; forgotten
     /// when the rack changes family.

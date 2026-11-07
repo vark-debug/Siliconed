@@ -197,9 +197,18 @@ package struct Patch: Sendable, Equatable {
     /// Throws `.invalidPatch` for a mask of another size, an empty one (fewer than `minimumPixels`
     /// pixels — the workflow would paint the whole image instead), or a size that leaves no pixel.
     package func plan() throws(EngineError) -> Plan {
-        guard mask.width == image.width, mask.height == image.height else {
+        try Self.plan(mask: mask, width: image.width, height: image.height,
+                      expansion: expansion, maximumSide: maximumSide)
+    }
+
+    /// **The crop and its size for a mask and an image's dimensions** — the same rules as `plan()`,
+    /// without the image's pixels: what the app prices the render at before it decodes anything.
+    package static func plan(mask: ImageMask, width: Int, height: Int,
+                             expansion: Expansion = Expansion(),
+                             maximumSide: Int = Patch.maximumSide) throws(EngineError) -> Plan {
+        guard mask.width == width, mask.height == height else {
             throw EngineError.invalidPatch(reason:
-                "the mask is \(mask.width)×\(mask.height), the image \(image.width)×\(image.height) — a mask must be the image's size")
+                "the mask is \(mask.width)×\(mask.height), the image \(width)×\(height) — a mask must be the image's size")
         }
         guard mask.effectivePixels >= Self.minimumPixels else {
             throw EngineError.invalidPatch(reason:
@@ -223,13 +232,13 @@ package struct Patch: Sendable, Equatable {
         let short = Double(min(box.width, box.height))
         func margin(_ factor: Double) -> Int { Int(short * (factor - 1)) }
         let top = min(margin(expansion.top), box.y)
-        let bottom = min(margin(expansion.bottom), image.height - box.y - box.height)
+        let bottom = min(margin(expansion.bottom), height - box.y - box.height)
         let left = min(margin(expansion.left), box.x)
-        let right = min(margin(expansion.right), image.width - box.x - box.width)
+        let right = min(margin(expansion.right), width - box.x - box.width)
 
         let crop = Crop(x: box.x - left, y: box.y - top,
                         width: box.width + left + right, height: box.height + top + bottom)
-        let scaled = target(crop.width, crop.height)
+        let scaled = Self.target(crop.width, crop.height, maximumSide: maximumSide)
 
         // `应用除数`: two whole-multiple schemes, the one whose area is nearer the scaled target
         // wins; `resize_with_aspect_ratio` then `center_crop_to_divisor` leave exactly that size.
@@ -248,7 +257,7 @@ package struct Patch: Sendable, Equatable {
     }
 
     /// The long side's bounds: `calculate_target_size`, with Python's half-to-even rounding.
-    private func target(_ width: Int, _ height: Int) -> (w: Int, h: Int) {
+    private static func target(_ width: Int, _ height: Int, maximumSide: Int) -> (w: Int, h: Int) {
         let long = max(width, height)
         let ratio: Double
         if long < Self.minimumSide {

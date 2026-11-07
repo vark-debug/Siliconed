@@ -17,14 +17,28 @@ extension AppState {
 
     /// **Puts a render in the queue**, and launches it if nothing is running. `imposedSeed`: "Redo" (the seed of a history
     /// image). `imposedFormat`: "Redo" (its size) — with edit images, `outputFormat` would derive another one from image 1.
-    /// `patch`: the 「移除」 path's sources **of this render alone** (a redo of a mask image); the form never holds them.
+    /// `patch`: the 「移除」 path's sources **of this render alone** (a redo of a mask image). `ignoresAttachedMask`: a redo —
+    /// its entry decides what it renders, the lab's attachment never enters it.
     /// **Something varies** (`Series.swift`): the series' grid, one finished image per cell.
-    func render(imposedSeed: UInt64? = nil, imposedFormat: RecommendedFormat? = nil, patch: PatchInput? = nil) {
+    ///
+    /// **A mask in the lab is this click's**: taken (`takeAttachedMask`), given image 1 and the command line's defaults
+    /// (`Patch.Settings()`), and the render's format becomes the crop's plan. The next click is ordinary again.
+    func render(imposedSeed: UInt64? = nil, imposedFormat: RecommendedFormat? = nil, patch: PatchInput? = nil,
+                ignoresAttachedMask: Bool = false) {
         guard canRender else { return }
+        guard let prompts = try? alternatives.get().prompts, (try? carried.get()) != nil else { return }
+        // **The attached mask, for one render**: cleared here, before the jobs are made — it belongs to them, never to
+        // the form (the leak `a08e33f` closed). A redo passes `ignoresAttachedMask`.
+        let attached = ignoresAttachedMask ? nil : takeAttachedMask()
+        var patch = patch
+        if patch == nil, let attached, let image = editInputs.first?.shown {
+            patch = (image, attached.mask, Patch.Settings())
+        }
         // Everything that reads the state is taken here: the job no longer depends on the form.
         let firstNumber = imposedSeed ?? (fixedSeed ? seed : UInt64.random(in: 0...UInt64(UInt32.max)))
-        let format = imposedFormat ?? outputFormat
-        guard let prompts = try? alternatives.get().prompts, (try? carried.get()) != nil else { return }
+        // A mask's render is its crop's plan (the format `outputFormat` would give while it is attached).
+        let format = imposedFormat ?? (patch == nil ? outputFormat
+                                       : attached.map { RecommendedFormat($0.plan.width, $0.plan.height) } ?? outputFormat)
         // **The 「移除」 path**: one image, not a series; the format comes with the settings (the plan's
         // size), as a redo gives it (`Admission` takes the plan's anyway).
         if patch == nil, case .success(let g?) = seriesGrid(seed: firstNumber) {
@@ -32,9 +46,10 @@ extension AppState {
             return
         }
         followsRender = true
-        // The edit's images as the render reads them, decoded once for the whole series.
+        // The edit's images as the render reads them, decoded once for the whole series; a mask reads image 1 alone,
+        // as its crop, so no reference travels with it (`Request.references` empty).
         enqueue(renderJobs(seed: firstNumber, format: format, patch: patch,
-                           prompts: prompts, edit: renderReferences))
+                           prompts: prompts, edit: patch == nil ? renderReferences : []))
     }
 
     /// **The jobs a click makes**: one per prompt alternative, from the form as it reads now. `patch`: the
@@ -670,12 +685,17 @@ extension AppState {
     func redo(_ entry: Entry) {
         restoreSettings(entry)
         // **The 「移除」 path's sources travel with this image**, not through the form: a redo draws the
-        // same crop from them, and the click after it is an ordinary render again.
-        let patch: PatchInput? = {
-            guard let geometry = entry.settings.patch, let image = entry.start, let mask = entry.mask else { return nil }
-            return (image, mask, geometry)
-        }()
-        render(imposedSeed: entry.seed, imposedFormat: entry.settings.format, patch: patch)
+        // same crop from them, and the click after it is an ordinary render again. `ignoresAttachedMask`:
+        // the lab's attachment never turns an ordinary redo into a patch (`redoPatch`).
+        render(imposedSeed: entry.seed, imposedFormat: entry.settings.format, patch: redoPatch(entry),
+               ignoresAttachedMask: true)
+    }
+
+    /// **What « Redo » hands the render**: the entry's own crop — its image and mask, with the margins it
+    /// was drawn at — or `nil` for an ordinary image, whatever the lab has attached.
+    func redoPatch(_ entry: Entry) -> PatchInput? {
+        guard let geometry = entry.settings.patch, let image = entry.start, let mask = entry.mask else { return nil }
+        return (image, mask, geometry)
     }
 
     func restoreSettings(_ entry: Entry) {

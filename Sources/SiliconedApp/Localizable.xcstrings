@@ -1089,6 +1089,47 @@
         }
       }
     },
+    "%@ has no mask workflow: a mask needs a model that edits by reference (Qwen-Image-2.1)." : {
+      "comment" : "The model refuses a patch: no additive start, or no image encoder",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ hat keinen Maskenablauf: eine Maske braucht ein Modell, das per Referenz bearbeitet (Qwen-Image-2.1)."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ no tiene flujo de máscara: una máscara necesita un modelo que edite por referencia (Qwen-Image-2.1)."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ n’a pas de parcours de masque : un masque demande un modèle qui édite par référence (Qwen-Image-2.1)."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ non ha un flusso maschera: una maschera richiede un modello che modifica per riferimento (Qwen-Image-2.1)."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ にはマスクの手順がありません。マスクには、参照で編集するモデル（Qwen-Image-2.1）が必要です"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 没有遮罩流程：遮罩需要按参考图编辑的模型（Qwen-Image-2.1）。"
+          }
+        }
+      }
+    },
     "%@ has no role “%@”" : {
       "localizations" : {
         "de" : {
@@ -5825,6 +5866,47 @@
         }
       }
     },
+    "A PNG mask the size of image 1: white is what changes, black what stays." : {
+      "comment" : "The mask is white-on-black, never scaled: it must be image 1's size",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine PNG-Maske in der Größe von Bild 1: Weiß ist das, was sich ändert, Schwarz das, was bleibt."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una máscara PNG del tamaño de la imagen 1: el blanco es lo que cambia, el negro lo que se queda."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un masque PNG à la taille de l’image 1 : le blanc est ce qui change, le noir ce qui reste."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una maschera PNG della dimensione dell’immagine 1: il bianco è ciò che cambia, il nero ciò che resta."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "画像 1 と同じサイズの PNG マスク。白が変わる部分、黒が残る部分です"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "与图像 1 同尺寸的 PNG 遮罩：白色为改动区，黑色为保留区。"
+          }
+        }
+      }
+    },
     "A diagnostic is already running." : {
       "localizations" : {
         "de" : {
@@ -6261,6 +6343,209 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "语言模型读取提示词，并将其转换为 DiT 能够理解的内容"
+          }
+        }
+      }
+    },
+    "A mask edits image 1 alone: one image in the lab, its size" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine Maske bearbeitet Bild 1 allein: ein Bild im Labor, in seiner Größe"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una máscara edita solo la imagen 1: una imagen en el taller, de su tamaño"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un masque modifie l’image 1 seule : une image dans l’atelier, à sa taille"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una maschera modifica solo l’immagine 1: una sola immagine nel laboratorio, alla sua dimensione"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マスクが編集するのは画像 1 だけです。ラボの画像は 1 枚、そのサイズで"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "遮罩只编辑图像 1：实验室里只留一张图，尺寸与它相同"
+          }
+        }
+      }
+    },
+    "A mask edits image 1 alone: remove the other images." : {
+      "comment" : "The patch's crop is the edit's only image",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine Maske bearbeitet Bild 1 allein: entferne die anderen Bilder."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una máscara edita solo la imagen 1: quita las demás imágenes."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un masque modifie l’image 1 seule : retirez les autres images."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una maschera modifica solo l’immagine 1: rimuovi le altre immagini."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マスクが編集するのは画像 1 だけです。ほかの画像を削除してください"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "遮罩只编辑图像 1：请移除其他图像。"
+          }
+        }
+      }
+    },
+    "A mask edits image 1 alone: the text cites a named subject — remove the @name or the mask." : {
+      "comment" : "A patch is the edit's only image, subjects' pictures included",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine Maske bearbeitet Bild 1 allein: der Text nennt ein benanntes Motiv — entferne den @Namen oder die Maske."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una máscara edita solo la imagen 1: el texto cita un sujeto con nombre — quita el @nombre o la máscara."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un masque modifie l’image 1 seule : le texte cite un sujet nommé — retirez le @nom ou le masque."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una maschera modifica solo l’immagine 1: il testo cita un soggetto con nome — rimuovi il @nome o la maschera."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マスクが編集するのは画像 1 だけです。テキストが名前付きの被写体を参照しています。@名前かマスクを外してください"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "遮罩只编辑图像 1：正文引用了具名主体——请去掉 @名称或移除遮罩。"
+          }
+        }
+      }
+    },
+    "A mask stays on this Mac: stop following another Mac first." : {
+      "comment" : "A patch cannot cross a mirror: its crop and mask are this Mac's",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine Maske bleibt auf diesem Mac: höre zuerst auf, einem anderen Mac zu folgen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una máscara se queda en este Mac: deja primero de seguir a otro Mac."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un masque reste sur ce Mac : cessez d’abord de suivre un autre Mac."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una maschera resta su questo Mac: smetti prima di seguire un altro Mac."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マスクはこの Mac にとどまります。先に別の Mac の追従をやめてください"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "遮罩留在本机：请先停止跟随另一台 Mac。"
+          }
+        }
+      }
+    },
+    "A mask the size of image 1: white is what changes, black what stays" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine Maske in der Größe von Bild 1: Weiß ist das, was sich ändert, Schwarz das, was bleibt"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una máscara del tamaño de la imagen 1: el blanco es lo que cambia, el negro lo que se queda"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un masque à la taille de l’image 1 : le blanc est ce qui change, le noir ce qui reste"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una maschera della dimensione dell’immagine 1: il bianco è ciò che cambia, il nero ciò che resta"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "画像 1 と同じサイズのマスク。白が変わる部分、黒が残る部分です"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "与图像 1 同尺寸的遮罩：白色为改动区，黑色为保留区"
           }
         }
       }
@@ -8507,6 +8792,87 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "在此强度下图像会原样返回：请调高强度。"
+          }
+        }
+      }
+    },
+    "Attach Mask…" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maske anhängen…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adjuntar máscara…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Joindre un masque…"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allega maschera…"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マスクを添付…"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "附加遮罩…"
+          }
+        }
+      }
+    },
+    "Attach an image first: the mask must have the image’s size." : {
+      "comment" : "A mask without image 1: there is nothing to patch",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hänge zuerst ein Bild an: die Maske muss seine Größe haben."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adjunta primero una imagen: la máscara debe tener su tamaño."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Joignez d’abord une image : le masque doit avoir sa taille."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allega prima un’immagine: la maschera deve avere la sua dimensione."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "先に画像を添付してください。マスクはその画像と同じサイズである必要があります"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请先附加一张图像：遮罩必须与它同尺寸。"
           }
         }
       }
@@ -21675,6 +22041,86 @@
         }
       }
     },
+    "Make the mask the size of image 1, then attach it again." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bringe die Maske auf die Größe von Bild 1 und hänge sie erneut an."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pon la máscara al tamaño de la imagen 1 y vuelve a adjuntarla."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mettez le masque à la taille de l’image 1, puis joignez-le à nouveau."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Porta la maschera alla dimensione dell’immagine 1, poi allegala di nuovo."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マスクを画像 1 と同じサイズにして、もう一度添付してください"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请把遮罩改成图像 1 的尺寸，然后重新附加。"
+          }
+        }
+      }
+    },
+    "Mask" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maske"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Máscara"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Masque"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maschera"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マスク"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "遮罩"
+          }
+        }
+      }
+    },
     "Matrix products and attention on the GPU, the CPU’s matrix unit and the Neural Engine, alone and together, each result checked against the exact one: what Siliconed plans a render with. No model is needed, nothing is downloaded. About a minute, five at most; the queue waits meanwhile." : {
       "localizations" : {
         "de" : {
@@ -26652,6 +27098,46 @@
         }
       }
     },
+    "PNG, image 1’s size: white changes, black stays." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PNG in der Größe von Bild 1: Weiß ändert sich, Schwarz bleibt."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PNG, del tamaño de la imagen 1: el blanco cambia, el negro se queda."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PNG, à la taille de l’image 1 : le blanc change, le noir reste."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PNG, della dimensione dell’immagine 1: il bianco cambia, il nero resta."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PNG、画像 1 と同じサイズ。白が変わる部分、黒が残る部分です"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PNG，与图像 1 同尺寸：白色为改动区，黑色为保留区。"
+          }
+        }
+      }
+    },
     "Paint the mask over the region to replace, white on black (or its alpha), at the image’s size — at least 10 pixels — and hand the image with its mask." : {
       "localizations" : {
         "de" : {
@@ -26688,6 +27174,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "请在要替换的区域上以黑底白（或其 alpha）绘制遮罩，尺寸与图像一致——至少 10 像素——并将图像连同遮罩一起提供。"
+          }
+        }
+      }
+    },
+    "Paint the region to change in white on black, then attach it again." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Male den zu ändernden Bereich weiß auf Schwarz und hänge sie erneut an."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pinta en blanco sobre negro la zona que cambia y vuelve a adjuntarla."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peignez en blanc sur noir la zone à changer, puis joignez-le à nouveau."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dipingi in bianco su nero la zona da cambiare, poi allegala di nuovo."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "変える部分を黒地に白で塗って、もう一度添付してください"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请用黑底白字涂出要改动的区域，然后重新附加。"
           }
         }
       }
@@ -28817,6 +29343,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "移除图像"
+          }
+        }
+      }
+    },
+    "Remove Mask" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maske entfernen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quitar la máscara"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retirer le masque"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rimuovi la maschera"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マスクを削除"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除遮罩"
           }
         }
       }
@@ -37238,6 +37804,94 @@
         }
       }
     },
+    "The mask has fewer than %@ pixels to replace: white is what changes, black what stays." : {
+      "comment" : "A patch with nothing to replace: the workflow's 10 px guard",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Maske hat weniger als %@ Pixel zum Ersetzen: Weiß ist das, was sich ändert, Schwarz das, was bleibt."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La máscara tiene menos de %@ píxeles que reemplazar: el blanco es lo que cambia, el negro lo que se queda."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le masque a moins de %@ pixels à remplacer : le blanc est ce qui change, le noir ce qui reste."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La maschera ha meno di %@ pixel da sostituire: il bianco è ciò che cambia, il nero ciò che resta."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マスクの置き換えるピクセルが %@ 未満です。白が変わる部分、黒が残る部分です"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "遮罩中可改动的像素少于 %@ 个：白色为改动区，黑色为保留区。"
+          }
+        }
+      }
+    },
+    "The mask is %@ × %@, the image %@ × %@: a mask must be the image’s size — it is never scaled." : {
+      "comment" : "The mask and image 1 must have the same pixel size",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Maske ist %1$@ × %2$@, das Bild %3$@ × %4$@: eine Maske muss die Größe des Bildes haben — sie wird nie skaliert."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "The mask is %1$@ × %2$@, the image %3$@ × %4$@: a mask must be the image’s size — it is never scaled."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La máscara es %1$@ × %2$@, la imagen %3$@ × %4$@: una máscara debe tener el tamaño de la imagen — nunca se escala."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le masque fait %1$@ × %2$@, l’image %3$@ × %4$@ : un masque doit avoir la taille de l’image — il n’est jamais redimensionné."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La maschera è %1$@ × %2$@, l’immagine %3$@ × %4$@: una maschera deve avere la dimensione dell’immagine — non viene mai ridimensionata."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マスクは %1$@ × %2$@、画像は %3$@ × %4$@ です。マスクは画像と同じサイズでなければならず、拡大縮小はしません"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "遮罩为 %1$@ × %2$@，图像为 %3$@ × %4$@：遮罩必须与图像同尺寸，绝不缩放。"
+          }
+        }
+      }
+    },
     "The measure needs more memory than this Mac allows." : {
       "localizations" : {
         "de" : {
@@ -37634,6 +38288,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "下一次生成是种子图像的变体，与它所源自的图像一样"
+          }
+        }
+      }
+    },
+    "The next render is an ordinary one again, at the format the form shows" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der nächste Render ist wieder ein gewöhnlicher, in der Größe, die das Formular zeigt"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El siguiente render vuelve a ser uno normal, con el tamaño que muestra el formulario"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le rendu suivant redevient ordinaire, à la taille affichée dans le formulaire"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il rendering successivo torna a essere uno normale, alla dimensione mostrata dal modulo"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "次のレンダリングは通常のものに戻り、フォームに表示されたサイズになります"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下次生成恢复为普通生成，尺寸为表单显示的尺寸"
           }
         }
       }
