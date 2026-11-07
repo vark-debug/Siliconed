@@ -391,20 +391,19 @@ final class AppState {
     /// sent: « @ana as a western comic » keeps the picture's framing as an edit does.
     /// An enlargement's original is the image it was made from, stretched to its size.
     /// In a mirror, an edit's images stayed on the other Mac (`.remote`): no original to lay under it.
-    /// **A start image is an original too**: an img2img's, and a 「移除」 patch's — that render reads
-    /// image 1 through the crop (`Entry.start`, set by `renderJobs`), not as a reference.
+    /// **A 「移除」 patch's image 1 is an original too**: that render reads it through the crop
+    /// (`Entry.start`, set by `renderJobs`), not as a reference. A crop-only patch keeps the crop
+    /// alone — the entry is not the original's composition, so it has nothing to lay under it.
     func canCompareOriginal(_ e: Entry) -> Bool {
         e.grid == nil && (e.references.contains { if case .remote = $0.source { false } else { true } }
                           || e.enlargedFrom != nil || comparisonStart(e) != nil)
     }
 
-    /// **The image an entry started from, when it is a like-for-like original**: an img2img's start image,
-    /// or a patch's image 1 — unless the patch kept the crop alone (`--crop-only`: the entry is the crop,
-    /// not the original's composition, so there is nothing to lay under it).
+    /// **A pasted patch's image 1**: the only start image the curtain reads. A plain img2img and a
+    /// text-to-image keep the bar they had — this is the patch path's original, not a new button.
     func comparisonStart(_ e: Entry) -> ReferenceImage? {
-        guard let start = e.start else { return nil }
+        guard let start = e.start, let patch = e.settings.patch, patch.paste else { return nil }
         if case .remote = start.source { return nil }
-        if let patch = e.settings.patch, !patch.paste { return nil }
         return start
     }
     /// The thumbnails' side in the history column (the slider at its foot); in memory, like the rest.

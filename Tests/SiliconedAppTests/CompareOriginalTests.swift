@@ -97,19 +97,17 @@ final class CompareOriginalTests: XCTestCase {
         XCTAssertNotNil(decoded, "the image it edited decodes, under the pasted result")
     }
 
-    /// **A plain img2img compares with its start image.**
-    func testAnImg2imgShowsItsStart() async {
+    /// **Normal generation keeps the bar it had**: a start image without a patch is not newly made
+    /// comparable — the curtain is the patch path's original, not a button invented here.
+    func testAPlainImg2imgKeepsItsBarAsItWas() async {
         let app = form()
-        let start = picture(512, 512, name: "start.png")
         var s = settings()
         s.strength = 0.6
-        let e = entry(s, start: start)
+        let e = entry(s, start: picture(512, 512, name: "start.png"))
         app.history = [e]
 
-        XCTAssertTrue(app.canCompareOriginal(e))
-        app.comparesOriginal = true
-        let decoded = await waitForOriginal(app)
-        XCTAssertNotNil(decoded)
+        XCTAssertNil(app.comparisonStart(e), "only a pasted patch reads its start")
+        XCTAssertFalse(app.canCompareOriginal(e))
     }
 
     /// **`--crop-only` keeps the crop alone**: it is not the original's composition, so no curtain.
