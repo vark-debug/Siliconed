@@ -264,10 +264,9 @@ final class AppState {
         set { chosenStartStrength = newValue }
     }
     var chosenStartStrength: Double?
-    /// **The 「移除」 path's sources** (`Request.patch`): the image to edit, its mask and the crop's
-    /// margins — set by `silicontrol add --mask`, restored with a history image, handed on by the render.
-    /// The app draws no brush and no curtain: `nil`, and the path is not taken.
-    var patchInput: (image: ReferenceImage, mask: ReferenceImage, settings: Patch.Settings)? = nil
+    /// **The 「移除」 path's sources** (`Request.patch`) are a value of one render (`PatchInput`, passed
+    /// to `render`) — a redo's —, never a state of the form: a mask that outlived its job would be
+    /// rendered again by the next ordinary click. The app draws no brush and no curtain.
     var steps = 8
     /// **More detail** (`Detail`): Normal is the render as the model makes it. What a render takes is
     /// `effectiveDetail`: on a model that offers none (Anima, Krea 2: `DenoisingModule.acceptsDetail`), Normal.

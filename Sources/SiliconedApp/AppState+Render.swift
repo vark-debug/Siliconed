@@ -7,13 +7,19 @@ import Siliconed
 import SwiftUI
 import UniformTypeIdentifiers
 
+/// **The 「移除」 path's sources for one render**: the image to edit, its mask and the crop's margins.
+/// A value handed to `render`, never a state the form keeps: a mask belongs to the job it was queued
+/// with, and the next click is an ordinary render.
+typealias PatchInput = (image: ReferenceImage, mask: ReferenceImage, settings: Patch.Settings)
+
 extension AppState {
     // MARK: Render
 
     /// **Puts a render in the queue**, and launches it if nothing is running. `imposedSeed`: "Redo" (the seed of a history
     /// image). `imposedFormat`: "Redo" (its size) — with edit images, `outputFormat` would derive another one from image 1.
+    /// `patch`: the 「移除」 path's sources **of this render alone** (a redo of a mask image); the form never holds them.
     /// **Something varies** (`Series.swift`): the series' grid, one finished image per cell.
-    func render(imposedSeed: UInt64? = nil, imposedFormat: RecommendedFormat? = nil) {
+    func render(imposedSeed: UInt64? = nil, imposedFormat: RecommendedFormat? = nil, patch: PatchInput? = nil) {
         guard canRender else { return }
         // Everything that reads the state is taken here: the job no longer depends on the form.
         let firstNumber = imposedSeed ?? (fixedSeed ? seed : UInt64.random(in: 0...UInt64(UInt32.max)))
@@ -21,16 +27,21 @@ extension AppState {
         guard let prompts = try? alternatives.get().prompts, (try? carried.get()) != nil else { return }
         // **The 「移除」 path**: one image, not a series; the format comes with the settings (the plan's
         // size), as a redo gives it (`Admission` takes the plan's anyway).
-        let patch = patchInput
         if patch == nil, case .success(let g?) = seriesGrid(seed: firstNumber) {
             renderSeries(g, format: format)
             return
         }
         followsRender = true
         // The edit's images as the render reads them, decoded once for the whole series.
-        let edit = renderReferences
-        // One job (a prompt without groups: a series is a grid), its lot of seeds.
-        enqueue(prompts.map { expanded in
+        enqueue(renderJobs(seed: firstNumber, format: format, patch: patch,
+                           prompts: prompts, edit: renderReferences))
+    }
+
+    /// **The jobs a click makes**: one per prompt alternative, from the form as it reads now. `patch`: the
+    /// 「移除」 path's sources, passed by the caller — never read from a place shared between jobs (`render`).
+    func renderJobs(seed: UInt64, format: RecommendedFormat, patch: PatchInput?,
+                    prompts: [String], edit: [ReferenceImage]) -> [Job] {
+        prompts.map { expanded in
             var settings = RenderSettings(identifier: identifier, modelName: card?.name ?? identifier, prompt: expanded,
                                           format: format, steps: steps, loras: activeLoRAs,
                                           references: edit.count, variations: variations, detail: effectiveDetail,
@@ -45,13 +56,13 @@ extension AppState {
             let plan = expectedPlan(steps: steps, format: format, withLoRA: !activeLoRAs.isEmpty || !plainSampling,
                                     references: used.count + (patch == nil ? 0 : 1), strength: settings.strength)
             var job = Job(ordinal: nextJobNumber(), settings: settings,
-                          seeds: (0..<max(1, batch)).map { firstNumber &+ UInt64($0) },
+                          seeds: (0..<max(1, batch)).map { seed &+ UInt64($0) },
                           references: used, previews: previews,
                           defaultSteps: card?.defaultSteps, plan: plan)
             job.start = start
             job.patch = patch.map { (image: $0.image, mask: $0.mask) }
             return job
-        })
+        }
     }
 
     /// **The series « Generate » renders**: its grid, each cell a finished image into the history, the canvas showing
@@ -655,7 +666,13 @@ extension AppState {
     /// (`outputFormat`), and one typed on the command line (`add … 1024 --ref …`) came back at image 1's proportions.
     func redo(_ entry: Entry) {
         restoreSettings(entry)
-        render(imposedSeed: entry.seed, imposedFormat: entry.settings.format)
+        // **The 「移除」 path's sources travel with this image**, not through the form: a redo draws the
+        // same crop from them, and the click after it is an ordinary render again.
+        let patch: PatchInput? = {
+            guard let geometry = entry.settings.patch, let image = entry.start, let mask = entry.mask else { return nil }
+            return (image, mask, geometry)
+        }()
+        render(imposedSeed: entry.seed, imposedFormat: entry.settings.format, patch: patch)
     }
 
     func restoreSettings(_ entry: Entry) {
@@ -675,13 +692,9 @@ extension AppState {
         } else {
             setStart(nil)
         }
-        // **The 「移除」 path**, as the image's settings say: the image it edited and its mask — « Redo »
-        // draws the same crop from them.
-        if let geometry = entry.settings.patch, let image = entry.start, let mask = entry.mask {
-            patchInput = (image, mask, geometry)
-        } else {
-            patchInput = nil
-        }
+        // **The 「移除」 path** stays with the image: its mask is `entry.mask` and its crop's margins
+        // `entry.settings.patch`, which « Redo » hands the engine (`redo`). Nothing of it enters the
+        // form, or the next click would render the same mask again.
         if let g = entry.grid?.grid {
             // A sheet's prompt is the one typed, its groups the grid's axes: not escaped.
             prompt = entry.settings.prompt
@@ -696,14 +709,16 @@ extension AppState {
         identifier = r.identifier
         // The job's prompt is an expanded one: its braces are characters, not a series.
         prompt = PromptAlternatives.escaping(r.prompt)
-        orientation = r.format.orientation
-        format = r.format
+        // **A mask's format is its crop's plan**, decided by the engine, not a size the user chose:
+        // writing it back would give the next ordinary render the crop's dimensions.
+        if r.patch == nil {
+            orientation = r.format.orientation
+            format = r.format
+        }
         steps = r.steps
         loras = r.loras.map(allowedStrength)
         detail = r.detail
         solver = r.solver
-        // A mask's sources are not in the settings: the caller set them (`add`, `restoreSettings(entry)`).
-        if r.patch == nil { patchInput = nil }
     }
 
     /// **A Siliconed PNG dropped on the canvas**: the form takes what its metadata says

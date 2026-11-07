@@ -453,9 +453,9 @@ extension RemoteControl {
         app.prompt = prompt
         app.setEditImages(references)
         // The starting image too, or none: « Generate » would queue the same request. A mask's two
-        // sources go to the rack as they are — the app only hands them on.
+        // sources stay with the job queued here: they are no part of the form, and the next click is
+        // an ordinary render (`render(…, patch:)`).
         app.setStart(start)
-        if let patchOrigins, let patchSettings { app.patchInput = (patchOrigins.image, patchOrigins.mask, patchSettings) }
         if let strength { app.startStrength = strength }
         // A seed drawn here is a Random render, as after a click: the rack must not keep showing an old Fixed one.
         if let seed = d.seed { app.fixedSeed = true; app.seed = seed } else { app.fixedSeed = false }

@@ -54,6 +54,9 @@ let package = Package(
         // purpose (`TokenizerAndVAETests`) — on kilobytes, in milliseconds.
         .testTarget(name: "SiliconedTests", dependencies: ["Siliconed", "SilicontrolHelp", "Verification", "Measurement"],
                     exclude: ["Fixtures"]),
+        // **The app's invariants, headless**: the form's settings and the jobs a click makes, with no
+        // view and no model. A 「移除」 mask belongs to its job, never to the form (`PatchStateLeakTests`).
+        .testTarget(name: "SiliconedAppTests", dependencies: ["SiliconedApp", "Siliconed"]),
     ]
 )
 
