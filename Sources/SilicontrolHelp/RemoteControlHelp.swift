@@ -421,13 +421,18 @@ package enum RemoteControlHelp {
                               images by number (« image 1 », « image 2 »): Qwen-Image-2.1 reads
                               them as <image1>, <image2>. Leave the format out: the output then
                               follows image 1 (help edit).
-          --ref-res N         with --ref (or --mask: its crop is image 1), Qwen-Image-2.1 only: the
-                              area each reference image is
+          --ref-res N         with --ref, Qwen-Image-2.1 only: the area each reference image is
                               encoded at — its side R in calculate_dimensions(R², w/h), so about
                               R² pixels, its own ratio kept, sides at 32. 768 to 2560, a multiple
                               of 32. Default: 1024 (~1 MP). Raising it keeps more of the detail
                               of the image being edited, at more memory (a 64 GB Mac plans up to
                               ~2560²); the output size does not change.
+                              With --mask, N is read only when the crop keeps another proportion
+                              than the render's (its cover fit would cut more than 64 px a side,
+                              the workflow's tolerance): that crop is prepared at R². When the crop
+                              is the render's own size it is image 1 and the denoiser's reference
+                              block at that size — the workflow's primary latent — and N is
+                              refused there, not ignored.
           --image IMAGE|i7    img2img: the render starts from this image (a file, or an image of the
                               history) instead of noise, and keeps its composition. Only for a
                               model with "start_image": true (Z-Image, Anima, Krea 2); not with
@@ -1756,14 +1761,19 @@ package enum RemoteControlHelp {
                               images par leur numéro (« image 1 », « image 2 ») : Qwen-Image-2.1
                               les lit comme <image1>, <image2>. Ne pas donner de format : la sortie
                               suit alors l'image 1 (help edit).
-          --ref-res N         avec --ref (ou --mask : sa découpe est l'image 1), Qwen-Image-2.1
-                              seulement : la surface où chaque image de
+          --ref-res N         avec --ref, Qwen-Image-2.1 seulement : la surface où chaque image de
                               référence est encodée — son côté R dans calculate_dimensions(R², w/h),
                               donc environ R² pixels, son propre rapport gardé, les côtés à 32.
                               768 à 2560, un multiple de 32. Défaut : 1024 (~1 MP). L'augmenter
                               garde plus du détail de l'image éditée, au prix de plus de mémoire
                               (un Mac de 64 Go prévoit jusqu'à ~2560²) ; la taille de sortie ne
                               change pas.
+                              Avec --mask, N n'est lu que si la découpe garde un autre rapport que
+                              celui du rendu (son ajustement « cover » couperait plus de 64 px par
+                              côté, la tolérance du workflow) : cette découpe est alors préparée à
+                              R². Quand la découpe fait la taille du rendu, elle est l'image 1 et le
+                              bloc de référence du denoiseur à cette taille — le latent primaire du
+                              workflow — et N y est refusé, non ignoré.
           --image IMAGE|i7    img2img : le rendu part de cette image (un fichier, ou une image de
                               l'historique) au lieu du bruit, et garde sa composition. Seulement
                               pour un modèle "start_image": true (Z-Image, Anima, Krea 2) ; pas

@@ -80,6 +80,13 @@ package struct Admission: Sendable {
                 throw EngineError.invalidPatch(reason: "\(denoising.model) starts from no additive latent (Qwen-Image-2.1's patch workflow is the one)")
             }
             let planned = try patch.plan()
+            // **`--ref-res` has no image to prepare when the crop is the render's own size**: the crop
+            // is image 1 and the reference block at that size (the workflow's primary latent), so N is
+            // refused, not ignored. A crop of another proportion is prepared at N, like a reference.
+            if planned.primaryMatchesTarget, request.referenceResolution != nil {
+                throw EngineError.invalidReferenceResolution(reason:
+                    "a --mask crop that is the render's own size (within \(Patch.coverTolerance) px a side) is prepared at that size: --ref-res does not apply — leave it out")
+            }
             patchPlan = planned
             width = planned.width / space.factor
             height = planned.height / space.factor
@@ -147,6 +154,20 @@ package struct Admission: Sendable {
             } ?? 0
             throw Strength.Failure.noEvaluation(strength: request.strength, steps: steps,
                                                 floor: Double(scheduled - last - 1) / Double(scheduled))
+        }
+        // **The images the text encoder reads and the reference blocks the denoiser receives are one
+        // list** (`QwenImage21Sequence`: each block fills the rows its image made, 4 × slots == h·w).
+        // A patch's crop is image 1 and the denoiser's block; an edit's references are both; img2img's
+        // image is neither. Judged here, before the encoder's minutes: the wiring C4 dropped in the
+        // render threw at the end of the text stage (`2373 slots for 5376 image tokens`) — a chain that
+        // cannot keep the two together is refused at the door instead.
+        let textImages = chain.text is any ImageTextModule
+            ? (patchPlan == nil ? request.references.count : 1) : 0
+        let referenceBlocks = patchPlan == nil
+            ? min(request.references.count, denoising.maxReferences)
+            : min(1, denoising.maxReferences)
+        guard textImages == referenceBlocks else {
+            throw EngineError.referenceSequence(text: textImages, blocks: referenceBlocks)
         }
         return Admission(space: space, height: height, width: width, steps: steps, start: start, plan: plan,
                          seededSigma: seededSigma, patch: patchPlan,

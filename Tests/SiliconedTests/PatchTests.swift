@@ -121,4 +121,87 @@ final class PatchTests: XCTestCase {
         XCTAssertLessThan(abs(at1536.width * at1536.height - 1536 * 1536), 1536 * 1536 / 8)
         XCTAssertGreaterThan(at1536.width, at1024.width, "the resolution alone sets its size")
     }
+
+    // ── C4's joint sequence: the crop is image 1 and the denoiser's reference block ──────────────
+
+    /// The image the user ran, and the black-and-white mask beside it — or, when they are not
+    /// installed, **the same geometry**: 1248×1807, white from `x158 y123`, 458×1512.
+    private func usersPatch() throws -> Patch {
+        let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let imageURL = root.appendingPathComponent("测试使用/图层 1.png")
+        let maskURL = root.appendingPathComponent("测试使用/download.png")
+        if FileManager.default.fileExists(atPath: imageURL.path), FileManager.default.fileExists(atPath: maskURL.path) {
+            return Patch(image: try ImageRGB(contentsOf: imageURL), mask: ImageMask(image: try ImageRGB(contentsOf: maskURL)))
+        }
+        return Patch(image: image(1248, 1807), mask: box(1248, 1807, x: 158, y: 123, w: 458, h: 1512))
+    }
+
+    /// **The request that failed, and its geometry** (`2373 slots for 5376 image tokens`): the mask's
+    /// box grows by `int(458 × 0.4)` = 183, clamps at the image's border, so the crop is 799×1807; the
+    /// long side is under 2560, and the 32-multiple nearest in area is **768×1792** (latent 48×112).
+    /// The crop is the render's own size (`_cover_crop_is_small`: 12 px a side, within 64), so its
+    /// prepared copy is the crop itself — image 1 **and** the reference block (`primaryMatchesTarget`).
+    func testTheUsersCropIsTheWorkflowsGeometry() throws {
+        let patch = try usersPatch()
+        let plan = try patch.plan()
+        XCTAssertEqual([plan.crop.x, plan.crop.y, plan.crop.width, plan.crop.height], [0, 0, 799, 1807])
+        XCTAssertEqual([plan.width, plan.height], [768, 1792])
+        XCTAssertEqual([plan.width / 16, plan.height / 16], [48, 112], "the latent grid")
+        XCTAssertTrue(plan.primaryMatchesTarget, "its cover fit cuts 12 px a side, within the workflow's 64")
+        XCTAssertEqual([patch.render(plan).width, patch.render(plan).height], [768, 1792], "z₀'s pixels")
+    }
+
+    /// **The joint sequence this patch makes** — the failing check, as numbers. A patch's crop is
+    /// image 1 for the text encoder and one reference block for the denoiser: **4 × slots == h·w**.
+    /// Fallback (`--ref-res 1024`, a crop of another proportion): 672×1568 → 1 029 slots / 4 116 rows,
+    /// target 5 376, so **9 492** image rows and 2 373 slots — the error's numbers. B (`primaryMatches
+    /// Target`): the copy is 768×1792 → 1 344 slots / 5 376 rows, so **10 752** rows and 2 688 slots —
+    /// the workflow's two copies of one image.
+    func testThePatchSequenceIsTheWorkflows() throws {
+        let patch = try usersPatch()
+        let plan = try patch.plan()
+
+        var fallback = MemoryFixtures.qwenRequest(plan.width, plan.height,
+                                                  references: [(width: plan.width, height: plan.height)], tokens: 33)
+        fallback.referenceResolution = 1024
+        let need = QwenImage21Need(fallback, maps: fallback.qwenMaps!)
+        XCTAssertEqual([need.references[0].prepared.width, need.references[0].prepared.height], [672, 1568])
+        XCTAssertEqual(need.references[0].slots, 1029)
+        let seq = need.sequence
+        XCTAssertEqual(seq.textRows.count, 19, "33 − 14 (the system turn)")
+        XCTAssertEqual(seq.target, 5376)
+        XCTAssertEqual(seq.count - seq.textRows.count, 9492, "the joint sequence's image rows")
+        XCTAssertEqual(seq.count - seq.textRows.count, 4 * (1029 + 1344), "4 × slots, unchanged")
+        XCTAssertEqual(seq.blockStarts, [8, 4135], "image 1 opens the encoder's rows: text, then the block")
+        XCTAssertEqual(seq.segments.count, 3, "text, the reference, the target")
+
+        var matched = fallback
+        matched.referenceMatchesTarget = true
+        let withB = QwenImage21Need(matched, maps: matched.qwenMaps!)
+        XCTAssertEqual([withB.references[0].prepared.width, withB.references[0].prepared.height], [768, 1792])
+        XCTAssertEqual(withB.references[0].slots, 1344)
+        XCTAssertEqual(withB.sequence.count - withB.sequence.textRows.count, 10752, "2 × 5376: the workflow")
+        XCTAssertEqual(withB.sequence.count - withB.sequence.textRows.count, 4 * (1344 + 1344))
+    }
+
+    /// **The edit path is untouched** (`--ref`, no `--mask`): its reference is still prepared at
+    /// `--ref-res` (799×1807 → 672×1536), and its layout is the one written out before B: 19 text
+    /// rows (8 before image 1, 11 after it), the reference's 4 032 rows, the target's 5 376;
+    /// 9 427 rows, prefix 4 051.
+    func testTheEditSequenceIsUnchanged() throws {
+        var edit = MemoryFixtures.qwenRequest(768, 1792, references: [(width: 799, height: 1807)], tokens: 33)
+        edit.referenceResolution = 1024
+        XCTAssertFalse(edit.referenceMatchesTarget)
+        let need = QwenImage21Need(edit, maps: edit.qwenMaps!)
+        XCTAssertEqual([need.references[0].prepared.width, need.references[0].prepared.height], [672, 1536])
+        XCTAssertEqual(need.references[0].slots, 1008, "42 × 96 ÷ 4")
+        let seq = need.sequence
+        XCTAssertEqual([seq.count, seq.prefix, seq.target], [9427, 4051, 5376])
+        XCTAssertEqual(seq.count - seq.textRows.count, 9408)
+        XCTAssertEqual(seq.blockStarts, [8, 4051])
+        XCTAssertEqual(seq.textRows.count, 19)
+        XCTAssertEqual(seq.textRows.prefix(8).map { $0.joint }, Array(0..<8))
+        XCTAssertEqual(seq.textRows.suffix(11).map { $0.joint }, Array(4040..<4051))
+    }
 }

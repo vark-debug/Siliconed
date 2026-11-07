@@ -84,6 +84,12 @@ package enum EngineError: Error, Equatable, Sendable, Codable, LocalizedError, C
     /// A reference resolution outside the bounds the references are prepared at (`Request.referenceResolution`).
     /// `reason` says what is wrong with it.
     case invalidReferenceResolution(reason: String)
+    /// **The text encoder and the denoiser must read the same images** (`Admission.judge`): a
+    /// Qwen-Image-2.1 joint sequence places one reference block on the rows each image's slots made
+    /// (4 × slots == h·w), so `text` images and `blocks` reference latents must be the same count —
+    /// a chain whose text encoder reads no image, or whose denoiser reads no reference, cannot take a
+    /// patch's crop.
+    case referenceSequence(text: Int, blocks: Int)
     /// More reference images than the model reads (`max` 0: it does no reference editing).
     case tooManyReferences(count: Int, max: Int)
     /// A side under `Format.minimumSide` — the models are out of their domain below. `side`: the
@@ -259,6 +265,7 @@ package enum EngineError: Error, Equatable, Sendable, Codable, LocalizedError, C
         case .invalidSeededStart: return "invalid_seeded_start"
         case .invalidPatch: return "invalid_patch"
         case .invalidReferenceResolution: return "invalid_reference_resolution"
+        case .referenceSequence: return "reference_sequence"
         case .tooManyReferences: return "too_many_references"
         case .imageTooSmall: return "image_too_small"
         case .formatRefused: return "format_refused"
@@ -340,6 +347,9 @@ package enum EngineError: Error, Equatable, Sendable, Codable, LocalizedError, C
             return "The patch is refused: \(reason)."
         case let .invalidReferenceResolution(reason):
             return "The reference resolution is refused: \(reason)."
+        case let .referenceSequence(text, blocks):
+            return "The text encoder reads \(text) image(s), the denoiser \(blocks) reference block(s): "
+                + "a sequence needs one block per image it read."
         case let .tooManyReferences(count, max):
             return max == 0 ? "This model does not edit from reference images."
                 : "\(count) reference images: this model reads at most \(max)."
@@ -450,6 +460,8 @@ package enum EngineError: Error, Equatable, Sendable, Codable, LocalizedError, C
             return "Paint the mask over the region to replace, white on black (or its alpha), at the image's size — with at least 10 pixels — and hand the image and its mask together."
         case .invalidReferenceResolution:
             return "Leave the reference resolution out (1024), or choose 768 to 2560, a multiple of 32."
+        case .referenceSequence:
+            return "Choose a chain whose text encoder reads images and whose denoiser reads references (Qwen-Image-2.1): a patch needs the two together."
         case .tooManyReferences(_, let max) where max == 0:
             return "Choose a model that edits by reference (Qwen-Image-2.1)."
         case .tooManyReferences(_, let max): return "Keep at most \(max) reference images."
@@ -643,6 +655,7 @@ package enum EngineError: Error, Equatable, Sendable, Codable, LocalizedError, C
         .invalidReferenceResolution(reason: "1000 px is not a multiple of 32"),
         .invalidSeededStart(reason: "the encoded crop is 24×32 latent cells, the noise 32×32"),
         .invalidPatch(reason: "the mask is empty or has fewer than 10 pixels to replace"),
+        .referenceSequence(text: 1, blocks: 0),
     ]
 }
 

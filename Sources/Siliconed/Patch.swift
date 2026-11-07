@@ -104,6 +104,11 @@ package struct Patch: Sendable, Equatable {
     /// `遮罩裁剪V2`'s `纯白像素 < 10` guard, whose action this path does not reproduce: below this
     /// many pixels the patch is refused rather than the whole image replaced (see `EngineError.invalidPatch`).
     package static let minimumPixels = 10
+    /// `Text Encode Qwen Image 2.1 GH`'s `_cover_crop_is_small(..., tolerance: 64)`: the crop counts as
+    /// the target itself when a cover fit cuts at most this many pixels from each side. True, the
+    /// workflow keeps the primary at the latent's size — the same image for the text encoder and for
+    /// the denoiser's reference block (`Patch.Plan.primaryMatchesTarget`).
+    package static let coverTolerance = 64
 
     /// The multipliers of the mask's shortest side, one per side.
     package struct Expansion: Sendable, Equatable {
@@ -140,6 +145,18 @@ package struct Patch: Sendable, Equatable {
         package let crop: Crop
         package let width: Int
         package let height: Int
+
+        /// **Whether the crop is, within `Patch.coverTolerance`, the target itself** — the workflow's
+        /// `_cover_crop_is_small`: fitted onto `width×height` by cover, the crop gives up at most 64 px
+        /// on a side. True, the crop is handed to the text encoder and to the denoiser **as it is**
+        /// (the workflow's primary latent, which is also the text encoder's image 1, so its slots and
+        /// the reference block's rows agree); false, it is prepared at `--ref-res` like any reference.
+        package var primaryMatchesTarget: Bool {
+            let scale = max(Double(width) / Double(crop.width), Double(height) / Double(crop.height))
+            let cut = max((Double(crop.width) * scale - Double(width)) / 2,
+                          (Double(crop.height) * scale - Double(height)) / 2)
+            return cut <= Double(Patch.coverTolerance)
+        }
     }
 
     package var image: ImageRGB

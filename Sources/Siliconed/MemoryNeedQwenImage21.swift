@@ -190,10 +190,13 @@ package struct QwenImage21Need {
         self.request = request
         self.maps = maps
         let resolution = request.referenceResolution ?? QwenImage21Pipeline.outputResolution
-        references = request.references.map { r in
-            Reference(original: (r.width, r.height),
-                      prepared: Qwen3VLImages.conditionSize(width: r.width, height: r.height,
-                                                            resolution: resolution))
+        references = request.references.enumerated().map { index, r in
+            // The patch's crop, when it is the target's own pixels, is not prepared again: the
+            // workflow keeps its primary at the latent's size (`Patch.Plan.primaryMatchesTarget`).
+            let prepared = request.referenceMatchesTarget && index == 0
+                ? (width: r.width, height: r.height)
+                : Qwen3VLImages.conditionSize(width: r.width, height: r.height, resolution: resolution)
+            return Reference(original: (r.width, r.height), prepared: prepared)
         }
         let n = references.count
         // `<|im_start|>user\n` (3), each image's tags, and after the last image at least the closing

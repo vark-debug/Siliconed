@@ -50,6 +50,11 @@ package struct MemoryNeed: Sendable, Equatable {
         /// prepares each reference at ~`R²` (`QwenImage21Need`), so its vision tokens, the encoder's
         /// sequence, the reference latents and the K/V all follow it. `nil`: the published 1024.
         package var referenceResolution: Int? = nil
+        /// **A 「移除」 patch's crop is the target's own pixels** (`Patch.Plan.primaryMatchesTarget`):
+        /// its prepared copy — the text encoder's image 1 and the denoiser's reference block — is the
+        /// crop itself, at `width×height`, rather than one at `referenceResolution`. Exactly one
+        /// reference, the crop.
+        package var referenceMatchesTarget = false
         /// The prompt's tokens (template included, as the encoder sees them) — or an upper bound of
         /// them (`promptTokens(_:family:references:)`).
         package var promptTokens: Int

@@ -113,6 +113,31 @@ final class AdmissionTests: XCTestCase {
         }
     }
 
+    /// **B**: a `--mask` crop that is the render's own size (`Patch.Plan.primaryMatchesTarget`, the
+    /// workflow's 64 px a side) is image 1 and the reference block **at that size**: an explicit
+    /// `--ref-res` is refused there — not silently ignored — and admitted once left out.
+    func testAPatchWhoseCropIsTheRenderRefusesAReferenceResolution() throws {
+        let values = (0..<(1000 * 700)).map { i -> Float in
+            let x = i % 1000, y = i / 1000
+            return x >= 400 && x < 600 && y >= 250 && y < 450 ? 1 : 0
+        }
+        let patch = Patch(image: ImageRGB(pixels: [Float](repeating: 0, count: 3 * 1000 * 700), height: 700,
+                                          width: 1000),
+                          mask: ImageMask(width: 1000, height: 700, values: values))
+        var request = Request("x", resolution: 512)
+        request.patch = patch
+        request.referenceResolution = 1024
+        XCTAssertTrue(try patch.plan().primaryMatchesTarget)
+        XCTAssertThrowsError(try Admission.judge(request, chain: qwen, usesANE: false)) {
+            guard let error = $0 as? EngineError, case .invalidReferenceResolution(let reason) = error else {
+                return XCTFail("\($0)")
+            }
+            XCTAssertTrue(reason.contains("--ref-res does not apply"), reason)
+        }
+        request.referenceResolution = nil
+        XCTAssertNoThrow(try Admission.judge(request, chain: qwen, usesANE: false))
+    }
+
     /// **Qwen-Image-2.1-Turbo's 9-step workflow table** (C1): `--steps 9` is admitted and plans nine
     /// evaluations (the module walks the graph's `ManualSigmas` — to the bit in
     /// `QwenImage21PipelineTests`); a σ table the request supplies sets the steps from its length, and a

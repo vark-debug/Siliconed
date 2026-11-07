@@ -96,11 +96,14 @@ extension Engine {
                 ?? (request.image.map { [$0] } ?? request.references).map { ($0.width, $0.height) },
             promptTokens: MemoryNeed.Request.promptTokens(request.prompt, family: model.card.family,
                                                            references: referenceCount))
-        // The crop is encoded twice — once at its own size for z₀ (`Latent.seeded`), once at the
-        // references' resolution for the text encoder: the VAE encoder is charged for the larger.
+        // The crop is encoded twice — once at its own size for z₀ (`Latent.seeded`), once for the
+        // text encoder's image 1, which is also the denoiser's reference block: the VAE encoder is
+        // charged for the larger. The text's copy is the crop itself when it is the target's own
+        // pixels (`Patch.Plan.primaryMatchesTarget`), at `--ref-res` otherwise.
         memoryRequest.seededStart = patchPlan.map { ($0.width, $0.height) }
         memoryRequest.solver = request.solver
         memoryRequest.referenceResolution = request.referenceResolution
+        memoryRequest.referenceMatchesTarget = patchPlan?.primaryMatchesTarget ?? false
         memoryRequest.accelerators = admitted.accelerators
         memoryRequest.batch = seeds.count
         memoryRequest.library = model.library ?? .processWide
@@ -170,10 +173,15 @@ extension Engine {
             //    encoder's image 1 **and** z₀ below — the same pixels, the workflow's `#204`. ──
             let patchCrop = patchPlan.flatMap { plan in request.patch.map { $0.render(plan) } }
             // ── The references at the denoiser's size, once: a text stage that reads images and the
-            //    image encoder below receive this same copy. A patch has one — its crop. ──
+            //    image encoder below receive this same copy. A patch has one — its crop. When the
+            //    crop is the target's own pixels (`Patch.Plan.primaryMatchesTarget`), that copy is
+            //    the crop itself, as the workflow's `Text Encode Qwen Image 2.1 GH` keeps its primary
+            //    latent; otherwise it is prepared at `--ref-res`. ──
             let prepared: [ImageRGB]
             if let patchCrop {
-                prepared = try chain.denoising.preparedReferences([patchCrop], referenceResolution: request.referenceResolution)
+                prepared = patchPlan?.primaryMatchesTarget == true
+                    ? [patchCrop]
+                    : try chain.denoising.preparedReferences([patchCrop], referenceResolution: request.referenceResolution)
             } else if request.references.isEmpty {
                 prepared = []
             } else {
@@ -248,11 +256,12 @@ extension Engine {
                 PhaseBoundary.mark("image")
             }
 
-            // ── The references (editing), once: same encoder, each at its own size. A patch has none:
-            //    its crop is z₀ and the text encoder's image 1, not an image the denoiser re-reads
-            //    (the workflow wires it to the encoder only). ──
+            // ── The references, once: the denoiser re-reads the **same images** the text encoder read,
+            //    each at its own size. A patch has one — its crop: it is image 1 and the reference block
+            //    (`QwenImage21Sequence`: 4 × slots == h·w). Dropping it here left the encoder's image
+            //    slots without the rows they place (`2373 slots for 5376 image tokens`). ──
             var references: [Latent] = []
-            if patchPlan == nil, !prepared.isEmpty, let encoding = chain.encoding {
+            if !prepared.isEmpty, let encoding = chain.encoding {
                 try context.check()
                 context.emit(.stage(.image, image: 0))
                 let referencesStart = Date()
