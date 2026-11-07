@@ -4554,6 +4554,46 @@
     "--ref and --mask don’t go together: the patch’s crop is the edit’s only image" : {},
     "--ref-res 1024 (the default) or 1536 — silicontrol help add" : {},
     "--ref-res goes with --ref or --mask" : {},
+    "--seeded-start goes with --mask: the patch’s crop is the start" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--seeded-start gehört zu --mask: der Ausschnitt des Patches ist der Start"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--seeded-start va con --mask: el recorte del parche es el inicio"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--seeded-start va avec --mask : la découpe du patch est le départ"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--seeded-start va con --mask: il ritaglio della patch è l’inizio"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--seeded-start は --mask と一緒に使います。パッチの切り出しが開始点になります"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--seeded-start 需与 --mask 一起使用：patch 的裁剪区域就是起点"
+          }
+        }
+      }
+    },
     "--solver %@ is offered only when More Solvers is on" : {
       "localizations" : {
         "de" : {

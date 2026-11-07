@@ -139,8 +139,7 @@ extension RemoteControl {
         // the render would start from noise anyway — refused for what it is, not ignored (`Admission`
         // says the same of a request built by the API).
         if d.seededStart, d.mask == nil {
-            throw Refusal("usage", String(localized: "--seeded-start goes with --mask: the patch’s crop is the start"),
-                          help: String(localized: "--image photo.jpg --mask mask.png --seeded-start — silicontrol help add"))
+            throw Refusal("usage", String(localized: "--seeded-start goes with --mask: the patch’s crop is the start"))
         }
         return d
     }
