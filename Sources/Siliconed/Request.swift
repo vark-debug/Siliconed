@@ -92,12 +92,21 @@ package struct Request: Sendable, Equatable {
     /// as defined, not a rescaled one.
     package var seededStart: ImageRGB? = nil
     /// **A 「移除」 patch** (`Patch`): the image, its mask and the crop's margins, as the ComfyUI
-    /// workflow's mask branch. The engine crops the image, tints the crop green, and hands **the same
-    /// pixels** to the text encoder (as its first image) and to the additive start (`z₀`) — the render's
-    /// format is the plan's size, whatever `width` and `height` say (`Admission` takes the plan's).
+    /// workflow's mask branch. The engine crops the image, tints the crop green, and hands the crop to
+    /// the text encoder as its first image — the denoiser's reference block — and, **only when
+    /// `patchSeededStart` says so**, to the additive start (`z₀`). The render's format is the plan's
+    /// size, whatever `width` and `height` say (`Admission` takes the plan's).
     /// Refused beside `image`, `seededStart` or `references`, and by a denoiser without `acceptsSeededStart`
     /// (Qwen-Image-2.1's Turbo). `nil`: the path is not taken, and nothing else changes.
     package var patch: Patch? = nil
+    /// **The patch's encoded start, opt-in** (`--seeded-start`): the crop becomes z₀ and the seed's
+    /// noise is added to it (`Latent.seeded`: `z₀ + √2·ε` at σ₀ = 1, ComfyUI's `max_denoise` branch),
+    /// as the workflow's `Text Encode Qwen Image 2.1 GH` keeps its primary latent. **Off by default**:
+    /// the crop is image 1 alone, and the render starts from noise — measured on a 9-step manual
+    /// schedule, where a third of the crop at z₀ kept the tint the prompt asked to remove, while the
+    /// same pixels as a reference alone removed it (the crop's detail energy 10.95 → 21.76, near the
+    /// original's 22.58). Refused without `patch`: there is no crop to start from.
+    package var patchSeededStart = false
     /// **The editing reference images** ("change her jacket to red"): the denoiser re-reads them
     /// at each layer, and the generated image starts from noise — nothing to do with `image`,
     /// which is its starting point. Each keeps **its own** aspect ratio, at the size the denoiser

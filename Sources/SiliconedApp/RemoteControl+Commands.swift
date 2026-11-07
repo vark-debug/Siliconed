@@ -146,6 +146,9 @@ extension RemoteControl {
         var expansion: Patch.Expansion?
         /// `--max-side N`: the crop's longest side, 768–2560 (`Patch.maximumSide`); `nil`, 2560.
         var maximumSide: Int?
+        /// `--seeded-start`: the crop is also the render's start (`Request.patchSeededStart`), instead
+        /// of the default noise-only start; refused without `--mask`.
+        var seededStart = false
         /// `nil`: like the app's « Preview at every step » switch.
         var previews: Bool?
         var wait = false

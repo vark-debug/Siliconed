@@ -230,9 +230,23 @@ final class AdmissionTests: XCTestCase {
         let admitted = try Admission.judge(request, chain: qwen, usesANE: false)
         XCTAssertEqual([admitted.width, admitted.height], [48, 48], "768² from the plan, not the request's 512²")
         XCTAssertEqual([admitted.patch?.width, admitted.patch?.height], [768, 768])
-        XCTAssertEqual(admitted.seededSigma, 1)
+        XCTAssertNil(admitted.seededSigma, "the default patch starts from noise: the crop is image 1 alone")
         XCTAssertEqual(admitted.start, 0)
         XCTAssertEqual(admitted.plan.reduced, 0, "the crop is never projected onto a half-size grid")
+        // `--seeded-start`: the crop becomes z₀, its σ₀ the schedule's first node.
+        var seededPatch = request; seededPatch.patchSeededStart = true
+        XCTAssertEqual(try Admission.judge(seededPatch, chain: qwen, usesANE: false).seededSigma, 1)
+        seededPatch.sigmas = [0.9, 0.6, 0.3, 0]
+        XCTAssertEqual(try Admission.judge(seededPatch, chain: qwen, usesANE: false).seededSigma, 0.9,
+                       "σ₀ is the table's first node, never assumed to be 1")
+        // Asked without a patch, it is refused for what it is — never ignored.
+        var seededAlone = Request("x", resolution: 512); seededAlone.patchSeededStart = true
+        XCTAssertThrowsError(try Admission.judge(seededAlone, chain: qwen, usesANE: false)) {
+            guard let failure = $0 as? Request.Failure, case .seededStart(let why) = failure else {
+                return XCTFail("\($0)")
+            }
+            XCTAssertTrue(why.contains("--mask"), why)
+        }
 
         func refuses(_ request: Request, chain: Chain, _ file: StaticString = #filePath, _ line: UInt = #line) {
             XCTAssertThrowsError(try Admission.judge(request, chain: chain, usesANE: false), file: file, line: line) {

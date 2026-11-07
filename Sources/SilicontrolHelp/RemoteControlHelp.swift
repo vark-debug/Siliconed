@@ -446,12 +446,17 @@ package enum RemoteControlHelp {
           --mask IMAGE|i7     the 「remove」 path (局部重绘): --image is the image to edit, --mask
                               the region to replace — white on black, or the bitmap's alpha — of
                               the image's size. The mask is filled, cropped with a margin, tinted
-                              green, and that crop is both the text encoder's image 1 and the
-                              render's start (z₀ + σ·ε): the prompt says what replaces the region.
+                              green, and that crop is the text encoder's image 1: the prompt says
+                              what replaces the region. THE RENDER STARTS FROM NOISE, the crop being
+                              a reference alone; --seeded-start also makes it the start.
                               The crop decides the format (leave it out), so --ref, --strength,
                               a typed format and grid are refused, said. Qwen-Image-2.1 only.
                               A mask of another size, or one with fewer than 10 pixels of region,
                               is refused (error "patch", invalid_patch) — not painted over.
+          --seeded-start     with --mask: the crop is also the render's start — the additive latent
+                              z₀ + √2·ε (ComfyUI's max_denoise noise), as the workflow's encoded
+                              primary latent is. Default: off — noise only, the crop as image 1.
+                              Without --mask there is no crop to start from: refused, said.
           --expand T,B,L,R    with --mask: the crop's margins, multipliers of the mask's shortest
                               side (1.3: 0.3 × that side above; 1.4: 0.4 below, left, right).
                               Default: 1.3,1.4,1.4,1.4 (the workflow's).
@@ -1788,13 +1793,19 @@ package enum RemoteControlHelp {
           --mask IMAGE|i7     la voie « retirer » (局部重绘) : --image est l'image à éditer, --mask
                               la région à remplacer — blanc sur noir, ou l'alpha du bitmap — de la
                               taille de l'image. Le masque est rempli, découpé avec une marge, teint
-                              en vert, et cette découpe est à la fois l'image 1 de l'encodeur de
-                              texte et le départ du rendu (z₀ + σ·ε) : le prompt dit ce qui
-                              remplace la région. La découpe décide du format (ne pas le donner),
-                              donc --ref, --strength, un format tapé et grid sont refusés, dit.
-                              Qwen-Image-2.1 seulement. Un masque d'une autre taille, ou de moins
-                              de 10 pixels de région, est refusé (erreur "patch", invalid_patch) —
-                              pas peint par-dessus.
+                              en vert, et cette découpe est l'image 1 de l'encodeur de texte : le
+                              prompt dit ce qui remplace la région. LE RENDU PART DU BRUIT, la
+                              découpe n'étant qu'une référence ; --seeded-start en fait aussi le
+                              départ. La découpe décide du format (ne pas le donner), donc --ref,
+                              --strength, un format tapé et grid sont refusés, dit. Qwen-Image-2.1
+                              seulement. Un masque d'une autre taille, ou de moins de 10 pixels de
+                              région, est refusé (erreur "patch", invalid_patch) — pas peint
+                              par-dessus.
+          --seeded-start     avec --mask : la découpe est aussi le départ du rendu — le latent
+                              additif z₀ + √2·ε (le bruit « max_denoise » de ComfyUI), comme le
+                              latent primaire encodé du workflow. Défaut : désactivé — bruit seul,
+                              et la découpe n'est que l'image 1. Sans --mask, il n'y a pas de
+                              découpe dont partir : refusé, dit.
           --expand T,B,L,R    avec --mask : les marges de la découpe, multiplicateurs du côté le
                               plus court du masque (1.3 : 0.3 × ce côté au-dessus ; 1.4 : 0.4 en
                               dessous, à gauche, à droite). Défaut : 1.3,1.4,1.4,1.4 (celui du

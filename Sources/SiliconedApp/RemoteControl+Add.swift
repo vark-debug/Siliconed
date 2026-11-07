@@ -91,6 +91,7 @@ extension RemoteControl {
                                   help: "--max-side 2560 (the workflow’s) — silicontrol help add")
                 }
                 d.maximumSide = n
+            case "--seeded-start": d.seededStart = true
             case "--strength":
                 let v = try value(a)
                 guard let s = StartImage.strength(v) else {
@@ -133,6 +134,13 @@ extension RemoteControl {
                 throw Refusal("usage", String(localized: "extra argument: \"\(p)\""),
                             help: String(localized: "the prompt is ONE argument: put it in quotes — silicontrol help add"))
             }
+        }
+        // `--seeded-start` seeds a patch's crop: without a mask there is no crop to start from, and
+        // the render would start from noise anyway — refused for what it is, not ignored (`Admission`
+        // says the same of a request built by the API).
+        if d.seededStart, d.mask == nil {
+            throw Refusal("usage", String(localized: "--seeded-start goes with --mask: the patch’s crop is the start"),
+                          help: String(localized: "--image photo.jpg --mask mask.png --seeded-start — silicontrol help add"))
         }
         return d
     }
@@ -248,7 +256,8 @@ extension RemoteControl {
             }
             d.format = (planned.width, planned.height)
             patchOrigins = (original, mask)
-            patchSettings = Patch.Settings(expansion: expansion, maximumSide: maximumSide)
+            patchSettings = Patch.Settings(expansion: expansion, maximumSide: maximumSide,
+                                           seededStart: d.seededStart)
         }
 
         // The starting image (img2img): a model whose chain starts from one, never with references — one or the other.

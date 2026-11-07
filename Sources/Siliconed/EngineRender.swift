@@ -96,11 +96,12 @@ extension Engine {
                 ?? (request.image.map { [$0] } ?? request.references).map { ($0.width, $0.height) },
             promptTokens: MemoryNeed.Request.promptTokens(request.prompt, family: model.card.family,
                                                            references: referenceCount))
-        // The crop is encoded twice — once at its own size for z₀ (`Latent.seeded`), once for the
-        // text encoder's image 1, which is also the denoiser's reference block: the VAE encoder is
-        // charged for the larger. The text's copy is the crop itself when it is the target's own
-        // pixels (`Patch.Plan.primaryMatchesTarget`), at `--ref-res` otherwise.
-        memoryRequest.seededStart = patchPlan.map { ($0.width, $0.height) }
+        // The crop is encoded once for the text encoder's image 1, which is also the denoiser's
+        // reference block; with `--seeded-start` it is encoded a second time for z₀ (`Latent.seeded`),
+        // and the VAE encoder is charged for the larger. The text's copy is the crop itself when it is
+        // the target's own pixels (`Patch.Plan.primaryMatchesTarget`), at `--ref-res` otherwise.
+        memoryRequest.seededStart = request.patchSeededStart
+            ? patchPlan.map { ($0.width, $0.height) } : nil
         memoryRequest.solver = request.solver
         memoryRequest.referenceResolution = request.referenceResolution
         memoryRequest.referenceMatchesTarget = patchPlan?.primaryMatchesTarget ?? false
@@ -132,9 +133,12 @@ extension Engine {
         context.detailScale = Detail.scale(width: pixelWidth, height: pixelHeight)
         context.solver = request.solver
         context.sigmas = request.sigmas
-        // The workflow's crop: the denoiser keeps its spectral schedule off (`Context.seededStart`),
-        // as for an edit — a half-size first evaluation would project z₀ onto another grid.
-        context.seededStart = request.seededStart != nil || request.patch != nil
+        // The workflow's crop, when it is also the start (`--seeded-start`): the denoiser keeps its
+        // spectral schedule off (`Context.seededStart`), as for an edit — a half-size first evaluation
+        // would project z₀ onto another grid. Without it the patch renders from noise, like an
+        // edit, and the crop is a reference alone.
+        context.seededStart = request.seededStart != nil
+            || (request.patch != nil && request.patchSeededStart)
         // The library's warnings become events for the duration of the render (and go to
         // `Warnings.outsideRender` without `onProgress`: a "✗ step 3: the VELOCITY carries …" is not lost),
         // and memory is returned to the system on exit — **including on a cancellation**: the
@@ -236,13 +240,16 @@ extension Engine {
                 PhaseBoundary.mark("image")
             }
 
-            // ── The additive start (the « 移除、局部重绘 » workflow's crop), once: the same encoder,
-            //    its latent kept **under** the noise (`Latent.seeded`, z₀ + σ₀·ε) rather than mixed
-            //    away by `Latent.start` at σ₀ = 1. Admission refuses it beside `image` and on a chain
-            //    without an encoder, so at most one of the two blocks runs. A patch renders its crop
-            //    at the plan's size: the same pixels the text encoder read, at the latent's own size. ──
+            // ── The additive start, once: the same encoder, its latent kept **under** the noise
+            //    (`Latent.seeded`, z₀ + σ₀·ε) rather than mixed away by `Latent.start` at σ₀ = 1.
+            //    Only two requests take it: a patch that asked for it (`--seeded-start`), and the
+            //    engine's own additive start. **A patch without it starts from noise**, the crop being
+            //    the text encoder's image 1 and the denoiser's reference block alone. Admission refuses
+            //    it beside `image` and on a chain without an encoder, so at most one of the two blocks
+            //    runs. ──
             var seeded: Latent? = nil
-            if let image = patchCrop ?? request.seededStart, let encoding = chain.encoding {
+            if let image = request.seededStart ?? (request.patchSeededStart ? patchCrop : nil),
+               let encoding = chain.encoding {
                 try context.check()
                 context.emit(.stage(.image, image: 0))
                 let seedingStart = Date()
@@ -296,9 +303,10 @@ extension Engine {
                 var latent = Latent.noise(space, height: height, width: width, seed: seed,
                                           variations: request.variations)
                 if let z₀ { latent = Latent.start(image: z₀, noise: latent, sigma: plan.startSigma) }
-                // The workflow's start: z₀ + σ₀·ε (σ₀ the schedule's first node, which a custom table
-                // may put below 1). `nil` on every other path; refusal before any computation keeps
-                // `seeded` and `z₀` from ever meeting.
+                // The workflow's start, when it was asked for (`--seeded-start`): z₀ + λ·ε (σ₀ the
+                // schedule's first node, which a custom table may put below 1; λ = √(1 + σ₀²) on
+                // ComfyUI's max_denoise branch). `seeded` is `nil` on every other path — a patch's
+                // default among them, where `latent` above is the seed's noise alone.
                 if let seeded, let seededSigma {
                     latent = try Latent.seeded(image: seeded, noise: latent, sigma: seededSigma)
                 }

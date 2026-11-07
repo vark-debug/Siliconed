@@ -405,6 +405,9 @@ extension AppState {
                                   loras: loraEntries, image: start, strength: settings.strength ?? Strength.defaultValue,
                                   previews: job.previews)
             request.patch = patch
+            // The crop as z₀ only when the entry asked for it (`--seeded-start`): the default render
+            // starts from noise, the crop being image 1 alone (`Request.patchSeededStart`).
+            request.patchSeededStart = settings.patch?.seededStart ?? false
             request.references = references
             request.referenceResolution = settings.referenceResolution
             request.detail = settings.detail

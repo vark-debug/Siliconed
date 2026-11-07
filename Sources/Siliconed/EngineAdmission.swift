@@ -58,11 +58,18 @@ package struct Admission: Sendable {
         // before the memory that charges it (`QwenImage21Need`).
         try Request.admit(referenceResolution: request.referenceResolution)
         // **The 「移除」 patch** (`Request.patch`): its crop decides the render's format, and it is its
-        // own start rule — the crop is z₀ and the text encoder's image 1. Judged here, before img2img,
-        // references and an additive start, which it cannot share the request with. `patch.plan()` throws
-        // `EngineError.invalidPatch` for a mask of another size, an empty one, or an unusable crop.
+        // own start rule — the crop is the text encoder's image 1 (and the denoiser's reference block),
+        // and with `patchSeededStart` also z₀. Judged here, before img2img, references and an additive
+        // start, which it cannot share the request with. `patch.plan()` throws `EngineError.invalidPatch`
+        // for a mask of another size, an empty one, or an unusable crop.
         var seededSigma: Float?
         var patchPlan: Patch.Plan?
+        // **The patch's encoded start is opt-in** (`Request.patchSeededStart`, `--seeded-start`): asked
+        // without a patch, it has no crop to start from — refused for what it is, not ignored.
+        if request.patchSeededStart, request.patch == nil {
+            throw Request.Failure.seededStart("a seeded start adds the noise to a patch's crop: "
+                + "--seeded-start goes with --mask, and without one the render starts from noise alone")
+        }
         if let patch = request.patch {
             guard request.image == nil else {
                 throw EngineError.invalidPatch(reason: "an img2img image (its strength) and a patch (its mask) start two ways: choose one")
@@ -90,7 +97,11 @@ package struct Admission: Sendable {
             patchPlan = planned
             width = planned.width / space.factor
             height = planned.height / space.factor
-            seededSigma = (request.sigmas ?? denoising.sigmas(steps: steps)).first
+            // The crop as z₀ only when asked (`--seeded-start`): the default render starts from noise
+            // with the crop as image 1 alone.
+            if request.patchSeededStart {
+                seededSigma = (request.sigmas ?? denoising.sigmas(steps: steps)).first
+            }
         }
         // **img2img is judged before any computation, too**: an out-of-range strength, a chain
         // without an encoder, a strength that leaves no evaluation all throw here.

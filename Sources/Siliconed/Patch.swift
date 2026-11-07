@@ -126,9 +126,13 @@ package struct Patch: Sendable, Equatable {
     package struct Settings: Sendable, Equatable {
         package var expansion: Expansion
         package var maximumSide: Int
+        /// **The crop as z₀, opt-in** (`Request.patchSeededStart`, `--seeded-start`): false — the
+        /// default — renders the crop as image 1 alone and starts from noise.
+        package var seededStart: Bool
 
-        package init(expansion: Expansion = Expansion(), maximumSide: Int = Patch.maximumSide) {
-            self.expansion = expansion; self.maximumSide = maximumSide
+        package init(expansion: Expansion = Expansion(), maximumSide: Int = Patch.maximumSide,
+                     seededStart: Bool = false) {
+            self.expansion = expansion; self.maximumSide = maximumSide; self.seededStart = seededStart
         }
     }
 
