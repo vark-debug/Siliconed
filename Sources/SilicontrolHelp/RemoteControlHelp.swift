@@ -388,6 +388,8 @@ package enum RemoteControlHelp {
                               displayed name, or a path). STRENGTH: 1 by default, 0.8 attenuates,
                               > 1 emphasizes; below 0 (a « slider » LoRA), with Experimental →
                               Negative LoRA Strengths on in the app's Settings.
+                              Qwen-Image-2.1 also takes two presets, at the workflow's own
+                              strength: remove (1) and redraw (0.48). A preset names no strength.
           --steps N           number of steps, 1 to 50. Default: the model's "default_steps". A
                               model may have a schedule for some counts only (Qwen-Image-2.1: 8,
                               and 9 — a ComfyUI graph's ManualSigmas: the published eight, then
@@ -1749,6 +1751,8 @@ package enum RemoteControlHelp {
           --lora NOM[:FORCE]  répétable, 3 au plus. NOM = un "loras.lora" de « models » (ou son
                               nom affiché, ou un chemin). FORCE : 1 par défaut, 0.8 atténue,
                               > 1 appuie.
+                              Qwen-Image-2.1 accepte aussi deux préréglages, à la force du
+                              workflow\u{00A0}: remove (1) et redraw (0.48). Un préréglage ne prend pas de force.
           --steps N           nombre de pas, de 1 à 50. Défaut : "default_steps" du modèle. Un
                               modèle peut n'avoir de calendrier que pour certains (Qwen-Image-2.1 :
                               8, et 9 — le « ManualSigmas » d'un graphe ComfyUI : les huit publiés,

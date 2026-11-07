@@ -56,13 +56,25 @@ extension RemoteControl {
             case "--y": d.y = try value(a)
             case "--lora":
                 let v = try value(a)
+                var name = v, strength: Double?
                 // `name:strength` — the last colon separates the strength (a path has none).
                 if let colonIndex = v.lastIndex(of: ":"), let f = Double(v[v.index(after: colonIndex)...].replacingOccurrences(of: ",", with: ".")) {
                     // `Double` reads « nan » and « inf »: a strength that would make every weight NaN.
                     guard f.isFinite else { throw Refusal("usage", String(localized: "--lora expects a finite strength, not \"\(v)\"")) }
-                    d.loras.append((String(v[..<colonIndex]), f))
+                    name = String(v[..<colonIndex]); strength = f
+                }
+                if let preset = PatchLoRA.preset(named: name) {
+                    // The preset's node had its strength: a strength typed here would silently lose it.
+                    guard strength == nil else {
+                        throw Refusal("lora", String(localized: "a preset's strength is fixed: name it without a strength"),
+                                      help: "silicontrol add --lora remove")
+                    }
+                    d.loras.append((preset.fileName, preset.strength))
+                } else if PatchLoRA.isUnwired(named: name) {
+                    throw Refusal("lora", String(localized: "\"expand\" is not a preset: the workflow wires remove and redraw"),
+                                  help: "silicontrol add --lora remove")
                 } else {
-                    d.loras.append((v, 1))
+                    d.loras.append((name, strength ?? 1))
                 }
             case "--ref": d.references.append(try value(a))
             case "--out": d.folder = try value(a)

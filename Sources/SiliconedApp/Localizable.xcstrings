@@ -1,6 +1,46 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "\"expand\" is not a preset: the workflow wires remove and redraw" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "„expand“ ist keine Voreinstellung: der Workflow verbindet remove und redraw"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«expand» no es un preajuste: el flujo de trabajo conecta remove y redraw"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "« expand » n’est pas un préréglage : le workflow câble remove et redraw"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«expand» non è una preimpostazione: il flusso collega remove e redraw"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「expand」はプリセットではありません。ワークフローは remove と redraw を接続します"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“expand”不是预设：工作流只接 remove 和 redraw"
+          }
+        }
+      }
+    },
     "\"max_references\" in \"silicontrol models\"" : {
       "localizations" : {
         "de" : {
@@ -28826,6 +28866,46 @@
         }
       }
     },
+    "Redraw preset (0.48)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "„Voreinstellung Neuzeichnen (0.48)“"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«Preajuste redibujado (0.48)»"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "« Préréglage redessin (0.48) »"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«Preimpostazione ridisegno (0.48)»"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「再描画プリセット（0.48）」"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“重绘预设（0.48）”"
+          }
+        }
+      }
+    },
     "Reference" : {
       "comment" : "The role of an image the model sees as context",
       "localizations" : {
@@ -29543,6 +29623,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "从队列中移除"
+          }
+        }
+      }
+    },
+    "Remove preset (1.0)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "„Voreinstellung Entfernen (1.0)“"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«Preajuste retirado (1.0)»"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "« Préréglage retrait (1.0) »"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«Preimpostazione rimozione (1.0)»"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「除去プリセット（1.0）」"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“移除预设（1.0）”"
           }
         }
       }
@@ -46092,6 +46212,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "遮罩的提示词暂时还不能引用已命名的主体"
+          }
+        }
+      }
+    },
+    "a preset's strength is fixed: name it without a strength" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "„Die Stärke einer Voreinstellung ist fest: nennen Sie sie ohne Stärke“"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«La fuerza de un preajuste es fija: nómbrelo sin fuerza»"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "« La force d’un préréglage est fixe : nommez-le sans force »"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«La forza di una preimpostazione è fissa: nominala senza forza»"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プリセットの強度は固定です。強度を付けずに指定してください"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“预设的强度是固定的：请不带强度地指定”"
           }
         }
       }

@@ -425,7 +425,18 @@ struct LoRAAddMenu: View {
 
     var body: some View {
         let used = Set(app.loras.map(\.path))
+        let presets = app.patchLoRAPresets
         Menu {
+            // The workflow's two presets go in at their own strength, not the stack's 0.8.
+            if !presets.isEmpty {
+                ForEach(presets) { p in
+                    Button(p.lora.title) {
+                        app.loras.append(LoRASlot(path: p.card.path, strength: p.lora.strength))
+                    }
+                    .disabled(used.contains(p.card.path) || !app.canAddLoRA)
+                }
+                Divider()
+            }
             ForEach(app.compatibleLoras) { l in
                 Button(l.name) { app.loras.append(LoRASlot(path: l.path)) }
                     .disabled(used.contains(l.path) || !app.canAddLoRA)
