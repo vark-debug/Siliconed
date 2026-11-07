@@ -236,6 +236,30 @@ final class MemoryNeedQwenTests: XCTestCase {
         }
     }
 
+    /// **C2: the reference's target area is the request's** (`Request.referenceResolution`): the need
+    /// charges `conditionSize(R², w/h)` for each reference, so 1536² and 2560² cost more than the
+    /// published 1024² — and `nil` is 1024, to the byte.
+    func testTheNeedGrowsWithTheReferenceResolution() {
+        let resolutions: [Int?] = [nil, 1024, 1536, 2560]
+        func peak(_ r: Int?) -> Int {
+            var request = Self.request(1024, 1024, references: [(1024, 1024)])
+            request.referenceResolution = r
+            return Self.need(request).peak
+        }
+        let peaks = resolutions.map(peak)
+        XCTAssertEqual(peaks[0], peaks[1], "unset is the published 1024, to the byte")
+        XCTAssertLessThan(peaks[0], peaks[2])
+        XCTAssertLessThan(peaks[2], peaks[3])
+        // What the formula sees: the prepared sizes move with R, sides at 32, the output 1024².
+        for (r, side) in zip([nil, 1536, 2560] as [Int?], [1024, 1536, 2560]) {
+            var request = Self.request(1024, 1024, references: [(1024, 1024)])
+            request.referenceResolution = r
+            let reference = Self.shapes(request).references[0].prepared
+            XCTAssertEqual(reference.width, side)
+            XCTAssertEqual(reference.height, side)
+        }
+    }
+
     /// A reference's size: every original is prepared at ~R² (`conditionSize`), so what grows with it
     /// is the original held through the render — never less for a larger one.
     func testTheNeedGrowsWithAReferencesSize() {

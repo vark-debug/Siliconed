@@ -46,6 +46,9 @@ package struct Admission: Sendable {
             }
         }
         guard (1...Request.maximumSteps).contains(steps) else { throw Request.Failure.steps(steps) }
+        // The references' area is a shape of its own (Qwen-Image-2.1 alone reads it): judged here,
+        // before the memory that charges it (`QwenImage21Need`).
+        try Request.admit(referenceResolution: request.referenceResolution)
         // **img2img is judged before any computation, too**: an out-of-range strength, a chain
         // without an encoder, a strength that leaves no evaluation all throw here.
         var start = 0

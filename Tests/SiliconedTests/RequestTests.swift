@@ -44,6 +44,17 @@ final class RequestTests: XCTestCase {
         XCTAssertNotEqual(a, b)
     }
 
+    /// **C2**: the reference area (`Request.referenceResolution`) is `nil` unless asked — the pipeline's
+    /// 1024 — and a value tells requests apart (`Request` is comparable, for the app's previews).
+    func testTheReferenceResolutionIsOptionalAndTellsRequestsApart() {
+        let a = Request("x", resolution: 512)
+        XCTAssertNil(a.referenceResolution)
+        var b = a
+        b.referenceResolution = 1536
+        XCTAssertNotEqual(a, b)
+        XCTAssertNil(a.referenceResolution, "value semantics")
+    }
+
     func testASingleStepGivesFiniteSigmas() {
         for m in [zImage, anima, krea2] {
             let σ = m.chain.denoising.sigmas(steps: 1)

@@ -61,6 +61,14 @@ package struct Request: Sendable, Equatable {
     /// Turbo does — 9 steps and the extra 0.150000 of a ComfyUI graph, for one); the others refuse
     /// it before any computation. When it is set, `steps` follows its length: `steps + 1` values.
     package var sigmas: [Float]? = nil
+    /// **The area the reference images are encoded at** (`R` in `QwenImage21Pipeline`'s
+    /// `calculate_dimensions(R², w/h)`: the reference is ~`R²` pixels, its own ratio kept, sides at 32).
+    /// `nil`: the published `R = 1024` (~1 MP), to the bit — the pipeline's default and the product's.
+    /// Only Qwen-Image-2.1 reads it (its references, and the memory need they charge); the other
+    /// families ignore it. The **output size's rule never reads it**: an edit's format still follows
+    /// `QwenImage21Pipeline.outputSize` at 1024². Bounds: 768 to 2560, a multiple of 32
+    /// (`Request.admit(referenceResolution:)`).
+    package var referenceResolution: Int? = nil
     package var loras: [LoRAEntry]
     /// **The img2img starting image.** Set at any size, it is **immediately** filled and
     /// center-cropped to the request's format (`ImageRGB.fitted`): a request never keeps a
@@ -142,6 +150,8 @@ package struct Request: Sendable, Equatable {
         case schedule(String)
         /// A σ table given to a denoiser that reads its artifact's schedule only.
         case noCustomSchedule(model: String)
+        /// A reference resolution outside the pipeline's bounds (`admit(referenceResolution:)`): what is wrong with it.
+        case referenceResolution(String)
         package var description: String {
             switch self {
             case let .references(n, max) where max == 0:
@@ -158,6 +168,8 @@ package struct Request: Sendable, Equatable {
                 return "the σ table is refused: \(why)"
             case .noCustomSchedule(let model):
                 return "\(model) walks the schedule of its artifact: it takes no σ table"
+            case .referenceResolution(let why):
+                return "the reference resolution is refused: \(why)"
             }
         }
     }
@@ -202,6 +214,23 @@ package struct Request: Sendable, Equatable {
             throw Failure.schedule("the σ do not decrease strictly: #\(i) is \(σ), #\(i + 1) is \(next)")
         }
         return sigmas.count - 1
+    }
+
+    /// **A reference resolution the request supplies is one the pipeline has a size for**
+    /// (`referenceResolution`: `R`, the area's side). `nil` is the published 1024 and needs no check.
+    /// Qwen-Image-2.1's `calculate_dimensions` rounds each side to a multiple of 32; `R` itself must be
+    /// one too (the workflow's crop sizes are), between 768 and 2560 — the bounds of its 长边 crop.
+    /// Refused with `Failure.referenceResolution` rather than a resize the memory need would not see.
+    package static func admit(referenceResolution: Int?) throws {
+        guard let resolution = referenceResolution else { return }
+        guard QwenImage21Pipeline.minimumReferenceResolution...QwenImage21Pipeline.maximumReferenceResolution
+                ~= resolution else {
+            throw Failure.referenceResolution("\(resolution) px: the reference resolution is "
+                + "\(QwenImage21Pipeline.minimumReferenceResolution) to \(QwenImage21Pipeline.maximumReferenceResolution)")
+        }
+        guard resolution % QwenImage21Pipeline.referenceResolutionMultiple == 0 else {
+            throw Failure.referenceResolution("\(resolution) px: not a multiple of \(QwenImage21Pipeline.referenceResolutionMultiple)")
+        }
     }
 
     package init(_ prompt: String, width: Int, height: Int, seed: UInt64 = 42, steps: Int? = nil,

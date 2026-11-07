@@ -42,6 +42,10 @@ package struct MemoryNeed: Sendable, Equatable {
         /// Each reference image at its own size (named subjects' included; Z-Image's img2img start),
         /// in pixels as handed to the engine.
         package var references: [(width: Int, height: Int)] = []
+        /// **The area the references are encoded at** (`Request.referenceResolution`): Qwen-Image-2.1
+        /// prepares each reference at ~`R²` (`QwenImage21Need`), so its vision tokens, the encoder's
+        /// sequence, the reference latents and the K/V all follow it. `nil`: the published 1024.
+        package var referenceResolution: Int? = nil
         /// The prompt's tokens (template included, as the encoder sees them) — or an upper bound of
         /// them (`promptTokens(_:family:references:)`).
         package var promptTokens: Int

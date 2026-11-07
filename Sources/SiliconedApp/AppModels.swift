@@ -133,6 +133,8 @@ struct RenderSettings {
     var prompt: String
     var format: RecommendedFormat
     var steps: Int
+    /// `--ref-res N`: Qwen-Image-2.1's reference area (`Request.referenceResolution`), `nil` for its 1024.
+    var referenceResolution: Int? = nil
     var loras: [LoRASlot]
     /// How many references the render read — the edit's and the named subjects' (0: none).
     var references = 0

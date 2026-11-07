@@ -27,6 +27,14 @@ extension RemoteControl {
                     throw Refusal("usage", String(localized: "--steps expects an integer from 1 to \(Request.maximumSteps), not \"\(v)\""))
                 }
                 d.steps = n
+            case "--ref-res":
+                let v = try value(a)
+                let bounds = QwenImage21Pipeline.minimumReferenceResolution...QwenImage21Pipeline.maximumReferenceResolution
+                guard let n = Int(v), bounds ~= n, n % QwenImage21Pipeline.referenceResolutionMultiple == 0 else {
+                    throw Refusal("usage", String(localized: "\(a) expects \(bounds.lowerBound) to \(bounds.upperBound), a multiple of \(QwenImage21Pipeline.referenceResolutionMultiple), not \"\(v)\""),
+                                  help: String(localized: "--ref-res 1024 (the default) or 1536 — silicontrol help add"))
+                }
+                d.referenceResolution = n
             case "--detail":
                 let v = try value(a)
                 guard let level = Detail(rawValue: v.lowercased()) else {
@@ -133,6 +141,10 @@ extension RemoteControl {
             throw Refusal("usage", String(localized: "a grid’s cell is one image: --batch does not apply"),
                           help: String(localized: "--x seeds=N gives N seeds — silicontrol help grid"))
         }
+        if grid, d.referenceResolution != nil {
+            throw Refusal("usage", String(localized: "a grid does not take --ref-res yet"),
+                          help: String(localized: "leave it out, or render with add — silicontrol help add"))
+        }
         let b = app.library
         let model: Model
         do { model = try Model.named(d.model, in: b) } catch {
@@ -238,6 +250,11 @@ extension RemoteControl {
                             help: String(localized: "leave the format out (the output follows image 1)"))
             }
         }
+        // `--ref-res`: the area the references are encoded at — an edit's parameter, Qwen-Image-2.1's
+        // alone (a model with "max_references" > 0). Its value was checked by `parse`.
+        if d.referenceResolution != nil, references.isEmpty {
+            throw Refusal("usage", String(localized: "--ref-res goes with --ref"), help: "silicontrol add --ref IMAGE --ref-res 1536 …")
+        }
 
         let (width, height) = d.format ?? (1024, 1024)
         do { try Format.check(width: width, height: height, family: model.card.family) } catch {
@@ -325,6 +342,7 @@ extension RemoteControl {
                                           loras: stack, references: references.count, detail: d.detail,
                                           solver: d.solver)
             settings.strength = strength
+            settings.referenceResolution = d.referenceResolution
             let used = app.namedJob(v.prompt, settings: &settings, references: references, model: model)
             var job = Job(ordinal: app.nextJobNumber(), settings: settings,
                           seeds: (0..<d.batch).map { firstNumber &+ UInt64($0) },

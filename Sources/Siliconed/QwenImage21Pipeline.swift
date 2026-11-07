@@ -38,8 +38,9 @@ import Foundation
 ///     `[h·w, 64]`: planar `[64, h, w]` is exactly its draw order (`TorchNoise`);
 ///   - the scheduler steps in float32, `x + (σ_next − σ)·v`, two roundings (no FMA);
 ///   - the references are sized by **`calculate_dimensions(R², w/h)`** — round half to EVEN at 32 —
-///     with `R = output_resolution`, whatever the output size; one Lanczos (Pillow's, to the bit,
-///     `PillowResample`) feeds both the encoder and the VAE;
+///     with `R = output_resolution`, whatever the output size (a request may raise `R` alone,
+///     `Request.referenceResolution`: the output size's rule does not move); one Lanczos (Pillow's,
+///     to the bit, `PillowResample`) feeds both the encoder and the VAE;
 ///   - **every reference is made RGBA** (`convert("RGBA")`): a transparent one keeps its alpha — Pillow
 ///     premultiplies around the Lanczos, the VAE reads the four channels as they are, and only the vision
 ///     copy is laid over white (`preparedReference`, `PillowAlpha`; `qwen21-preprocess-alpha`);
@@ -67,6 +68,14 @@ import Foundation
 package enum QwenImage21Pipeline {
     /// `output_resolution`: the pipeline's default, and the product's — references at ~1 MP.
     package static let outputResolution = 1024
+    /// **The bounds of a reference resolution a request may supply** (`Request.referenceResolution`): the
+    /// « 移除、局部重绘 » workflow's crops put their long side between 768 and 2560 px, and every side
+    /// it renders is a multiple of 32. `R` is the area's side (`calculate_dimensions(R², w/h)`): past 2560
+    /// the reference's own K/V cache and VAE encoder grow past what a 64 GB Mac plans for, and under 768
+    /// the edit loses the crop's detail the workflow kept.
+    package static let minimumReferenceResolution = 768
+    package static let maximumReferenceResolution = 2560
+    package static let referenceResolutionMultiple = 32
     /// The Turbo's step count: the length of its published schedule.
     package static let defaultSteps = 8
 

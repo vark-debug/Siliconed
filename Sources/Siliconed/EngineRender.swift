@@ -86,6 +86,7 @@ extension Engine {
             promptTokens: MemoryNeed.Request.promptTokens(request.prompt, family: model.card.family,
                                                            references: request.references.count))
         memoryRequest.solver = request.solver
+        memoryRequest.referenceResolution = request.referenceResolution
         memoryRequest.accelerators = admitted.accelerators
         memoryRequest.batch = seeds.count
         memoryRequest.library = model.library ?? .processWide
@@ -150,7 +151,8 @@ extension Engine {
 
             // ── The references at the denoiser's size, once: a text stage that reads images and the
             //    image encoder below receive this same copy. ──
-            let prepared = request.references.isEmpty ? [] : try chain.denoising.preparedReferences(request.references)
+            let prepared = request.references.isEmpty ? [] : try chain.denoising.preparedReferences(
+                request.references, referenceResolution: request.referenceResolution)
 
             // ── The text, once for the whole batch. The module returns its memory on exit. ──
             try context.check()

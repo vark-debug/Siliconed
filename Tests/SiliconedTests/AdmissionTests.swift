@@ -93,6 +93,26 @@ final class AdmissionTests: XCTestCase {
         XCTAssertFalse(plain.contains("Faster rendering"))
     }
 
+    /// **C2**: a reference resolution is judged with the request, before the memory it charges: an
+    /// edit at 1536² is admitted, 1000 px (not a multiple of 32) and 3000 px (past the crop) are refused
+    /// as `Request.Failure.referenceResolution`; unset stays the published 1024.
+    func testTheReferenceResolutionIsJudgedBeforeAnyComputation() throws {
+        let reference = ImageRGB(pixels: [Float](repeating: 0, count: 3 * 64 * 64), height: 64, width: 64)
+        var edit = Request("x", resolution: 512)
+        edit.references = [reference]
+        XCTAssertNoThrow(try Admission.judge(edit, chain: qwen, usesANE: false))
+        edit.referenceResolution = 1536
+        XCTAssertNoThrow(try Admission.judge(edit, chain: qwen, usesANE: false))
+        for r in [1000, 3000] {
+            edit.referenceResolution = r
+            XCTAssertThrowsError(try Admission.judge(edit, chain: qwen, usesANE: false), "\(r)") {
+                guard let failure = $0 as? Request.Failure, case .referenceResolution = failure else {
+                    return XCTFail("\($0)")
+                }
+            }
+        }
+    }
+
     /// **Qwen-Image-2.1-Turbo's 9-step workflow table** (C1): `--steps 9` is admitted and plans nine
     /// evaluations (the module walks the graph's `ManualSigmas` — to the bit in
     /// `QwenImage21PipelineTests`); a σ table the request supplies sets the steps from its length, and a

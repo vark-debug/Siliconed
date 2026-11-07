@@ -122,6 +122,8 @@ extension RemoteControl {
         var seed: UInt64?
         var batch = 1
         var steps: Int?
+        /// `--ref-res N`: the area Qwen-Image-2.1's reference images are encoded at (`Request.referenceResolution`).
+        var referenceResolution: Int?
         /// `--detail more|most`: the rack's Detail choice (`Request.detail`).
         var detail = Detail.normal
         /// `--solver NAME`: the rack's Solver (`Request.solver`), More Solvers and `AppState.solverFamilies` only.

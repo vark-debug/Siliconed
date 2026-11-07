@@ -69,6 +69,47 @@ final class QwenImage21PipelineTests: XCTestCase {
         XCTAssertNoThrow(try QwenImage21Pipeline.check(sigmas: [1, 0.5, 0]))
     }
 
+    /// **C2: the reference's area is a request's (`Request.referenceResolution`)** — 1024 unless asked,
+    /// then the same `calculate_dimensions(R², w/h)` at that `R`; the output size's rule does not move.
+    func testTheReferenceResolutionMovesTheReferenceAlone() throws {
+        // 729×486: at 1024² the oracle's condition size is 1248×832 (the test photo's own),
+        // at 1536² it is 1888×1248 (sides at 32, the ratio kept).
+        let image = ImageRGB(pixels: (0..<(3 * 729 * 486)).map { Float($0 % 29) / 29 }, height: 486, width: 729)
+        let published = QwenImage21Pipeline.preparedReference(image)
+        let explicit = QwenImage21Pipeline.preparedReference(image, resolution: 1024)
+        XCTAssertEqual(published.width, 1248)
+        XCTAssertEqual(published.height, 832)
+        XCTAssertEqual(published.width, explicit.width)
+        XCTAssertEqual(published.height, explicit.height)
+        XCTAssertEqual(published.pixels, explicit.pixels, "unset is 1024, to the bit")
+        let raised = QwenImage21Pipeline.preparedReference(image, resolution: 1536)
+        XCTAssertEqual(raised.width, 1888)
+        XCTAssertEqual(raised.height, 1248)
+        XCTAssertEqual(QwenImage21Pipeline.outputSize(referenceWidth: 729, referenceHeight: 486).width, 1248,
+                       "the output size still follows 1024², whatever the reference's area")
+        XCTAssertEqual(QwenImage21Pipeline.outputSize(referenceWidth: 729, referenceHeight: 486).height, 832)
+        // The module reads the request's `R`; without one, its own (1024 here).
+        let module = QwenImage21DenoisingModule(map: "", scheduler: QwenImage21Pipeline.Scheduler())
+        XCTAssertEqual(try module.preparedReferences([image], referenceResolution: 1536).first?.width, 1888)
+        XCTAssertEqual(try module.preparedReferences([image], referenceResolution: nil).first?.width, 1248)
+        XCTAssertEqual(try module.preparedReferences([image]).first?.width, 1248)
+    }
+
+    /// The bounds of `Request.referenceResolution`: the workflow's 768–2560 long side, a multiple of 32;
+    /// `nil` (the published 1024) is always admitted.
+    func testTheReferenceResolutionIsAdmittedWithinTheWorkflowsCrop() {
+        let admitted: [Int?] = [nil, 768, 1024, 1536, 2560]
+        for r in admitted { XCTAssertNoThrow(try Request.admit(referenceResolution: r), "\(String(describing: r))") }
+        let refused = [512, 767, 2576, 1000, 1025, 0, -32]
+        for r in refused {
+            XCTAssertThrowsError(try Request.admit(referenceResolution: r), "\(r)") {
+                guard let failure = $0 as? Request.Failure, case .referenceResolution = failure else {
+                    return XCTFail("\($0)")
+                }
+            }
+        }
+    }
+
     /// The configs that would move the published σ are refused: the base model's dynamic shift and
     /// terminal stretch, a non-unit shift, Karras σ; and a `model_index.json` without `sample_sigmas`.
     func testTheSchedulerRefusesWhatWouldMoveTheSchedule() {

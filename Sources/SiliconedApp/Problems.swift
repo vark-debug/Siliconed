@@ -111,6 +111,8 @@ struct Problem: Equatable, Sendable {
                 : String(localized: "This model doesn’t render in \(steps) steps.")
         case let .invalidSchedule(reason):                           // invalid_schedule
             return String(localized: "This σ table is refused: \(reason).")
+        case let .invalidReferenceResolution(reason):                // invalid_reference_resolution
+            return String(localized: "This reference resolution is refused: \(reason).")
         case let .tooManyReferences(count, max):                     // too_many_references
             return max == 0 ? String(localized: "This model doesn’t edit images.")
                 : String(localized: "\(count) images: this model reads \(max) at most.")
@@ -257,6 +259,8 @@ struct Problem: Equatable, Sendable {
             return String(localized: "Leave the number of steps at the model’s default.")
         case .invalidSchedule:
             return String(localized: "Leave the σ table out (--steps 9 gives the workflow’s), or give the one this model walks.")
+        case .invalidReferenceResolution:
+            return String(localized: "Leave --ref-res out (1024), or choose 768 to 2560, a multiple of 32.")
         case .tooManyReferences(_, let max) where max == 0:
             return String(localized: "Choose a model that edits, like Qwen-Image-2.1.")
         case .tooManyReferences(_, let max):

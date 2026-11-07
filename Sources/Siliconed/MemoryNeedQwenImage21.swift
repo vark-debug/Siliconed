@@ -189,10 +189,11 @@ package struct QwenImage21Need {
     package init(_ request: MemoryNeed.Request, maps: QwenImage21Maps) {
         self.request = request
         self.maps = maps
+        let resolution = request.referenceResolution ?? QwenImage21Pipeline.outputResolution
         references = request.references.map { r in
             Reference(original: (r.width, r.height),
                       prepared: Qwen3VLImages.conditionSize(width: r.width, height: r.height,
-                                                            resolution: QwenImage21Pipeline.outputResolution))
+                                                            resolution: resolution))
         }
         let n = references.count
         // `<|im_start|>user\n` (3), each image's tags, and after the last image at least the closing

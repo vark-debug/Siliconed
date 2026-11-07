@@ -317,8 +317,10 @@ package protocol DenoisingModule: Sendable {
                    references: [Latent], lora: LoRA?, context: Context) throws
     /// **The reference images as this denoiser reads them**, prepared once for the whole render: the
     /// text stage (if it reads images) and the image encoder receive this same copy. By default,
-    /// as given (a denoiser without references never receives any).
-    func preparedReferences(_ images: [ImageRGB]) throws -> [ImageRGB]
+    /// as given (a denoiser without references never receives any). `referenceResolution`: the request's
+    /// `R` (`Request.referenceResolution`), `nil` for the family's own — Qwen-Image-2.1's `preparedReferences`
+    /// alone reads it; the others ignore it.
+    func preparedReferences(_ images: [ImageRGB], referenceResolution: Int?) throws -> [ImageRGB]
     /// **The format of an edit whose request names none**, from its first reference's size. By
     /// default the reference's own size under 1024² (its ratio kept), raised to the floor and kept
     /// under the area cap.
@@ -369,7 +371,7 @@ package extension DenoisingModule {
         guard references.isEmpty else { throw Request.Failure.references(references.count, max: maxReferences) }
         try denoise(&latent, text: text, steps: steps, start: start, lora: lora, context: context)
     }
-    func preparedReferences(_ images: [ImageRGB]) throws -> [ImageRGB] { images }
+    func preparedReferences(_ images: [ImageRGB], referenceResolution: Int?) throws -> [ImageRGB] { images }
     func editFormat(referenceWidth: Int, referenceHeight: Int) -> (width: Int, height: Int) {
         // The area brought under 1024² at the reference's ratio, each side floored to the multiple.
         let m = Format.multiple

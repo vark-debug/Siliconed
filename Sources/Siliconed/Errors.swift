@@ -74,6 +74,9 @@ package enum EngineError: Error, Equatable, Sendable, Codable, LocalizedError, C
     /// A σ table the request supplied (`Request.sigmas`) that the engine, or the model, does not walk.
     /// `reason` says what is wrong with it.
     case invalidSchedule(reason: String)
+    /// A reference resolution outside the bounds the references are prepared at (`Request.referenceResolution`).
+    /// `reason` says what is wrong with it.
+    case invalidReferenceResolution(reason: String)
     /// More reference images than the model reads (`max` 0: it does no reference editing).
     case tooManyReferences(count: Int, max: Int)
     /// A side under `Format.minimumSide` — the models are out of their domain below. `side`: the
@@ -246,6 +249,7 @@ package enum EngineError: Error, Equatable, Sendable, Codable, LocalizedError, C
         case .emptyPrompt: return "empty_prompt"
         case .invalidSteps: return "invalid_steps"
         case .invalidSchedule: return "invalid_schedule"
+        case .invalidReferenceResolution: return "invalid_reference_resolution"
         case .tooManyReferences: return "too_many_references"
         case .imageTooSmall: return "image_too_small"
         case .formatRefused: return "format_refused"
@@ -321,6 +325,8 @@ package enum EngineError: Error, Equatable, Sendable, Codable, LocalizedError, C
                 : "This model does not render in \(steps) steps."
         case let .invalidSchedule(reason):
             return "The σ table is refused: \(reason)."
+        case let .invalidReferenceResolution(reason):
+            return "The reference resolution is refused: \(reason)."
         case let .tooManyReferences(count, max):
             return max == 0 ? "This model does not edit from reference images."
                 : "\(count) reference images: this model reads at most \(max)."
@@ -425,6 +431,8 @@ package enum EngineError: Error, Equatable, Sendable, Codable, LocalizedError, C
         case .invalidSteps: return "Leave the number of steps at the model's default."
         case .invalidSchedule:
             return "Leave the σ table out, or give the one this model walks (Qwen-Image-2.1-Turbo: its published 8 or the workflow's 9 steps)."
+        case .invalidReferenceResolution:
+            return "Leave the reference resolution out (1024), or choose 768 to 2560, a multiple of 32."
         case .tooManyReferences(_, let max) where max == 0:
             return "Choose a model that edits by reference (Qwen-Image-2.1)."
         case .tooManyReferences(_, let max): return "Keep at most \(max) reference images."
@@ -493,6 +501,9 @@ package enum EngineError: Error, Equatable, Sendable, Codable, LocalizedError, C
             case .detail(let model): self = .detailUnsupported(model: model)
             case let .promptTooLong(tokens, max): self = .promptTooLong(tokens: tokens, max: max)
             case .schedule(let why): self = .invalidSchedule(reason: why)
+            // A reference resolution outside Qwen-Image-2.1's 768…2560 (a multiple of 32): its own
+            // case (`invalidReferenceResolution`), named above and keyed `"invalid_reference_resolution"`.
+            case .referenceResolution(let why): self = .invalidReferenceResolution(reason: why)
             case .noCustomSchedule(let model):
                 self = .invalidSchedule(reason: "\(model) walks the schedule of its artifact and takes no σ table")
             }

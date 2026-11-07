@@ -44,7 +44,8 @@ package struct QwenImage21TextModule: ImageTextModule {
 package struct QwenImage21DenoisingModule: DenoisingModule {
     package var map: String
     package var scheduler: QwenImage21Pipeline.Scheduler
-    /// `output_resolution`: the references' area (`R²`), and the edit format's.
+    /// `output_resolution`: the edit format's area (`R²` at 1024²). The references' own area is the
+    /// request's (`Request.referenceResolution`), 1024 unless asked.
     package var resolution: Int
     /// Where the K/V cache lives — `nil`: the policy (`QwenImage21CachePolicy`). Set by the checks that measure.
     package var storage: QwenImage21DiT.CacheStorage? = nil
@@ -121,9 +122,17 @@ package struct QwenImage21DenoisingModule: DenoisingModule {
     /// Every `Solver`: its sampler walks them all (`SolverWalk`), Euler in its own loop.
     package var solvers: [Solver] { Solver.allCases }
 
-    /// Pillow's Lanczos to `calculate_dimensions(R², w/h)`, each at its own ratio.
+    /// Pillow's Lanczos to `calculate_dimensions(R², w/h)`, each at its own ratio. `referenceResolution`:
+    /// the request's `R` (`Request.referenceResolution`); `nil`, the published 1024 (~1 MP) — the same
+    /// size as before C2, to the bit.
+    package func preparedReferences(_ images: [ImageRGB], referenceResolution: Int?) throws -> [ImageRGB] {
+        let r = referenceResolution ?? resolution
+        return images.map { QwenImage21Pipeline.preparedReference($0, resolution: r) }
+    }
+
+    /// The same, at the module's own `resolution` (1024 by default): the checks' entry.
     package func preparedReferences(_ images: [ImageRGB]) throws -> [ImageRGB] {
-        images.map { QwenImage21Pipeline.preparedReference($0, resolution: resolution) }
+        try preparedReferences(images, referenceResolution: nil)
     }
 
     package func editFormat(referenceWidth: Int, referenceHeight: Int) -> (width: Int, height: Int) {

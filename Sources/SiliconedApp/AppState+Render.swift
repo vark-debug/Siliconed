@@ -390,6 +390,7 @@ extension AppState {
                                   loras: loraEntries, image: start, strength: settings.strength ?? Strength.defaultValue,
                                   previews: job.previews)
             request.references = references
+            request.referenceResolution = settings.referenceResolution
             request.detail = settings.detail
             request.solver = settings.solver
             request.variations = settings.variations
