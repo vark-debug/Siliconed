@@ -99,7 +99,9 @@ package struct Patch: Sendable, Equatable {
     package static let maximumSide = 2560
     /// `整除数`: both sides of the crop are multiples of 32.
     package static let multiple = 32
-    /// The workflow tints the crop with `#00FF00` at 0.4, over the mask only.
+    /// The workflow tints the crop with `#00FF00` at 0.4, over the mask only. In the model's
+    /// −1…1 RGB that is (−1, 1, −1), not the yellow-green (0, 1, −1).
+    package static let tintColor: (Float, Float, Float) = (-1, 1, -1)
     package static let tintOpacity: Float = 0.4
     /// `遮罩裁剪V2`'s `纯白像素 < 10` guard, whose action this path does not reproduce: below this
     /// many pixels the patch is refused rather than the whole image replaced (see `EngineError.invalidPatch`).
@@ -274,7 +276,7 @@ package struct Patch: Sendable, Equatable {
             }
         }
         let alpha = Self.tintOpacity
-        let green: (Float, Float, Float) = (0, 1, -1)
+        let green = Self.tintColor
         for y in 0..<crop.height {
             let sourceRow = (crop.y + y) * mask.width + crop.x
             for x in 0..<crop.width where filled.values[sourceRow + x] > ImageMask.threshold {

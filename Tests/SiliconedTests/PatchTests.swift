@@ -89,7 +89,7 @@ final class PatchTests: XCTestCase {
         XCTAssertEqual(crop.width, 768)
         XCTAssertEqual(crop.height, 768)
         let plane = 768 * 768
-        for (index, expected) in [(0 * plane, Float(0.25 * 0.6)), (1 * plane, Float(0.25 * 0.6 + 0.4)),
+        for (index, expected) in [(0 * plane, Float(0.25 * 0.6 - 0.4)), (1 * plane, Float(0.25 * 0.6 + 0.4)),
                                   (2 * plane, Float(0.25 * 0.6 - 0.4))] {
             XCTAssertEqual(crop.pixels[index], expected, accuracy: 1e-6, "masked, channel \(index / plane)")
         }
@@ -99,7 +99,16 @@ final class PatchTests: XCTestCase {
                                                    width: 64, height: 64))
         let kept = 32 * 64 + 40 // x = 40: outside the mask
         for c in 0..<3 { XCTAssertEqual(unscaled.pixels[c * 4096 + kept], 0.25, "channel \(c): untouched") }
-        XCTAssertEqual(unscaled.pixels[10 * 64 + 10], 0.15, "x = 10: masked, the red channel × 0.6")
+        XCTAssertEqual(unscaled.pixels[10 * 64 + 10], -0.25, "x = 10: masked, the red channel × 0.6 − 0.4")
+    }
+
+    /// The workflow's tint is `#00FF00` (「图像合并（遮罩）」), which in the model's −1…1 RGB is
+    /// `(−1, 1, −1)`, not the yellow-green `(0, 1, −1)` the port used to mix.
+    func testTheGreenTintIsTheWorkflowsPureGreen() {
+        XCTAssertEqual(Patch.tintColor.0, -1)
+        XCTAssertEqual(Patch.tintColor.1, 1)
+        XCTAssertEqual(Patch.tintColor.2, -1)
+        XCTAssertEqual(Patch.tintOpacity, 0.4, accuracy: 1e-6)
     }
 
     /// **The same pixels are z₀ and image 1** (the user's C4 check): the rendered crop, fitted to the
