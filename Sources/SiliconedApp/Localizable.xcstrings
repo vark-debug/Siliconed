@@ -753,20 +753,92 @@
     },
     "%@ expects %lld to %lld, a multiple of %lld, not \"%@\"" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ erwartet %2$lld bis %3$lld, ein Vielfaches von %4$lld, nicht „%5$@“"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "%1$@ expects %2$lld to %3$lld, a multiple of %4$lld, not \"%5$@\""
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ espera %2$lld a %3$lld, un múltiplo de %4$lld, no «%5$@»"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ attend %2$lld à %3$lld, un multiple de %4$lld, pas « %5$@ »"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ richiede da %2$lld a %3$lld, un multiplo di %4$lld, non «%5$@»"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ は %2$lld〜%3$lld の範囲で、%4$lld の倍数を指定してください。「%5$@」は指定できません"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ 需要 %2$lld 至 %3$lld，且为 %4$lld 的倍数，而不是“%5$@”"
           }
         }
       }
     },
     "%@ expects %lld to %lld, not \"%@\"" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ erwartet %2$lld bis %3$lld, nicht „%4$@“"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "%1$@ expects %2$lld to %3$lld, not \"%4$@\""
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ espera %2$lld a %3$lld, no «%4$@»"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ attend %2$lld à %3$lld, pas « %4$@ »"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ richiede da %2$lld a %3$lld, non «%4$@»"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ は %2$lld〜%3$lld の範囲で指定してください。「%4$@」は指定できません"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ 需要 %2$lld 至 %3$lld，而不是“%4$@”"
           }
         }
       }
@@ -977,7 +1049,46 @@
         }
       }
     },
-    "%@ has no additive start for a mask (--mask)" : {},
+    "%@ has no additive start for a mask (--mask)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ hat keinen additiven Start für eine Maske (--mask)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ no tiene inicio aditivo para una máscara (--mask)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ n’a pas de départ additif pour un masque (--mask)"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ non ha un inizio additivo per una maschera (--mask)"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ にはマスク（--mask）用の付加的な開始がありません"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 没有可用于遮罩（--mask）的附加起点"
+          }
+        }
+      }
+    },
     "%@ has no role “%@”" : {
       "localizations" : {
         "de" : {
@@ -4182,6 +4293,46 @@
         }
       }
     },
+    "--crop-only goes with --mask: there is no crop to keep" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--crop-only gehört zu --mask: es gibt keinen Ausschnitt zum Behalten"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--crop-only va con --mask: no hay recorte que conservar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--crop-only va avec --mask : il n’y a pas de découpe à garder"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--crop-only va con --mask: non c’è un ritaglio da conservare"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--crop-only は --mask と一緒に使います。残す切り出しがありません"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--crop-only 需与 --mask 一起使用：没有可保留的裁剪区域"
+          }
+        }
+      }
+    },
     "--detail expects normal, more or most, not \"%@\"" : {
       "localizations" : {
         "de" : {
@@ -4222,7 +4373,46 @@
         }
       }
     },
-    "--expand expects four multipliers above 1, top,bottom,left,right, not \"%@\"" : {},
+    "--expand expects four multipliers above 1, top,bottom,left,right, not \"%@\"" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--expand erwartet vier Multiplikatoren größer als 1, top,bottom,left,right, nicht „%@“"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--expand espera cuatro multiplicadores mayores que 1, top,bottom,left,right, no «%@»"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--expand attend quatre multiplicateurs supérieurs à 1, top,bottom,left,right, pas « %@ »"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--expand richiede quattro moltiplicatori maggiori di 1, top,bottom,left,right, non «%@»"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--expand には 1 より大きい倍率を4つ、top,bottom,left,right の順で指定してください。「%@」は指定できません"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--expand 需要四个大于 1 的倍率，按 top,bottom,left,right 的顺序，而不是“%@”"
+          }
+        }
+      }
+    },
     "--format expects a value" : {
       "localizations" : {
         "de" : {
@@ -4383,7 +4573,46 @@
         }
       }
     },
-    "--image photo.jpg --mask photo-mask.png — silicontrol help add" : {},
+    "--image photo.jpg --mask photo-mask.png — silicontrol help add" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--image photo.jpg --mask photo-mask.png — silicontrol help add"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--image photo.jpg --mask photo-mask.png — silicontrol help add"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--image photo.jpg --mask photo-mask.png — silicontrol help add"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--image photo.jpg --mask photo-mask.png — silicontrol help add"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--image photo.jpg --mask photo-mask.png — silicontrol help add"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--image photo.jpg --mask photo-mask.png——silicontrol help add"
+          }
+        }
+      }
+    },
     "--kind expects one of %@, not \"%@\"" : {
       "localizations" : {
         "de" : {
@@ -4470,7 +4699,86 @@
         }
       }
     },
-    "--mask goes with --image <the image to edit>" : {},
+    "--mask goes with --image <the image to edit>" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--mask gehört zu --image <dem zu bearbeitenden Bild>"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--mask va con --image <la imagen que se va a editar>"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--mask va avec --image <l’image à éditer>"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--mask va con --image <l’immagine da modificare>"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--mask は --image <編集する画像> と一緒に使います"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--mask 须与 --image <要编辑的图像> 一起使用"
+          }
+        }
+      }
+    },
+    "--noise-mask and --no-noise-mask go with --mask: there is no mask to keep" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--noise-mask und --no-noise-mask gehören zu --mask: es gibt keine Maske zum Behalten"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--noise-mask y --no-noise-mask van con --mask: no hay ninguna máscara que conservar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--noise-mask et --no-noise-mask vont avec --mask : il n’y a pas de masque à conserver"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--noise-mask e --no-noise-mask vanno con --mask: non c’è alcuna maschera da conservare"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--noise-mask と --no-noise-mask は --mask と一緒に指定します。保持するマスクがありません"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--noise-mask 与 --no-noise-mask 需要配合 --mask：没有可保留的遮罩"
+          }
+        }
+      }
+    },
     "--out expects a folder" : {
       "localizations" : {
         "de" : {
@@ -4551,49 +4859,126 @@
         }
       }
     },
-    "--ref and --mask don’t go together: the patch’s crop is the edit’s only image" : {},
-    "--ref-res 1024 (the default) or 1536 — silicontrol help add" : {},
-    "--crop-only goes with --mask: there is no crop to keep" : {
+    "--ref and --mask don’t go together: the patch’s crop is the edit’s only image" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "--crop-only gehört zu --mask: es gibt keinen Ausschnitt zum Behalten"
+            "value" : "--ref und --mask passen nicht zusammen: der Ausschnitt der lokalen Korrektur ist das einzige Bild der Bearbeitung"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "--crop-only va con --mask: no hay recorte que conservar"
+            "value" : "--ref y --mask no van juntos: el recorte del retoque local es la única imagen de la edición"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "--crop-only va avec --mask : il n’y a pas de découpe à garder"
+            "value" : "--ref et --mask ne vont pas ensemble : la découpe de la retouche locale est la seule image de l’édition"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "--crop-only va con --mask: non c’è un ritaglio da conservare"
+            "value" : "--ref e --mask non vanno insieme: il ritaglio del ritocco locale è l’unica immagine della modifica"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "--crop-only は --mask と一緒に使います。残す切り出しがありません"
+            "value" : "--ref と --mask は併用できません。ローカル修正の切り出しが、編集で使う唯一の画像です"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "--crop-only 需与 --mask 一起使用：没有可保留的裁剪区域"
+            "value" : "--ref 与 --mask 不能同时使用：局部修补的裁剪区域就是编辑时唯一的图像"
           }
         }
       }
     },
-    "--ref-res goes with --ref or --mask" : {},
+    "--ref-res 1024 (the default) or 1536 — silicontrol help add" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--ref-res 1024 (der Standard) oder 1536 — silicontrol help add"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--ref-res 1024 (el valor predeterminado) o 1536 — silicontrol help add"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--ref-res 1024 (par défaut) ou 1536 — silicontrol help add"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--ref-res 1024 (il valore predefinito) oppure 1536 — silicontrol help add"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--ref-res 1024（既定）または 1536 — silicontrol help add"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--ref-res 1024（默认）或 1536——silicontrol help add"
+          }
+        }
+      }
+    },
+    "--ref-res goes with --ref or --mask" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--ref-res gehört zu --ref oder --mask"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--ref-res va con --ref o --mask"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--ref-res va avec --ref ou --mask"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--ref-res va con --ref o --mask"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--ref-res は --ref または --mask と一緒に使います"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--ref-res 须与 --ref 或 --mask 一起使用"
+          }
+        }
+      }
+    },
     "--seeded-start goes with --mask: the patch’s crop is the start" : {
       "localizations" : {
         "de" : {
@@ -4760,7 +5145,46 @@
         }
       }
     },
-    "--strength and --mask don’t go together: the patch starts from its crop" : {},
+    "--strength and --mask don’t go together: the patch starts from its crop" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--strength und --mask passen nicht zusammen: die lokale Korrektur startet aus ihrem Ausschnitt"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--strength y --mask no van juntos: el retoque local parte de su recorte"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--strength et --mask ne vont pas ensemble : la retouche locale part de sa découpe"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--strength e --mask non vanno insieme: il ritocco locale parte dal suo ritaglio"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--strength と --mask は併用できません。ローカル修正はその切り出しから始まります"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--strength 与 --mask 不能同时使用：局部修补从它的裁剪区域开始"
+          }
+        }
+      }
+    },
     "--strength expects a number above 0 and at most 1 (0.65 or 65%%), not \"%@\"" : {
       "localizations" : {
         "de" : {
@@ -10167,7 +10591,46 @@
         }
       }
     },
-    "Choose a chain whose text encoder reads images and whose denoiser reads references, like Qwen-Image-2.1: a patch needs the two together." : {},
+    "Choose a chain whose text encoder reads images and whose denoiser reads references, like Qwen-Image-2.1: a patch needs the two together." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wählen Sie eine Kette, deren Text-Encoder Bilder liest und deren Entrauscher Referenzbilder liest, wie Qwen-Image-2.1: eine lokale Korrektur braucht beides zusammen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige una cadena cuyo codificador de texto lee imágenes y cuyo eliminador de ruido lee imágenes de referencia, como Qwen-Image-2.1: un retoque local necesita ambos juntos."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisissez une chaîne dont l’encodeur de texte lit des images et dont le débruiteur lit des images de référence, comme Qwen-Image-2.1 : une retouche locale a besoin des deux ensemble."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scegli una catena il cui codificatore di testo legge immagini e il cui denoiser legge immagini di riferimento, come Qwen-Image-2.1: un ritocco locale ha bisogno di entrambi insieme."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "テキストエンコーダーが画像を読み取り、ノイズ除去モデルが参照画像を読み取るチェーンを選んでください（Qwen-Image-2.1 など）。ローカル修正には両方が必要です。"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请选择文本编码器读取图像、去噪器读取参考图的处理链，例如 Qwen-Image-2.1：局部修补需要两者同时具备。"
+          }
+        }
+      }
+    },
     "Choose a disk formatted APFS, Mac OS Extended or exFAT." : {
       "localizations" : {
         "de" : {
@@ -17239,7 +17702,46 @@
         }
       }
     },
-    "Hand the crop at the render’s format, or leave the seeded start out." : {},
+    "Hand the crop at the render’s format, or leave the seeded start out." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geben Sie den Ausschnitt im Format des Renderings an, oder lassen Sie den Seed-Start weg."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entrega el recorte en el formato del render, o deja fuera el inicio con semilla."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fournissez la découpe au format du rendu, ou laissez le départ ensemencé de côté."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Consegna il ritaglio nel formato del rendering, oppure lascia fuori l’inizio con seed."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "切り出しはレンダーの形式で渡すか、シード付き開始を使わないでください。"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请按渲染的格式提供裁剪区域，或不使用带种子的起点。"
+          }
+        }
+      }
+    },
     "Here: %@ of the %@ steps are redrawn." : {
       "localizations" : {
         "de" : {
@@ -20093,7 +20595,46 @@
         }
       }
     },
-    "Leave --ref-res out (1024), or choose 768 to 2560, a multiple of 32." : {},
+    "Leave --ref-res out (1024), or choose 768 to 2560, a multiple of 32." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lassen Sie --ref-res weg (1024), oder wählen Sie 768 bis 2560, ein Vielfaches von 32."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deja --ref-res fuera (1024), o elige de 768 a 2560, un múltiplo de 32."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laissez --ref-res de côté (1024), ou choisissez de 768 à 2560, un multiple de 32."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lascia fuori --ref-res (1024), oppure scegli da 768 a 2560, un multiplo di 32."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--ref-res を省略するか（1024）、768〜2560 で 32 の倍数を選んでください。"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请不要指定 --ref-res（1024），或选择 768 至 2560 且为 32 的倍数。"
+          }
+        }
+      }
+    },
     "Leave the Mac at rest during the measure: no render, export, compilation or game." : {
       "localizations" : {
         "de" : {
@@ -20174,7 +20715,46 @@
         }
       }
     },
-    "Leave the σ table out (--steps 9 gives the workflow’s), or give the one this model walks." : {},
+    "Leave the σ table out (--steps 9 gives the workflow’s), or give the one this model walks." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lassen Sie die σ-Tabelle weg (--steps 9 gibt die des Workflows), oder geben Sie die an, die dieses Modell verwendet."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deja fuera la tabla σ (--steps 9 da la del flujo de trabajo), o da la que sigue este modelo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laissez la table σ de côté (--steps 9 donne celle du workflow), ou donnez celle que suit ce modèle."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lascia fuori la tabella σ (--steps 9 dà quella del flusso di lavoro), oppure dai quella che segue questo modello."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "σ テーブルを省略するか（--steps 9 でワークフローのものになります）、このモデルがたどるものを指定してください。"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请不要指定 σ 表（--steps 9 会给出工作流的 σ 表），或给出此模型所用的 σ 表。"
+          }
+        }
+      }
+    },
     "Leave without cropping (Esc)" : {
       "localizations" : {
         "de" : {
@@ -26072,7 +26652,46 @@
         }
       }
     },
-    "Paint the mask over the region to replace, white on black (or its alpha), at the image’s size — at least 10 pixels — and hand the image with its mask." : {},
+    "Paint the mask over the region to replace, white on black (or its alpha), at the image’s size — at least 10 pixels — and hand the image with its mask." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Malen Sie die Maske über den zu ersetzenden Bereich, Weiß auf Schwarz (oder dessen Alpha), in der Größe des Bildes — mindestens 10 Pixel — und geben Sie das Bild mit seiner Maske an."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pinta la máscara sobre la región que se va a reemplazar, blanco sobre negro (o su alfa), al tamaño de la imagen — al menos 10 píxeles — y entrega la imagen con su máscara."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peignez le masque sur la région à remplacer, en blanc sur noir (ou son alpha), à la taille de l’image — au moins 10 pixels — et donnez l’image avec son masque."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dipingi la maschera sulla regione da sostituire, bianco su nero (o il suo alfa), alla dimensione dell’immagine — almeno 10 pixel — e consegna l’immagine con la sua maschera."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "置き換える領域にマスクを黒地に白（またはそのアルファ）で描き、画像と同じサイズ — 最低 10 ピクセル — で、そのマスクとともに画像を渡してください。"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请在要替换的区域上以黑底白（或其 alpha）绘制遮罩，尺寸与图像一致——至少 10 像素——并将图像连同遮罩一起提供。"
+          }
+        }
+      }
+    },
     "Pair With a Mac…" : {
       "localizations" : {
         "de" : {
@@ -38541,10 +39160,46 @@
     },
     "The text encoder reads %@ image(s), the denoiser %@ reference block(s): a sequence needs one block per image it read." : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Text-Encoder liest %1$@ Bild(er), der Entrauscher %2$@ Referenzblock/Referenzblöcke: eine Sequenz braucht einen Block pro gelesenem Bild."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "The text encoder reads %1$@ image(s), the denoiser %2$@ reference block(s): a sequence needs one block per image it read."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El codificador de texto lee %1$@ imagen(es), el eliminador de ruido %2$@ bloque(s) de referencia: una secuencia necesita un bloque por cada imagen leída."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’encodeur de texte lit %1$@ image(s), le débruiteur %2$@ bloc(s) de référence : une séquence demande un bloc par image lue."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il codificatore di testo legge %1$@ immagine/i, il denoiser %2$@ blocco/blocchi di riferimento: una sequenza richiede un blocco per ogni immagine letta."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "テキストエンコーダーは画像を %1$@ 枚、ノイズ除去モデルは参照ブロックを %2$@ 個読み取ります。シーケンスには読み取った画像ごとに1つのブロックが必要です。"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "文本编码器读取 %1$@ 张图像，去噪器读取 %2$@ 个参考块：序列需要为读取的每张图像提供一个块。"
           }
         }
       }
@@ -41019,7 +41674,46 @@
         }
       }
     },
-    "This patch is refused: %@." : {},
+    "This patch is refused: %@." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diese lokale Korrektur wird abgelehnt: %@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este retoque local se rechaza: %@."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette retouche locale est refusée : %@."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Questo ritocco locale viene rifiutato: %@."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このローカル修正は受け付けられません：%@。"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此局部修补被拒绝：%@。"
+          }
+        }
+      }
+    },
     "This prompt takes %@ images: a render takes %@ at most." : {
       "localizations" : {
         "de" : {
@@ -41066,7 +41760,46 @@
         }
       }
     },
-    "This reference resolution is refused: %@." : {},
+    "This reference resolution is refused: %@." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diese Referenzauflösung wird abgelehnt: %@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta resolución de referencia se rechaza: %@."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette résolution de référence est refusée : %@."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Questa risoluzione di riferimento viene rifiutata: %@."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この参照解像度は受け付けられません：%@。"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此参考分辨率被拒绝：%@。"
+          }
+        }
+      }
+    },
     "This render went wrong and its image is unusable: it wasn’t kept." : {
       "localizations" : {
         "de" : {
@@ -41107,7 +41840,46 @@
         }
       }
     },
-    "This seeded start is refused: %@." : {},
+    "This seeded start is refused: %@." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieser Seed-Start wird abgelehnt: %@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este inicio con semilla se rechaza: %@."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce départ ensemencé est refusé : %@."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Questo inizio con seed viene rifiutato: %@."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このシード付き開始は受け付けられません：%@。"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此带种子的起点被拒绝：%@。"
+          }
+        }
+      }
+    },
     "This series makes %@ renders: the queue has room for %@." : {
       "localizations" : {
         "de" : {
@@ -41320,7 +42092,46 @@
         }
       }
     },
-    "This σ table is refused: %@." : {},
+    "This σ table is refused: %@." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diese σ-Tabelle wird abgelehnt: %@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta tabla σ se rechaza: %@."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette table σ est refusée : %@."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Questa tabella σ viene rifiutata: %@."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この σ テーブルは受け付けられません：%@。"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此 σ 表被拒绝：%@。"
+          }
+        }
+      }
+    },
     "Thumbnail size" : {
       "localizations" : {
         "de" : {
@@ -44391,7 +45202,46 @@
         }
       }
     },
-    "a grid does not take --ref-res yet" : {},
+    "a grid does not take --ref-res yet" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ein Raster akzeptiert --ref-res noch nicht"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "una cuadrícula aún no acepta --ref-res"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "une grille n’accepte pas encore --ref-res"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "una griglia non accetta ancora --ref-res"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "グリッドはまだ --ref-res を受け付けません"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "网格暂时还不接受 --ref-res"
+          }
+        }
+      }
+    },
     "a grid needs --x (and optionally --y)" : {
       "localizations" : {
         "de" : {
@@ -44472,8 +45322,86 @@
         }
       }
     },
-    "a mask decides the format: leave 1024 / WxH out" : {},
-    "a mask’s prompt does not cite named subjects yet" : {},
+    "a mask decides the format: leave 1024 / WxH out" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "eine Maske bestimmt das Format: Lassen Sie 1024 / WxH weg"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "una máscara decide el formato: deja 1024 / WxH fuera"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "un masque décide du format : laissez 1024 / WxH de côté"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "una maschera decide il formato: lascia fuori 1024 / WxH"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マスクが形式を決めます。1024 / WxH は省略してください"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "遮罩决定格式：请不要指定 1024 / WxH"
+          }
+        }
+      }
+    },
+    "a mask’s prompt does not cite named subjects yet" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "der Prompt einer Maske nennt noch keine benannten Motive"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "el prompt de una máscara aún no cita sujetos con nombre"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "le prompt d’un masque ne cite pas encore de sujets nommés"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "il prompt di una maschera non cita ancora soggetti con nome"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マスクのプロンプトは名前付きサブジェクトをまだ引用できません"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "遮罩的提示词暂时还不能引用已命名的主体"
+          }
+        }
+      }
+    },
     "a render, an installation or the diagnostic is running" : {
       "localizations" : {
         "de" : {
@@ -46518,7 +47446,46 @@
         }
       }
     },
-    "grid does not take --mask" : {},
+    "grid does not take --mask" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "das Raster akzeptiert --mask nicht"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "la cuadrícula no acepta --mask"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "la grille n’accepte pas --mask"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "la griglia non accetta --mask"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "グリッドは --mask を受け付けません"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "网格不接受 --mask"
+          }
+        }
+      }
+    },
     "grid expected (g2), not \"%@\"" : {
       "localizations" : {
         "de" : {
@@ -47119,7 +48086,46 @@
         }
       }
     },
-    "leave it out, or render with add — silicontrol help add" : {},
+    "leave it out, or render with add — silicontrol help add" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "lassen Sie es weg, oder rendern Sie mit add — silicontrol help add"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "déjalo fuera, o renderiza con add — silicontrol help add"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "laissez-le de côté, ou rendez avec add — silicontrol help add"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "lascialo fuori, oppure esegui il rendering con add — silicontrol help add"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "省略するか、add でレンダリングしてください — silicontrol help add"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请不要指定，或用 add 渲染——silicontrol help add"
+          }
+        }
+      }
+    },
     "leave out --accelerators" : {
       "localizations" : {
         "de" : {
@@ -47200,8 +48206,86 @@
         }
       }
     },
-    "leave out --ref" : {},
-    "leave out --strength" : {},
+    "leave out --ref" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "lassen Sie --ref weg"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "deja --ref fuera"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "laissez --ref de côté"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "lascia fuori --ref"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--ref を省略してください"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请不要指定 --ref"
+          }
+        }
+      }
+    },
+    "leave out --strength" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "lassen Sie --strength weg"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "deja --strength fuera"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "laissez --strength de côté"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "lascia fuori --strength"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--strength を省略してください"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请不要指定 --strength"
+          }
+        }
+      }
+    },
     "leave the format out (the output follows image 1)" : {
       "localizations" : {
         "de" : {
@@ -47608,7 +48692,46 @@
         }
       }
     },
-    "models that do have \"seeded_start\": true in \"silicontrol models\"" : {},
+    "models that do have \"seeded_start\": true in \"silicontrol models\"" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modelle, die in „silicontrol models“ tatsächlich \"seeded_start\": true haben"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "los modelos que sí tienen \"seeded_start\": true en «silicontrol models»"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "modèles qui ont bien \"seeded_start\": true dans « silicontrol models »"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "modelli che hanno davvero \"seeded_start\": true in «silicontrol models»"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "\"seeded_start\": true を持つモデル（「silicontrol models」で確認）"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在“silicontrol models”中确有 \"seeded_start\": true 的模型"
+          }
+        }
+      }
+    },
     "models that do have \"start_image\": true in \"silicontrol models\"" : {
       "localizations" : {
         "de" : {
@@ -49689,7 +50812,46 @@
         }
       }
     },
-    "render one patch with add — silicontrol help add" : {},
+    "render one patch with add — silicontrol help add" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "eine lokale Korrektur mit add rendern — silicontrol help add"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "renderiza un retoque local con add — silicontrol help add"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "rendez une retouche locale avec add — silicontrol help add"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "esegui il rendering di un ritocco locale con add — silicontrol help add"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "add でローカル修正を1つレンダリングしてください — silicontrol help add"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "用 add 渲染一个局部修补——silicontrol help add"
+          }
+        }
+      }
+    },
     "retry once the installation is done (silicontrol models)" : {
       "localizations" : {
         "de" : {
@@ -50622,7 +51784,46 @@
         }
       }
     },
-    "the crop’s size follows the mask — silicontrol help add" : {},
+    "the crop’s size follows the mask — silicontrol help add" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "die Größe des Ausschnitts richtet sich nach der Maske — silicontrol help add"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "el tamaño del recorte sigue a la máscara — silicontrol help add"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "la taille de la découpe suit le masque — silicontrol help add"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "la dimensione del ritaglio segue la maschera — silicontrol help add"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "切り出しのサイズはマスクに従います — silicontrol help add"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "裁剪区域的尺寸跟随遮罩——silicontrol help add"
+          }
+        }
+      }
+    },
     "the diagnostic was stopped" : {
       "localizations" : {
         "de" : {
