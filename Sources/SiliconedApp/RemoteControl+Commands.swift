@@ -152,6 +152,10 @@ extension RemoteControl {
         /// `--crop-only`: the crop alone (`Request.patchCropOnly`), instead of the default where it is
         /// laid back over the original at the original's size; refused without `--mask`.
         var cropOnly = false
+        /// `--noise-mask` / `--no-noise-mask`: the workflow's `noise_mask` (`Request.patchNoiseMask`),
+        /// **on by default** — outside the mask every step keeps the crop's own latent. `nil`: the
+        /// default; an explicit switch without `--mask` is refused.
+        var noiseMask: Bool?
         /// `nil`: like the app's « Preview at every step » switch.
         var previews: Bool?
         var wait = false

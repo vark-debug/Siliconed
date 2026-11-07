@@ -106,6 +106,11 @@ package struct Patch: Sendable, Equatable {
     /// `遮罩裁剪V2`'s `纯白像素 < 10` guard, whose action this path does not reproduce: below this
     /// many pixels the patch is refused rather than the whole image replaced (see `EngineError.invalidPatch`).
     package static let minimumPixels = 10
+    /// `Text Encode Qwen Image 2.1 GH`'s `MASK_EXPAND_PIXELS` and `MASK_FEATHER_PIXELS`: the sampling
+    /// mask grows by a 61×61 ellipse (30 px), then a Gaussian of 21 taps and σ 10, **at the plan's
+    /// pixels**, before ComfyUI's `prepare_mask` takes it to the latent grid.
+    package static let maskExpansionPixels = 30
+    package static let maskFeatherPixels = 10
     /// `Text Encode Qwen Image 2.1 GH`'s `_cover_crop_is_small(..., tolerance: 64)`: the crop counts as
     /// the target itself when a cover fit cuts at most this many pixels from each side. True, the
     /// workflow keeps the primary at the latent's size — the same image for the text encoder and for
@@ -135,11 +140,18 @@ package struct Patch: Sendable, Equatable {
         /// workflow's `GH_CropRestore`, the render at the **original's size**; false keeps the crop alone,
         /// at the plan's size, for comparison. A redo keeps this (`RenderSettings.patch`).
         package var paste: Bool
+        /// **The workflow's `noise_mask`** (`Request.patchNoiseMask`, `--no-noise-mask` turns it off):
+        /// true — the default — replaces, at every step, the estimate outside the mask with the crop's
+        /// own latent (`z₀`), exactly as `KSamplerX0Inpaint` does with `latent_image`. The workflow's
+        /// `Text Encode Qwen Image 2.1 GH` attaches it whenever its primary latent is the crop
+        /// (`Patch.Plan.primaryMatchesTarget`), so the render is 1:1 with it; without it, the whole crop
+        /// is rebuilt, outside pixels included.
+        package var noiseMask: Bool
 
         package init(expansion: Expansion = Expansion(), maximumSide: Int = Patch.maximumSide,
-                     seededStart: Bool = false, paste: Bool = true) {
+                     seededStart: Bool = false, paste: Bool = true, noiseMask: Bool = true) {
             self.expansion = expansion; self.maximumSide = maximumSide
-            self.seededStart = seededStart; self.paste = paste
+            self.seededStart = seededStart; self.paste = paste; self.noiseMask = noiseMask
         }
     }
 
@@ -288,5 +300,34 @@ package struct Patch: Sendable, Equatable {
         }
         return ImageRGB(pixels: pixels, height: crop.height, width: crop.width)
             .fitted(width: plan.width, height: plan.height)
+    }
+
+    /// **The workflow's `noise_mask`** (`Text Encode Qwen Image 2.1 GH`: `_expand_and_feather_mask`,
+    /// then ComfyUI's `prepare_mask`): the filled mask at the crop's pixels, resized to the plan's
+    /// (bilinear), **grown 30 px** (a 61×61 ellipse), blurred by a **21-tap** Gaussian (σ 10,
+    /// `BORDER_REFLECT_101`), then **bilinear** to the latent grid (`comfy.utils.reshape_mask` — not
+    /// area, not nearest). 0 keeps the crop's own latent (`z₀`), 1 lets the model draw.
+    package func noiseMask(_ plan: Plan, height: Int, width: Int) -> [Float] {
+        let crop = plan.crop
+        let filled = mask.filled()
+        var values = [Float](repeating: 0, count: crop.width * crop.height)
+        for y in 0..<crop.height {
+            let from = (crop.y + y) * mask.width + crop.x
+            let to = y * crop.width
+            for x in 0..<crop.width { values[to + x] = min(1, max(0, filled.values[from + x])) }
+        }
+        // `_resize_mask`: the crop's mask at the prepared image's size, **before** it grows.
+        values = Self.linearResize(values, width: crop.width, height: crop.height, channels: 1,
+                                   toWidth: plan.width, toHeight: plan.height)
+        values = Self.dilate(values, width: plan.width, height: plan.height,
+                             radius: Self.maskExpansionPixels)
+        // `cv2.GaussianBlur(item, (21, 21), sigmaX: 10, sigmaY: 10)`: the explicit kernel, not the auto one.
+        let blurred = Self.gaussianBlur(values.map(Double.init), width: plan.width, height: plan.height,
+                                        sigma: Double(Self.maskFeatherPixels),
+                                        taps: 2 * Self.maskFeatherPixels + 1)
+        values = blurred.map(Float.init)
+        // `reshape_mask(..., (h, w))`: bilinear, `align_corners=False`, the edges clamped.
+        return Self.linearResize(values, width: plan.width, height: plan.height, channels: 1,
+                                 toWidth: width, toHeight: height).map { min(1, max(0, $0)) }
     }
 }

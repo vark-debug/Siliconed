@@ -80,9 +80,12 @@ package struct QwenImage21Sampler {
     ///   - sigmas: the full schedule (`steps + 1` values).
     ///   - told: the σ the DiT is told at each step (`Detail.modelSigmas`); `nil`: `sigmas`.
     ///   - reduced: the first steps evaluated at half size (the spectral schedule); 0 with references.
+    ///   - inpaint: the workflow's `noise_mask` (`Request.patchNoiseMask`): each step's estimate, outside
+    ///     the mask, is the crop's own latent `z₀` (`Context.Inpaint`).
     package mutating func run(latent: inout [Float], height: Int, width: Int,
                               hidden: [Float], slots: [Bool], references: [Latent],
                               sigmas: [Float], told: [Float]? = nil, reduced: Int = 0,
+                              inpaint: Context.Inpaint? = nil,
                               onStep: (Step) throws -> Void) throws {
         let steps = sigmas.count - 1
         // Under DPM++ and UniPC, diffusers' integer timestep over 1000 (`Solver.toldSigma`).
@@ -148,7 +151,7 @@ package struct QwenImage21Sampler {
             for i in range {
                 try cancellation.check()
                 started = Date()
-                let v: [Float]
+                var v: [Float]
                 if divisor > 1 {
                     // 𝓑x + σ𝓑ε on the state's own σ (not the told one, which only conditions the DiT).
                     let sigma = sigmas[i]
@@ -168,6 +171,29 @@ package struct QwenImage21Sampler {
                     v = (0..<count).map { (latent[$0] - upsampled[$0]) * inverse }
                 } else {
                     v = try latent.withUnsafeBufferPointer { try dit.forward(latent: $0.baseAddress!, sigma: told[i]) }
+                }
+                // **`noise_mask`** (`KSamplerX0Inpaint`): the workflow corrects the model's estimate
+                // `x₀ = x − σ·v` **before** the update — outside the mask it is the crop's own latent `z₀`,
+                // inside it the model's (`out·mask + latent_image·(1−mask)`). The derivative is rebuilt
+                // from the corrected estimate, so Euler and the walkers alike step with it. With
+                // `--seeded-start` the start is `z₀ + √2·ε`; the backfill is still `z₀`, never that noise.
+                if let inpaint, sigmas[i] > 0,
+                   inpaint.mask.count == height * width, inpaint.backfill.count == count {
+                    let sigma = sigmas[i], plane = height * width
+                    let mask = inpaint.mask, z0 = inpaint.backfill
+                    latent.withUnsafeBufferPointer { x in
+                        v.withUnsafeMutableBufferPointer { velocity in
+                            for c in 0..<channels {
+                                let base = c * plane
+                                for p in 0..<plane {
+                                    let m = mask[p]
+                                    if m >= 1 { continue }
+                                    velocity[base + p] = m * velocity[base + p]
+                                        + (1 - m) * (x[base + p] - z0[base + p]) / sigma
+                                }
+                            }
+                        }
+                    }
                 }
                 if let walk {
                     latent.withUnsafeMutableBufferPointer { x in

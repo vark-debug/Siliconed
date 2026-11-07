@@ -199,7 +199,8 @@ package struct QwenImage21DenoisingModule: DenoisingModule {
         context.beginDenoising(evaluations: steps)
         try sampler.run(latent: &latent.values, height: height, width: width, hidden: text.values,
                         slots: text.imageSlots, references: references, sigmas: σ,
-                        told: context.told(σ, start: start, bell: .late), reduced: reduced) { step in
+                        told: context.told(σ, start: start, bell: .late), reduced: reduced,
+                        inpaint: context.inpaint) { step in
             try context.stepDone(sigma: step.sigma, seconds: step.seconds, evaluatedHeight: step.evaluatedHeight,
                                  evaluatedWidth: step.evaluatedWidth, space: space, x: step.estimate, v: step.velocity,
                                  nextSigma: step.estimateSigma, fullHeight: height, fullWidth: width)

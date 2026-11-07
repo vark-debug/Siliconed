@@ -224,6 +224,20 @@ package final class Context {
     /// rule's noise).
     package var solver: Solver = .euler
     package var solverSeed: UInt64 = 0
+    /// **The workflow's `noise_mask`** (`Request.patchNoiseMask`): the mask on the **latent grid**
+    /// (one weight per cell, 0…1) and the crop's own latent `z₀` (planar `[channels, h, w]`), which
+    /// every step backfills where the mask is 0 (`KSamplerX0Inpaint`). Set once by the engine for a
+    /// patch, `nil` otherwise; the samplers that do not take it ignore it.
+    package var inpaint: Inpaint?
+
+    /// The two sides of `noise_mask`: who draws (mask) and what stays (the crop's latent).
+    package struct Inpaint: Sendable {
+        package var mask: [Float]
+        package var backfill: [Float]
+        package init(mask: [Float], backfill: [Float]) {
+            self.mask = mask; self.backfill = backfill
+        }
+    }
 
     /// The σs the DiT is told, for a full schedule of which steps `start…` run; no bell, the σ themselves.
     package func told(_ sigmas: [Float], start: Int, bell: Detail.Bell? = nil) -> [Float] {

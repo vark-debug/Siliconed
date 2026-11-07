@@ -75,6 +75,12 @@ package struct Admission: Sendable {
             throw EngineError.invalidPatch(reason: "--crop-only keeps a patch's crop alone: it goes with --mask, "
                 + "and without one there is no crop to keep")
         }
+        // `--noise-mask` replaces the estimate outside the mask with the crop's latent: without a
+        // patch there is neither mask nor crop.
+        if request.patchNoiseMask, request.patch == nil {
+            throw EngineError.invalidPatch(reason: "--noise-mask keeps a patch's mask: it goes with --mask, "
+                + "and without one the whole image is drawn")
+        }
         if let patch = request.patch {
             guard request.image == nil else {
                 throw EngineError.invalidPatch(reason: "an img2img image (its strength) and a patch (its mask) start two ways: choose one")

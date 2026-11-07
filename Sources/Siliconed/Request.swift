@@ -112,6 +112,14 @@ package struct Request: Sendable, Equatable {
     /// the original's size; true returns the crop itself, at the plan's size, to compare the two.
     /// Refused without `patch`: there is no crop to keep.
     package var patchCropOnly = false
+    /// **The workflow's `noise_mask`, opt-out** (`--noise-mask` turns it back on): true — the
+    /// `Patch.Settings.noiseMask` default, as the workflow's `Text Encode Qwen Image 2.1 GH` attaches
+    /// the mask whenever its primary latent is the crop — makes every step replace the model's estimate
+    /// outside the mask (grown 30 px, feathered, on the latent grid) with the crop's own latent `z₀`,
+    /// inside it with the model's (`KSamplerX0Inpaint`'s `out·mask + latent_image·(1−mask)`).
+    /// **With `patchSeededStart`** the start stays `z₀ + √2·ε`; the backfill is `z₀`, never the noise.
+    /// False: the whole crop is rebuilt, and the mask only tints. Refused without `patch`.
+    package var patchNoiseMask = false
     /// **The editing reference images** ("change her jacket to red"): the denoiser re-reads them
     /// at each layer, and the generated image starts from noise — nothing to do with `image`,
     /// which is its starting point. Each keeps **its own** aspect ratio, at the size the denoiser

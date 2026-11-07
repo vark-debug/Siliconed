@@ -422,6 +422,9 @@ extension AppState {
             // The crop returns to its place unless the entry asked for the crop alone (`--crop-only`):
             // the redo reads `settings.patch` too, so a paste is never lost on a redraw.
             request.patchCropOnly = settings.patch.map { !$0.paste } ?? false
+            // **The workflow's `noise_mask`** (`Patch.Settings.noiseMask`, on unless turned off):
+            // outside the mask every step keeps the crop's own latent (`z₀`).
+            request.patchNoiseMask = settings.patch?.noiseMask ?? false
             request.references = references
             request.referenceResolution = settings.referenceResolution
             request.detail = settings.detail

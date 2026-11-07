@@ -614,9 +614,11 @@ extension Patch {
     }
 
     /// `cv2.GaussianBlur(..., (0, 0), sigma)`: `ksize = cvRound(sigma·8 + 1) | 1`, coefficients
-    /// `exp(−i²/2σ²)` normalized, `BORDER_REFLECT_101`.
-    static func gaussianBlur(_ values: [Double], width: Int, height: Int, sigma: Double) -> [Double] {
-        let size = Int((sigma * 8 + 1).rounded()) | 1
+    /// `exp(−i²/2σ²)` normalized, `BORDER_REFLECT_101`. `taps`: an explicit kernel size, as the
+    /// workflow's `GaussianBlur(item, (21, 21), 10)` passes it (`Patch.noiseMask`).
+    static func gaussianBlur(_ values: [Double], width: Int, height: Int, sigma: Double,
+                             taps: Int? = nil) -> [Double] {
+        let size = taps.map { $0 | 1 } ?? (Int((sigma * 8 + 1).rounded()) | 1)
         let radius = size / 2
         var kernel = (0...2 * radius).map { i in exp(-pow(Double(i - radius), 2) / (2 * sigma * sigma)) }
         let total = kernel.reduce(0, +)

@@ -111,6 +111,25 @@ final class PatchTests: XCTestCase {
         XCTAssertEqual(Patch.tintOpacity, 0.4, accuracy: 1e-6)
     }
 
+    /// **The workflow's `noise_mask`** (`Text Encode Qwen Image 2.1 GH`, `prepare_mask`): the filled
+    /// mask at the plan's pixels, **grown 30 px** (a 61×61 ellipse), blurred by a **21-tap** Gaussian
+    /// (σ 10), then **bilinear** to the latent grid (`reshape_mask`, not area nor nearest). 0 keeps the
+    /// crop's latent, 1 lets the model draw; the feather is the workflow's, around the grown region.
+    func testTheNoiseMaskIsTheWorkflowsOnTheLatentGrid() {
+        let patch = Patch(image: image(256, 256), mask: box(256, 256, x: 96, y: 96, w: 64, h: 64))
+        let plan = Patch.Plan(crop: Patch.Crop(x: 0, y: 0, width: 256, height: 256), width: 256, height: 256)
+        let values = patch.noiseMask(plan, height: 16, width: 16)
+        XCTAssertEqual(values.count, 16 * 16, "one weight per latent cell")
+        // The region's core: grown 30 px (66…190), blurred — latent cell (8, 8) covers the centre.
+        XCTAssertEqual(values[8 * 16 + 8], 1, accuracy: 1e-5, "inside: the model draws")
+        XCTAssertLessThan(values[0], 0.02, "far outside: the crop's own latent, untouched")
+        // The grown edge at 66 px: a feathered band, not a step — cell x = 4 covers 64…80.
+        let feather = values[8 * 16 + 4]
+        XCTAssertGreaterThan(feather, 0.3)
+        XCTAssertLessThan(feather, 0.95)
+        XCTAssertLessThan(values[8 * 16 + 3], 0.4, "a cell further out keeps most of the crop")
+    }
+
     /// **The same pixels are z₀ and image 1** (the user's C4 check): the rendered crop, fitted to the
     /// plan's size — what the seeded start encodes — is the rendered crop bit for bit, and the text
     /// encoder's copy follows `referenceResolution`, not the output's size.

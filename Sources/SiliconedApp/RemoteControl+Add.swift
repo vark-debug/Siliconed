@@ -93,6 +93,8 @@ extension RemoteControl {
                 d.maximumSide = n
             case "--seeded-start": d.seededStart = true
             case "--crop-only": d.cropOnly = true
+            case "--noise-mask": d.noiseMask = true
+            case "--no-noise-mask": d.noiseMask = false
             case "--strength":
                 let v = try value(a)
                 guard let s = StartImage.strength(v) else {
@@ -146,6 +148,11 @@ extension RemoteControl {
         // render would never paste (`Admission` says the same of a request built by the API).
         if d.cropOnly, d.mask == nil {
             throw Refusal("usage", String(localized: "--crop-only goes with --mask: there is no crop to keep"))
+        }
+        // `noise_mask` keeps a patch's mask: without one there is neither mask nor crop, and both
+        // switches would be no-ops (`Admission` says the same of a request built by the API).
+        if d.noiseMask != nil, d.mask == nil {
+            throw Refusal("usage", String(localized: "--noise-mask and --no-noise-mask go with --mask: there is no mask to keep"))
         }
         return d
     }
@@ -262,7 +269,8 @@ extension RemoteControl {
             d.format = (planned.width, planned.height)
             patchOrigins = (original, mask)
             patchSettings = Patch.Settings(expansion: expansion, maximumSide: maximumSide,
-                                           seededStart: d.seededStart, paste: !d.cropOnly)
+                                           seededStart: d.seededStart, paste: !d.cropOnly,
+                                           noiseMask: d.noiseMask ?? true)
         }
 
         // The starting image (img2img): a model whose chain starts from one, never with references — one or the other.

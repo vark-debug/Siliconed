@@ -100,7 +100,10 @@ extension Engine {
         // reference block; with `--seeded-start` it is encoded a second time for z₀ (`Latent.seeded`),
         // and the VAE encoder is charged for the larger. The text's copy is the crop itself when it is
         // the target's own pixels (`Patch.Plan.primaryMatchesTarget`), at `--ref-res` otherwise.
-        memoryRequest.seededStart = request.patchSeededStart
+        // `noise_mask` needs that same z₀ (its backfill), so it is charged the second encode a crop of
+        // another grid costs; the crop that is the target reads the reference block's latent instead.
+        memoryRequest.seededStart = (request.patchSeededStart
+            || (request.patchNoiseMask && !(patchPlan?.primaryMatchesTarget ?? false)))
             ? patchPlan.map { ($0.width, $0.height) } : nil
         memoryRequest.solver = request.solver
         memoryRequest.referenceResolution = request.referenceResolution
@@ -279,6 +282,31 @@ extension Engine {
                 }
                 context.timings.encoding += Date().timeIntervalSince(referencesStart)
                 context.emit(.encoding(seconds: context.timings.encoding))
+            }
+
+            // ── **The workflow's `noise_mask`** (`Request.patchNoiseMask`): at every step the estimate
+            //    outside the mask is the crop's own latent `z₀`, inside it the model's
+            //    (`KSamplerX0Inpaint`). `z₀` is `--seeded-start`'s latent when there is one — the start
+            //    stays z₀ + √2·ε, the backfill is z₀ —, otherwise the reference block's own copy when the
+            //    crop is the target's pixels, and one more encode when the crop was scaled. ──
+            if request.patchNoiseMask, let plan = patchPlan, let crop = patchCrop, let patch = request.patch {
+                var backfill = seeded
+                if backfill == nil, plan.primaryMatchesTarget { backfill = references.first }
+                if backfill == nil, let encoding = chain.encoding {
+                    try context.check()
+                    context.emit(.stage(.image, image: 0))
+                    let maskStart = Date()
+                    backfill = try autoreleasepool {
+                        try encode(crop.fitted(width: pixelWidth, height: pixelHeight), with: encoding, context: context)
+                    }
+                    context.timings.encoding += Date().timeIntervalSince(maskStart)
+                    context.emit(.encoding(seconds: context.timings.encoding))
+                    PhaseBoundary.mark("mask")
+                }
+                if let backfill {
+                    context.inpaint = Context.Inpaint(mask: patch.noiseMask(plan, height: height, width: width),
+                                                      backfill: backfill.values)
+                }
             }
 
             // ── Every image's denoising, then every decoding. ──

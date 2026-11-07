@@ -464,6 +464,16 @@ package enum RemoteControlHelp {
           --crop-only        with --mask: the crop alone, at the plan's size, instead of the default
                               paste — the original's size, the crop at its place. Default: off.
                               For comparing the paste with the raw crop. Without --mask: refused.
+          --noise-mask, --no-noise-mask
+                              with --mask: ComfyUI's noise_mask, as KSamplerX0Inpaint takes it —
+                              at every step the estimate outside the mask is the crop's own latent
+                              z₀, inside it the model's. The mask is the workflow's
+                              (Text Encode Qwen Image 2.1 GH): grown 30 px, a 21-tap Gaussian
+                              (σ 10), then bilinear to the latent grid (ComfyUI's reshape_mask).
+                              ON BY DEFAULT, as the workflow attaches it whenever its primary
+                              latent is the crop; --no-noise-mask off — the whole crop is rebuilt,
+                              outside pixels included. With --seeded-start the start stays
+                              z₀ + √2·ε, the backfill is z₀. Without --mask: refused, said.
           --expand T,B,L,R    with --mask: the crop's margins, multipliers of the mask's shortest
                               side (1.3: 0.3 × that side above; 1.4: 0.4 below, left, right).
                               Default: 1.3,1.4,1.4,1.4 (the workflow's).
@@ -1822,6 +1832,17 @@ package enum RemoteControlHelp {
                               pose par défaut — la taille de l'original, la découpe à sa place.
                               Défaut : désactivé. Pour comparer la pose et la découpe brute.
                               Sans --mask : refusé, dit.
+          --noise-mask, --no-noise-mask
+                              avec --mask : le noise_mask de ComfyUI, tel que KSamplerX0Inpaint le
+                              prend — à chaque pas l'estimation hors du masque est le latent de
+                              la découpe z₀, dedans celle du modèle. Le masque est celui du
+                              workflow (Text Encode Qwen Image 2.1 GH) : dilaté de 30 px, flou
+                              gaussien de 21 taps (σ 10), puis bilinéaire sur la grille latente
+                              (reshape_mask de ComfyUI). ACTIF PAR DÉFAUT, comme le workflow
+                              l'attache quand son latent primaire est la découpe ; --no-noise-mask
+                              le désactive — toute la découpe est reconstruite, pixels extérieurs
+                              compris. Avec --seeded-start le départ reste z₀ + √2·ε, le
+                              remplissage est z₀. Sans --mask : refusé, dit.
           --expand T,B,L,R    avec --mask : les marges de la découpe, multiplicateurs du côté le
                               plus court du masque (1.3 : 0.3 × ce côté au-dessus ; 1.4 : 0.4 en
                               dessous, à gauche, à droite). Défaut : 1.3,1.4,1.4,1.4 (celui du
