@@ -100,25 +100,44 @@ final class Img2ImgTests: XCTestCase {
         for i in 0..<32 { XCTAssertEqual(milieu[i], 0.5 * ε.values[i] + 0.5 * 0.25, accuracy: 1e-7) }
     }
 
-    /// **The additive start, `z₀ + σ·ε`** — the workflow's `noise_scaling`, not `start`'s mixture: at
-    /// σ = 1 it keeps the crop under the noise (where `start` would return the noise alone), at σ = 0
-    /// it is the crop bit for bit, and in between each element is the sum as written (fp32).
+    /// **The additive start, `z₀ + λ·ε`** — the workflow's `noise_scaling`, not `start`'s mixture: at
+    /// σ = 1 the noise is `√2·ε` (ComfyUI's `max_denoise` since 1 is `sigma_max`), so the crop is kept
+    /// *under* the noise (where `start` would return the noise alone); at σ = 0 it is the crop bit for
+    /// bit; below `sigma_max` λ is σ itself, each element the sum as written (fp32).
     func testTheSeededStartAddsTheNoiseInsteadOfMixingIt() throws {
         let z₀ = Latent(space: .flux, height: 1, width: 2, values: (0..<32).map { Float($0) / 32 })
         let ε = Latent.noise(.flux, height: 1, width: 2, seed: 42)
+        // `max_denoise`: σ₀ = sigma_max = 1 ⇒ the noise is scaled by sqrt(1 + σ₀²) = √2.
         let atOne = try Latent.seeded(image: z₀, noise: ε, sigma: 1)
-        XCTAssertEqual(atOne.values.map(\.bitPattern),
-                       zip(z₀.values, ε.values).map { $0.0 + $0.1 }.map(\.bitPattern))
+        let rootTwo = Float(2).squareRoot()
+        XCTAssertEqual(zip(z₀.values, ε.values).map { $0.0 + rootTwo * $0.1 }.map(\.bitPattern),
+                       atOne.values.map(\.bitPattern), "at σ = 1 the start is z₀ + √2·ε")
         XCTAssertNotEqual(atOne.values, ε.values, "at σ = 1, `start` is the noise alone: the crop would be gone")
         XCTAssertNotEqual(atOne.values, z₀.values)
         let atZero = try Latent.seeded(image: z₀, noise: ε, sigma: 0)
         XCTAssertEqual(atZero.values.map(\.bitPattern), z₀.values.map(\.bitPattern))
+        // Below sigma_max there is no `max_denoise`: the weight is σ₀ as written.
         let atSixty = try Latent.seeded(image: z₀, noise: ε, sigma: 0.6)
         for i in 0..<32 { XCTAssertEqual(atSixty.values[i], z₀.values[i] + 0.6 * ε.values[i]) }
+        let atNinety = try Latent.seeded(image: z₀, noise: ε, sigma: 0.9)
+        for i in 0..<32 { XCTAssertEqual(atNinety.values[i], z₀.values[i] + 0.9 * ε.values[i]) }
         // The two starts differ at σ = 1 — the reason the crop cannot reuse `Latent.start`:
         XCTAssertEqual(Latent.start(image: z₀, noise: ε, sigma: 1).values.map(\.bitPattern),
                        ε.values.map(\.bitPattern))
         XCTAssertNotEqual(atOne.values, Latent.start(image: z₀, noise: ε, sigma: 1).values)
+    }
+
+    /// **`max_denoise` is ComfyUI's** (`rel_tol: 1e-5`, or above `sigma_max`): 1 and a σ₀ within
+    /// 1e-5 of it take `sqrt(1 + σ²)`; anything clearly below `sigma_max` takes σ itself, and so
+    /// does a schedule whose first node is below it.
+    func testTheSeededStartsNoiseWeightMatchesComfyUIMaxDenoise() {
+        XCTAssertEqual(Latent.seededNoiseScale(sigma: 1), Float(2).squareRoot())
+        XCTAssertEqual(Latent.seededNoiseScale(sigma: 0.999999), (1 + 0.999999 * 0.999999).squareRoot())
+        XCTAssertEqual(Latent.seededNoiseScale(sigma: 1.2), (1 + 1.2 * 1.2).squareRoot(),
+                       "above sigma_max, ComfyUI also takes the max_denoise branch")
+        XCTAssertEqual(Latent.seededNoiseScale(sigma: 0.9), 0.9)
+        XCTAssertEqual(Latent.seededNoiseScale(sigma: 0.6), 0.6)
+        XCTAssertEqual(Latent.seededNoiseScale(sigma: 0), 0)
     }
 
     /// **The additive start's grids must agree**: an encoded crop of another size (or space) than the

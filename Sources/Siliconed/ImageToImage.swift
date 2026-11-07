@@ -324,13 +324,33 @@ extension Latent {
         return Latent(space: ε.space, height: ε.height, width: ε.width, values: values)
     }
 
-    /// **The « 移除、局部重绘 » workflow's starting latent**: `z₀ + σ_s · ε`, element by element, in
-    /// fp32 — what ComfyUI's `KSAMPLER` does with `noise_scaling = additive` (`x = latent + σ · noise`),
-    /// the crop's latent kept under the noise. ⚠️ **Not `start`**: diffusers' `σ_s · ε + (1 − σ_s) · z₀`
-    /// at σ_s = 1 is the noise alone, and the workflow starts at 1 — reusing it would throw the crop away.
-    /// At σ_s = 1 this is `z₀ + ε`; at σ_s = 0, `z₀` to the bit; any other σ_s (a custom table's first
-    /// node need not be 1) is the sum as written, never a rescaled mixture. Only a denoiser whose
-    /// `acceptsSeededStart` says so is handed one (`Request.seededStart`), and never beside `image`.
+    /// ComfyUI's `ModelSamplingDiscreteFlow.sigma_max` for a rectified-flow model: `time_snr_shift`
+    /// at the top timestep is 1 whatever the shift, so it is 1 here (`QwenImage21`'s sampler).
+    package static let flowSigmaMax: Float = 1
+
+    /// **`λ`, the noise's weight in the additive start** — ComfyUI's
+    /// `Sampler.max_denoise(model_wrap, sigmas)` (`comfy/samplers.py`) followed by
+    /// `ModelSamplingDiscreteFlow.noise_scaling` (`comfy/model_sampling.py`): when σ₀ is `sigma_max`
+    /// (`math.isclose(…, rel_tol: 1e-5)`, or above it) the noise is multiplied by
+    /// `sqrt(1 + σ₀²)` — at σ₀ = 1, `√2 · ε`; otherwise by σ₀ itself (`noise * sigma`).
+    /// The engine starts the crop's render at the schedule's first node, 1 for both the family's
+    /// table and `manualSigmas`, so this is the `max_denoise` branch every patch takes.
+    package static func seededNoiseScale(sigma: Float) -> Float {
+        let maxDenoise = abs(flowSigmaMax - sigma) <= 1e-5 * max(abs(flowSigmaMax), abs(sigma))
+            || sigma > flowSigmaMax
+        return maxDenoise ? (1 + sigma * sigma).squareRoot() : sigma
+    }
+
+    /// **The « 移除、局部重绘 » workflow's starting latent**: `z₀ + λ · ε`, element by element, in
+    /// fp32 — what ComfyUI's `KSAMPLER` does with `noise_scaling = additive`, the crop's latent kept
+    /// under the noise. `λ` is `sqrt(1 + σ_s²)` when `max_denoise` holds and `σ_s` otherwise
+    /// (`seededNoiseScale`): the σ_s = 1 every crop here starts at is `sigma_max` ⇒ `max_denoise`,
+    /// so the start is `z₀ + √2 · ε`, not `z₀ + ε` (ComfyUI's start, and the one the workflow was
+    /// made with). ⚠️ **Not `start`**: diffusers' `σ_s · ε + (1 − σ_s) · z₀` at σ_s = 1 is the noise
+    /// alone, and the workflow starts at 1 — reusing it would throw the crop away. At σ_s = 0 this
+    /// is `z₀` to the bit; any other σ_s (a custom table's first node need not be 1) is the sum as
+    /// written, never a rescaled mixture. Only a denoiser whose `acceptsSeededStart` says so is
+    /// handed one (`Request.seededStart`), and never beside `image`.
     ///
     /// **The grids must agree** (`z₀`'s is the render's): a mismatch is a request or a pipeline that
     /// would denoise noise of another size, and it is said by name rather than left to a later shape
@@ -343,8 +363,9 @@ extension Latent {
                 reason: "the encoded crop is \(z₀.height)×\(z₀.width) latent cells of \(z₀.space), "
                     + "the noise \(ε.height)×\(ε.width) of \(ε.space): they must be the render's grid")
         }
+        let lambda = seededNoiseScale(sigma: sigma)
         var values = [Float](repeating: 0, count: ε.values.count)
-        for i in 0..<values.count { values[i] = z₀.values[i] + sigma * ε.values[i] }
+        for i in 0..<values.count { values[i] = z₀.values[i] + lambda * ε.values[i] }
         return Latent(space: ε.space, height: ε.height, width: ε.width, values: values)
     }
 }
