@@ -106,14 +106,15 @@ final class EditSequenceTests: XCTestCase {
     // ── what is refused before any computation ──────────────────────────────────────────────
 
     /// Three references pass the count (the request then stops on its 6 steps, which the Turbo has no
-    /// schedule for — still before any file); a fourth is refused as such.
+    /// schedule for — 8, its published count, and 9, the workflow's, are the only ones it walks —
+    /// still before any file); a fourth is refused as such.
     func testAtMostThreeReferences() {
         XCTAssertEqual(qwen.chain.denoising.maxReferences, 3)
         let reference = image(64, 64)
         var r = Request("replace the cloudy sky with a blue sky", resolution: 512, steps: 6)
         r.references = Array(repeating: reference, count: 3)
         XCTAssertThrowsError(try Engine().render(r, model: qwen)) {
-            XCTAssertEqual($0 as? EngineError, .invalidSteps(steps: 6, allowed: [8]), "\($0)")
+            XCTAssertEqual($0 as? EngineError, .invalidSteps(steps: 6, allowed: [8, 9]), "\($0)")
         }
         r.references.append(reference)
         XCTAssertThrowsError(try Engine().render(r, model: qwen)) {
@@ -129,9 +130,11 @@ final class EditSequenceTests: XCTestCase {
             XCTAssertEqual($0 as? EngineError, .imageToImageUnsupported(model: "qwen-image-2.1"), "\($0)")
             XCTAssertTrue("\($0)".contains("reference 1"), "\($0)")
         }
-        // The Turbo's published count passes the module's own check; another count does not.
+        // The Turbo's published count and the workflow's pass the module's own check; another count
+        // does not.
         XCTAssertNoThrow(try qwen.chain.denoising.check(steps: 8, startImage: false))
-        for n in [5, 6, 7, 9] { XCTAssertThrowsError(try qwen.chain.denoising.check(steps: n, startImage: false), "\(n)") }
+        XCTAssertNoThrow(try qwen.chain.denoising.check(steps: 9, startImage: false))
+        for n in [5, 6, 7, 10] { XCTAssertThrowsError(try qwen.chain.denoising.check(steps: n, startImage: false), "\(n)") }
     }
 
     /// What the chain declares: the text, the references, and the encoder that sees them. ⚠️ It also

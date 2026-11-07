@@ -159,7 +159,7 @@ final class AppTests: XCTestCase {
             (ImageRGB.Failure.unreadable("/a.png"), .imageUnreadable(file: "/a.png")),
             (Request.Failure.emptyPrompt, .emptyPrompt),
             (Request.Failure.steps(0), .invalidSteps(steps: 0, allowed: [])),
-            (QwenImage21Pipeline.Failure.steps(6), .invalidSteps(steps: 6, allowed: [8])),
+            (QwenImage21Pipeline.Failure.steps(6), .invalidSteps(steps: 6, allowed: [8, 9])),
             (EngineSettings.Failure.alreadyRead(loaded: "/a", requested: "/b"),
              .settingsAlreadyLoaded(loaded: "/a", requested: "/b")),
             (CancellationError(), .cancelled),
