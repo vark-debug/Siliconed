@@ -370,7 +370,12 @@ extension RemoteControl {
                           help: String(localized: "turn on Beta → Negative LoRA Strengths in Settings (⌘,)"))
         }
         let stack = try d.loras.map { entry -> LoRASlot in
-            guard let f = b.lora(entry.name, for: model.identifier) ?? b.lora(absolute(entry.name, cwd), for: model.identifier) else {
+            // A preset resolves to the workflow's own card: the library may hold its LoRA twice
+            // under one `nom`, and a name alone then designates neither.
+            let preset = PatchLoRA.allCases.first { $0.fileName == entry.name }
+            let name = preset.flatMap { PatchLoRA.card(for: $0, in: b.loras(for: model.identifier)) }?.path
+                ?? entry.name
+            guard let f = b.lora(name, for: model.identifier) ?? b.lora(absolute(name, cwd), for: model.identifier) else {
                 let compatible = b.loras(for: model.identifier).map { Self.shortName($0.path) }
                 let name = entry.name, id = model.identifier, list = compatible.joined(separator: ", ")
                 throw Refusal("lora", String(localized: "LoRA \"\(name)\" not found for \(id)"),

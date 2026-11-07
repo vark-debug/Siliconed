@@ -56,10 +56,20 @@ enum PatchLoRA: String, CaseIterable, Identifiable {
     static func presets(in loras: [LoRACard], for identifier: String) -> [PatchLoRAPreset] {
         guard identifier == workflow else { return [] }
         return allCases.compactMap { preset in
-            let wanted = key(preset.fileName)
-            let card = loras.first { key($0.rawName) == wanted || key(($0.path as NSString).lastPathComponent) == wanted }
-            return card.map { PatchLoRAPreset(lora: preset, card: $0) }
+            card(for: preset, in: loras).map { PatchLoRAPreset(lora: preset, card: $0) }
         }
+    }
+
+    /// **The card a preset stands for**, if installed. By name — but the library may hold one LoRA
+    /// twice under one `nom` (an import that kept both files): then the shorter path — the first
+    /// file over its suffixed copy — so a preset resolves to one card rather than to a name that
+    /// designates two.
+    static func card(for preset: PatchLoRA, in loras: [LoRACard]) -> LoRACard? {
+        let wanted = key(preset.fileName)
+        let matches = loras.filter {
+            key($0.rawName) == wanted || key(($0.path as NSString).lastPathComponent) == wanted
+        }
+        return matches.sorted { ($0.path.count, $0.path) < ($1.path.count, $1.path) }.first
     }
 
     /// `Qwen2.1 万物移除Remove GH`, `Qwen2.1_万物移除Remove_GH.lora.silicon`: the same key.

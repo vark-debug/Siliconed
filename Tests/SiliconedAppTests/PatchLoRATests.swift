@@ -53,6 +53,20 @@ final class PatchLoRATests: XCTestCase {
                        ["/tmp/qwen2-1-remove-gh.lora.silicon", "/tmp/qwen2-1-gh-v1-0.lora.silicon"])
     }
 
+    /// The library can hold one LoRA twice under one `nom` (an import that kept both files): the
+    /// preset still resolves to one card — the smaller path — where a bare name would designate two
+    /// and `Library.lora` would answer none.
+    func testAPresetResolvesPastADuplicatedName() {
+        let loras = [
+            card("Qwen2.1 一致性无偏移_GH_V1.0", name: "qwen2-1-gh-v1-0"),
+            card("Qwen2.1 一致性无偏移_GH_V1.0", name: "qwen2-1-gh-v1-0-2")
+        ]
+        XCTAssertEqual(PatchLoRA.card(for: .redraw, in: loras)?.path,
+                       "/tmp/qwen2-1-gh-v1-0.lora.silicon")
+        XCTAssertEqual(PatchLoRA.presets(in: loras, for: PatchLoRA.workflow).map(\.card.path),
+                       ["/tmp/qwen2-1-gh-v1-0.lora.silicon"])
+    }
+
     /// Another model's rack keeps its LoRA list as it was: these presets are the workflow's.
     func testAnotherModelGetsNoPresets() {
         let loras = [card("Qwen2.1_万物移除Remove_GH", name: "qwen2-1-remove-gh")]
