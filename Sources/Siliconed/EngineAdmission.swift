@@ -6,9 +6,10 @@ import Foundation
 /// each **resolved here once** — the render, its memory need and its `Context` all read this value, never the settings again.
 ///
 ///     refusals, in this order    empty prompt · steps outside 1…maximumSteps · img2img (encoder, strength) · references ·
-///                                the denoiser's own `check` · solver · detail · a strength that leaves no evaluation
+///                                an additive start (`Request.seededStart`) · the denoiser's own `check` · solver · detail ·
+///                                a strength that leaves no evaluation
 ///     then                       the plan (`DenoisingModule.plan`): a LoRA or a Detail turns the half-size start off, and so do
-///                                references (`DenoisingPlan.unreduced`: the plan cannot see them, the chain can)
+///                                references and an additive start (`DenoisingPlan.unreduced`: the plan cannot see them, the chain can)
 ///
 /// A request the model cannot render is refused for what it is, not for its memory: the preflight (`Preflight`) comes after.
 package struct Admission: Sendable {
@@ -16,9 +17,13 @@ package struct Admission: Sendable {
     /// The latent grid (`request` pixels over the space's factor).
     package let height: Int, width: Int
     package let steps: Int
-    /// The first step executed (0 in txt2img).
+    /// The first step executed (0 in txt2img, and 0 with an additive start: the crop is in the latent, not in the strength).
     package let start: Int
     package let plan: DenoisingPlan
+    /// **The additive start's σ₀** (`Request.seededStart`): the first node of the schedule the render walks — the request's
+    /// table when it gave one (whose first value need not be 1), the family's otherwise. `nil`: no additive start (`Latent.seeded`
+    /// is never called); the img2img path keeps reading `plan.startSigma`, untouched.
+    package let seededSigma: Float?
     /// **What the denoiser may compute on beyond fp32**: the switch asked (`Request.accelerators`), the Neural Engine where the plan
     /// offers it (`usesANE`); off, fp32 throughout.
     package let accelerators: Accelerators
@@ -66,6 +71,27 @@ package struct Admission: Sendable {
                                                  max: chain.encoding == nil ? 0 : denoising.maxReferences)
             }
         }
+        // **The additive start** (the « 移除、局部重绘 » workflow's crop) is its own path, judged here
+        // and refused for what it is: it is not img2img (no strength, start stays 0), and a model that
+        // reads no such start, a chain without an encoder to turn the crop into z₀, or an img2img image
+        // beside it (two start rules in one request) throws before any computation. Its σ₀ is the
+        // schedule's first node as the render will walk it — a custom table's first value may be below 1,
+        // and `z₀ + σ₀·ε` (`Latent.seeded`) is then the start as defined.
+        var seededSigma: Float?
+        if request.seededStart != nil {
+            guard request.image == nil else {
+                throw Request.Failure.seededStart("a request starts from one image at most: "
+                    + "an img2img image (its strength) or a seeded start (the workflow's crop), not both")
+            }
+            guard chain.encoding != nil else {
+                throw Request.Failure.seededStart("this chain has no image encoder to turn the crop into z₀")
+            }
+            guard denoising.acceptsSeededStart else {
+                throw Request.Failure.seededStart("\(denoising.model) starts from no additive latent "
+                    + "(Qwen-Image-2.1's patch workflow is the one)")
+            }
+            seededSigma = (request.sigmas ?? denoising.sigmas(steps: steps)).first
+        }
         if let σ = request.sigmas {
             try denoising.check(sigmas: σ, startImage: request.image != nil)
         } else {
@@ -77,11 +103,11 @@ package struct Admission: Sendable {
         guard request.detail == .normal || denoising.acceptsDetail else {
             throw Request.Failure.detail(model: denoising.model)
         }
-        // Detail, like a LoRA, turns Qwen-Image-2.1's spectral schedule off; an edit too.
+        // Detail, like a LoRA, turns Qwen-Image-2.1's spectral schedule off; an edit and an additive start too.
         let faster = request.fasterRendering
         var plan = denoising.plan(height: height, width: width, steps: steps, start: start,
                                   withLoRA: !request.loras.isEmpty || request.detail != .normal, faster: faster)
-        if !request.references.isEmpty { plan = plan.unreduced }
+        if !request.references.isEmpty || request.seededStart != nil { plan = plan.unreduced }
         guard plan.evaluations > 0 else {
             // The floor: the last start that keeps an evaluation, `d`, is reached as soon as
             // `N − N·s < d + 1`, i.e. `s > (N − d − 1)/N`.
@@ -93,6 +119,7 @@ package struct Admission: Sendable {
                                                 floor: Double(scheduled - last - 1) / Double(scheduled))
         }
         return Admission(space: space, height: height, width: width, steps: steps, start: start, plan: plan,
+                         seededSigma: seededSigma,
                          accelerators: Accelerators(requested: request.accelerators, usesANE: usesANE), fasterRendering: faster)
     }
 }

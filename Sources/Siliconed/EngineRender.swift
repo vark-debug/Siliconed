@@ -67,6 +67,10 @@ extension Engine {
         let admitted = try Admission.judge(request, chain: chain, usesANE: EngineSettings.effective.plan.usesANE)
         let (space, height, width, steps, start, plan) = (admitted.space, admitted.height, admitted.width, admitted.steps,
                                                            admitted.start, admitted.plan)
+        // The additive start's σ₀ (`Admission`, `Request.seededStart`): nil — and `Latent.seeded`
+        // never called — on every path that is not the workflow's; the img2img start keeps reading
+        // `plan.startSigma`, untouched.
+        let seededSigma = admitted.seededSigma
         // Installed, license, format, memory, no other render: the first that fails throws. The
         // lock is held until this function returns, the whole batch.
         // B, this Mac's budget (`MemoryBudget`): the preflight judges the floor against it, and the
@@ -115,6 +119,9 @@ extension Engine {
         context.detailScale = Detail.scale(width: request.width, height: request.height)
         context.solver = request.solver
         context.sigmas = request.sigmas
+        // The workflow's crop: the denoiser keeps its spectral schedule off (`Context.seededStart`),
+        // as for an edit — a half-size first evaluation would project z₀ onto another grid.
+        context.seededStart = request.seededStart != nil
         // The library's warnings become events for the duration of the render (and go to
         // `Warnings.outsideRender` without `onProgress`: a "✗ step 3: the VELOCITY carries …" is not lost),
         // and memory is returned to the system on exit — **including on a cancellation**: the
@@ -146,8 +153,8 @@ extension Engine {
             PhaseBoundary.mark("start")
             context.emit(.start(Plan(
                 denoising: plan, seeds: seeds,
-                stages: request.image != nil || !request.references.isEmpty ? [.text, .image, .denoising, .decoding]
-                                                                            : [.text, .denoising, .decoding])))
+                stages: request.image != nil || request.seededStart != nil || !request.references.isEmpty
+                    ? [.text, .image, .denoising, .decoding] : [.text, .denoising, .decoding])))
 
             // ── The references at the denoiser's size, once: a text stage that reads images and the
             //    image encoder below receive this same copy. ──
@@ -202,6 +209,25 @@ extension Engine {
                 PhaseBoundary.mark("image")
             }
 
+            // ── The additive start (the « 移除、局部重绘 » workflow's crop), once: the same encoder,
+            //    its latent kept **under** the noise (`Latent.seeded`, z₀ + σ₀·ε) rather than mixed
+            //    away by `Latent.start` at σ₀ = 1. Admission refuses it beside `image` and on a chain
+            //    without an encoder, so at most one of the two blocks runs. ──
+            var seeded: Latent? = nil
+            if let image = request.seededStart, let encoding = chain.encoding {
+                try context.check()
+                context.emit(.stage(.image, image: 0))
+                let seedingStart = Date()
+                // Fitted to the render's format, as img2img fits its image: z₀ then comes out at the
+                // noise's grid, and `Latent.seeded` says by name if a pipeline ever gives another.
+                seeded = try autoreleasepool {
+                    try encode(image.fitted(width: request.width, height: request.height), with: encoding, context: context)
+                }
+                context.timings.encoding = Date().timeIntervalSince(seedingStart)
+                context.emit(.encoding(seconds: context.timings.encoding))
+                PhaseBoundary.mark("image")
+            }
+
             // ── The references (editing), once: same encoder, each at its own size. ──
             var references: [Latent] = []
             if !prepared.isEmpty, let encoding = chain.encoding {
@@ -239,6 +265,12 @@ extension Engine {
                 var latent = Latent.noise(space, height: height, width: width, seed: seed,
                                           variations: request.variations)
                 if let z₀ { latent = Latent.start(image: z₀, noise: latent, sigma: plan.startSigma) }
+                // The workflow's start: z₀ + σ₀·ε (σ₀ the schedule's first node, which a custom table
+                // may put below 1). `nil` on every other path; refusal before any computation keeps
+                // `seeded` and `z₀` from ever meeting.
+                if let seeded, let seededSigma {
+                    latent = try Latent.seeded(image: seeded, noise: latent, sigma: seededSigma)
+                }
 
                 context.emit(.stage(.denoising, image: n))
                 let denoisingStart = Date()
@@ -284,7 +316,7 @@ extension Engine {
                                   steps: steps, loras: request.loras, loraSummary: stack?.summary, image: image,
                                   evaluations: plan.evaluations, spectral: plan.reduced,
                                   strength: request.image != nil ? request.strength : nil, startStep: plan.startStep,
-                                  startSigma: plan.startSigma,
+                                  startSigma: seededSigma ?? plan.startSigma,
                                   timings: context.timings, footprints: context.footprints, tokens: text.tokens,
                                   detail: request.detail, solver: request.solver,
                                   variations: request.variations.filter { $0.effectiveStrength > 0 },

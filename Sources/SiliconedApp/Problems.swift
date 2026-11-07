@@ -113,6 +113,8 @@ struct Problem: Equatable, Sendable {
             return String(localized: "This σ table is refused: \(reason).")
         case let .invalidReferenceResolution(reason):                // invalid_reference_resolution
             return String(localized: "This reference resolution is refused: \(reason).")
+        case let .invalidSeededStart(reason):                        // invalid_seeded_start
+            return String(localized: "This seeded start is refused: \(reason).")
         case let .tooManyReferences(count, max):                     // too_many_references
             return max == 0 ? String(localized: "This model doesn’t edit images.")
                 : String(localized: "\(count) images: this model reads \(max) at most.")
@@ -261,6 +263,8 @@ struct Problem: Equatable, Sendable {
             return String(localized: "Leave the σ table out (--steps 9 gives the workflow’s), or give the one this model walks.")
         case .invalidReferenceResolution:
             return String(localized: "Leave --ref-res out (1024), or choose 768 to 2560, a multiple of 32.")
+        case .invalidSeededStart:
+            return String(localized: "Hand the crop at the render’s format, or leave the seeded start out.")
         case .tooManyReferences(_, let max) where max == 0:
             return String(localized: "Choose a model that edits, like Qwen-Image-2.1.")
         case .tooManyReferences(_, let max):

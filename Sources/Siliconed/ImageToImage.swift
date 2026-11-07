@@ -323,4 +323,28 @@ extension Latent {
         for i in 0..<values.count { values[i] = sigma * ε.values[i] + complement * z₀.values[i] }
         return Latent(space: ε.space, height: ε.height, width: ε.width, values: values)
     }
+
+    /// **The « 移除、局部重绘 » workflow's starting latent**: `z₀ + σ_s · ε`, element by element, in
+    /// fp32 — what ComfyUI's `KSAMPLER` does with `noise_scaling = additive` (`x = latent + σ · noise`),
+    /// the crop's latent kept under the noise. ⚠️ **Not `start`**: diffusers' `σ_s · ε + (1 − σ_s) · z₀`
+    /// at σ_s = 1 is the noise alone, and the workflow starts at 1 — reusing it would throw the crop away.
+    /// At σ_s = 1 this is `z₀ + ε`; at σ_s = 0, `z₀` to the bit; any other σ_s (a custom table's first
+    /// node need not be 1) is the sum as written, never a rescaled mixture. Only a denoiser whose
+    /// `acceptsSeededStart` says so is handed one (`Request.seededStart`), and never beside `image`.
+    ///
+    /// **The grids must agree** (`z₀`'s is the render's): a mismatch is a request or a pipeline that
+    /// would denoise noise of another size, and it is said by name rather than left to a later shape
+    /// precondition. `z₀` is the VAE encoder's output for the crop fitted to the request's format
+    /// (`EngineRender`), so the same grid comes out as the noise's for any admitted format.
+    package static func seeded(image z₀: Latent, noise ε: Latent, sigma: Float) throws(EngineError) -> Latent {
+        guard z₀.space == ε.space, z₀.height == ε.height, z₀.width == ε.width,
+              z₀.values.count == ε.values.count else {
+            throw EngineError.invalidSeededStart(
+                reason: "the encoded crop is \(z₀.height)×\(z₀.width) latent cells of \(z₀.space), "
+                    + "the noise \(ε.height)×\(ε.width) of \(ε.space): they must be the render's grid")
+        }
+        var values = [Float](repeating: 0, count: ε.values.count)
+        for i in 0..<values.count { values[i] = z₀.values[i] + sigma * ε.values[i] }
+        return Latent(space: ε.space, height: ε.height, width: ε.width, values: values)
+    }
 }

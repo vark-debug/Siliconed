@@ -77,7 +77,8 @@ package final class Engine: Sendable {
         package let spectral: Int
         /// The img2img strength; `nil` in txt2img.
         package let strength: Double?
-        /// The first step executed and its σ (0 and 1 in txt2img).
+        /// The first step executed and its σ (0 and 1 in txt2img; 0 and the schedule's first node with a
+        /// seeded start, which is not img2img).
         package let startStep: Int
         package let startSigma: Float
         package let timings: Timings

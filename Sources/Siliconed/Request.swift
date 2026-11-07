@@ -77,6 +77,20 @@ package struct Request: Sendable, Equatable {
     package var image: ImageRGB? { didSet { fit() } }
     /// diffusers' `strength` (`Strength`), in `]0 ; 1]`. No effect without `image`.
     package var strength: Double
+    /// **The crop an additive start redraws** — the « 移除、局部重绘 » workflow's initial latent: the
+    /// chain's image encoder turns it into z₀, and the seed's noise is **added** to it at the schedule's
+    /// first σ (`Latent.seeded`: `z₀ + σ₀·ε`, a ComfyUI graph's `noise_scaling`) instead of
+    /// `Latent.start`'s `σ₀·ε + (1 − σ₀)·z₀`, which at σ₀ = 1 is pure noise. **Fitted to the render's
+    /// format when it is encoded** (like `image`), so z₀ must come out at the render's latent grid —
+    /// it does not, the render throws `invalidSeededStart`.
+    ///
+    /// `nil`: no additive start — txt2img, img2img (`image`) and an edit by references are untouched,
+    /// to the bit. Only a denoiser whose `acceptsSeededStart` says so reads it (Qwen-Image-2.1's Turbo);
+    /// every other family, and a request that also carries `image`, refuses it before any computation
+    /// (`Admission`). It always starts at step 0: `strength` has no effect on it. With a σ table
+    /// (`sigmas`), σ₀ is its first value — which need not be 1, and `z₀ + σ₀·ε` is then the start
+    /// as defined, not a rescaled one.
+    package var seededStart: ImageRGB? = nil
     /// **The editing reference images** ("change her jacket to red"): the denoiser re-reads them
     /// at each layer, and the generated image starts from noise — nothing to do with `image`,
     /// which is its starting point. Each keeps **its own** aspect ratio, at the size the denoiser
@@ -152,6 +166,9 @@ package struct Request: Sendable, Equatable {
         case noCustomSchedule(model: String)
         /// A reference resolution outside the pipeline's bounds (`admit(referenceResolution:)`): what is wrong with it.
         case referenceResolution(String)
+        /// **An additive start the model, or the request, cannot take** (`seededStart`): `why` says
+        /// which — a denoiser without one, an img2img image beside it, or an encoded crop off the grid.
+        case seededStart(String)
         package var description: String {
             switch self {
             case let .references(n, max) where max == 0:
@@ -170,6 +187,8 @@ package struct Request: Sendable, Equatable {
                 return "\(model) walks the schedule of its artifact: it takes no σ table"
             case .referenceResolution(let why):
                 return "the reference resolution is refused: \(why)"
+            case .seededStart(let why):
+                return "the seeded start is refused: \(why)"
             }
         }
     }

@@ -119,6 +119,10 @@ package struct QwenImage21DenoisingModule: DenoisingModule {
 
     /// Its pipeline has no img2img: the image encoder serves the references only.
     package var acceptsStartImage: Bool { false }
+    /// **The « 移除、局部重绘 » workflow's crop** (`Request.seededStart`): the one start this pipeline
+    /// takes, with `Latent.seeded` (the crop's latent **added** to the noise, as its ComfyUI graph's
+    /// `noise_scaling`) — not `acceptsStartImage`, which stays false.
+    package var acceptsSeededStart: Bool { true }
     /// Every `Solver`: its sampler walks them all (`SolverWalk`), Euler in its own loop.
     package var solvers: [Solver] { Solver.allCases }
 
@@ -165,8 +169,9 @@ package struct QwenImage21DenoisingModule: DenoisingModule {
         sampler.solver = context.solver
         sampler.solverSeed = context.solverSeed
         let (height, width) = (latent.height, latent.width)
-        // Detail, like a LoRA, turns it off (`plan`), and so does another schedule; an edit has none.
-        let reduced = references.isEmpty
+        // Detail, like a LoRA, turns it off (`plan`), and so does another schedule; an edit has none,
+        // and neither does an additive start (its first evaluation must see the crop's own grid).
+        let reduced = references.isEmpty && !context.seededStart
             ? plan(height: height, width: width, steps: steps, start: start,
                    withLoRA: lora != nil || context.detail != .normal,
                            faster: context.fasterRendering).reduced : 0

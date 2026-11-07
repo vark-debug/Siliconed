@@ -100,6 +100,56 @@ final class Img2ImgTests: XCTestCase {
         for i in 0..<32 { XCTAssertEqual(milieu[i], 0.5 * ε.values[i] + 0.5 * 0.25, accuracy: 1e-7) }
     }
 
+    /// **The additive start, `z₀ + σ·ε`** — the workflow's `noise_scaling`, not `start`'s mixture: at
+    /// σ = 1 it keeps the crop under the noise (where `start` would return the noise alone), at σ = 0
+    /// it is the crop bit for bit, and in between each element is the sum as written (fp32).
+    func testTheSeededStartAddsTheNoiseInsteadOfMixingIt() throws {
+        let z₀ = Latent(space: .flux, height: 1, width: 2, values: (0..<32).map { Float($0) / 32 })
+        let ε = Latent.noise(.flux, height: 1, width: 2, seed: 42)
+        let atOne = try Latent.seeded(image: z₀, noise: ε, sigma: 1)
+        XCTAssertEqual(atOne.values.map(\.bitPattern),
+                       zip(z₀.values, ε.values).map { $0.0 + $0.1 }.map(\.bitPattern))
+        XCTAssertNotEqual(atOne.values, ε.values, "at σ = 1, `start` is the noise alone: the crop would be gone")
+        XCTAssertNotEqual(atOne.values, z₀.values)
+        let atZero = try Latent.seeded(image: z₀, noise: ε, sigma: 0)
+        XCTAssertEqual(atZero.values.map(\.bitPattern), z₀.values.map(\.bitPattern))
+        let atSixty = try Latent.seeded(image: z₀, noise: ε, sigma: 0.6)
+        for i in 0..<32 { XCTAssertEqual(atSixty.values[i], z₀.values[i] + 0.6 * ε.values[i]) }
+        // The two starts differ at σ = 1 — the reason the crop cannot reuse `Latent.start`:
+        XCTAssertEqual(Latent.start(image: z₀, noise: ε, sigma: 1).values.map(\.bitPattern),
+                       ε.values.map(\.bitPattern))
+        XCTAssertNotEqual(atOne.values, Latent.start(image: z₀, noise: ε, sigma: 1).values)
+    }
+
+    /// **The additive start's grids must agree**: an encoded crop of another size (or space) than the
+    /// noise is refused by name, with both sizes, rather than left to a later shape precondition.
+    func testTheSeededStartRefusesAnotherGrid() {
+        let crop = Latent(space: .flux, height: 2, width: 2, values: [Float](repeating: 0.25, count: 64))
+        let noise = Latent.noise(.flux, height: 1, width: 2, seed: 7)
+        XCTAssertThrowsError(try Latent.seeded(image: crop, noise: noise, sigma: 1)) {
+            guard let error = $0 as? EngineError, case let .invalidSeededStart(reason) = error else {
+                return XCTFail("\($0)")
+            }
+            XCTAssertTrue(reason.contains("2×2") && reason.contains("1×2"), reason)
+        }
+        let otherSpace = Latent(space: .qwenImage, height: 1, width: 2, values: [Float](repeating: 0, count: 32))
+        XCTAssertThrowsError(try Latent.seeded(image: otherSpace, noise: noise, sigma: 1))
+    }
+
+    /// **The img2img path is untouched** (C3): `Latent.start` still computes `σ·ε + (1 − σ)·z₀` to
+    /// the bit, at every σ, including the σ = 1 that has to stay pure noise for txt2img. The additive
+    /// start lives beside it, never in it.
+    func testTheImg2ImgStartIsUnchangedToTheBit() {
+        let z₀ = Latent(space: .flux, height: 1, width: 2,
+                        values: (0..<32).map { Float($0) / 64 - 0.25 })
+        let ε = Latent.noise(.flux, height: 1, width: 2, seed: 99)
+        for σ: Float in [0, 0.1, 0.25, 0.5, 0.6, 0.8333333, 1] {
+            let expected = zip(ε.values, z₀.values).map { σ * $0.0 + (1 - σ) * $0.1 }
+            XCTAssertEqual(Latent.start(image: z₀, noise: ε, sigma: σ).values.map(\.bitPattern),
+                           expected.map(\.bitPattern), "σ = \(σ)")
+        }
+    }
+
     /// **Fill, then crop at the center**: the proportions are kept, the format is covered.
     func testCenteredCropKeepsProportions() {
         let landscape = ImageRGB.crop(source: (1000, 500), target: (512, 512))

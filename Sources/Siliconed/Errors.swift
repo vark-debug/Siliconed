@@ -74,6 +74,10 @@ package enum EngineError: Error, Equatable, Sendable, Codable, LocalizedError, C
     /// A σ table the request supplied (`Request.sigmas`) that the engine, or the model, does not walk.
     /// `reason` says what is wrong with it.
     case invalidSchedule(reason: String)
+    /// **An additive start the engine cannot take** (`Request.seededStart`): a denoiser that reads
+    /// none, an img2img image beside it, or an encoded crop whose latent grid is not the render's.
+    /// `reason` says which.
+    case invalidSeededStart(reason: String)
     /// A reference resolution outside the bounds the references are prepared at (`Request.referenceResolution`).
     /// `reason` says what is wrong with it.
     case invalidReferenceResolution(reason: String)
@@ -249,6 +253,7 @@ package enum EngineError: Error, Equatable, Sendable, Codable, LocalizedError, C
         case .emptyPrompt: return "empty_prompt"
         case .invalidSteps: return "invalid_steps"
         case .invalidSchedule: return "invalid_schedule"
+        case .invalidSeededStart: return "invalid_seeded_start"
         case .invalidReferenceResolution: return "invalid_reference_resolution"
         case .tooManyReferences: return "too_many_references"
         case .imageTooSmall: return "image_too_small"
@@ -325,6 +330,8 @@ package enum EngineError: Error, Equatable, Sendable, Codable, LocalizedError, C
                 : "This model does not render in \(steps) steps."
         case let .invalidSchedule(reason):
             return "The σ table is refused: \(reason)."
+        case let .invalidSeededStart(reason):
+            return "The seeded start is refused: \(reason)."
         case let .invalidReferenceResolution(reason):
             return "The reference resolution is refused: \(reason)."
         case let .tooManyReferences(count, max):
@@ -431,6 +438,8 @@ package enum EngineError: Error, Equatable, Sendable, Codable, LocalizedError, C
         case .invalidSteps: return "Leave the number of steps at the model's default."
         case .invalidSchedule:
             return "Leave the σ table out, or give the one this model walks (Qwen-Image-2.1-Turbo: its published 8 or the workflow's 9 steps)."
+        case .invalidSeededStart:
+            return "Leave the seeded start out, or hand the crop at the render's format (Qwen-Image-2.1's patch workflow)."
         case .invalidReferenceResolution:
             return "Leave the reference resolution out (1024), or choose 768 to 2560, a multiple of 32."
         case .tooManyReferences(_, let max) where max == 0:
@@ -504,6 +513,7 @@ package enum EngineError: Error, Equatable, Sendable, Codable, LocalizedError, C
             // A reference resolution outside Qwen-Image-2.1's 768…2560 (a multiple of 32): its own
             // case (`invalidReferenceResolution`), named above and keyed `"invalid_reference_resolution"`.
             case .referenceResolution(let why): self = .invalidReferenceResolution(reason: why)
+            case .seededStart(let why): self = .invalidSeededStart(reason: why)
             case .noCustomSchedule(let model):
                 self = .invalidSchedule(reason: "\(model) walks the schedule of its artifact and takes no σ table")
             }
@@ -621,6 +631,9 @@ package enum EngineError: Error, Equatable, Sendable, Codable, LocalizedError, C
         .insufficientMemory(needed: 7_800_000_000, budget: 8_589_934_592), .memoryNeedUnknown(model: "z-image"),
         .renderAlreadyRunning, .cancelled, .nonFiniteImage,
         .settingsAlreadyLoaded(loaded: "/a", requested: "/b"), .internalFailure(component: "gpu", detail: "no Metal device"),
+        .invalidSchedule(reason: "a σ table that does not strictly decrease"),
+        .invalidReferenceResolution(reason: "1000 px is not a multiple of 32"),
+        .invalidSeededStart(reason: "the encoded crop is 24×32 latent cells, the noise 32×32"),
     ]
 }
 

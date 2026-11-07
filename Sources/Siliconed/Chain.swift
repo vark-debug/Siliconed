@@ -187,6 +187,11 @@ package final class Context {
     /// this instead of its artifact's schedule when it is not `nil`. Only a denoiser whose `check(sigmas:startImage:)` accepts
     /// one ever sees it (Qwen-Image-2.1's Turbo) — `Admission` has refused the others.
     package var sigmas: [Float]?
+    /// **The render starts from an encoded crop, its latent added to the noise** (`Request.seededStart`,
+    /// `Latent.seeded`): set once by the engine. A denoiser whose half-size start would project that
+    /// crop onto another grid turns the spectral schedule off (`QwenImage21DenoisingModule.denoise`),
+    /// as it does for an edit.
+    package var seededStart = false
     /// The render's token; the modules pass it to their DiTs and encoders (between layers).
     package let cancellation: Cancellation?
     /// Compute each step's preview (`Request.previews`).
@@ -336,6 +341,12 @@ package protocol DenoisingModule: Sendable {
     /// Whether the denoiser starts from an encoded image (img2img). By default yes; a pipeline
     /// without img2img (Qwen-Image-2.1) says no, and the chain then offers no image entry.
     var acceptsStartImage: Bool { get }
+    /// **Whether the denoiser starts from a crop whose latent is added to the noise**
+    /// (`Request.seededStart`, `Latent.seeded`: `z₀ + σ₀·ε`, a ComfyUI graph's `noise_scaling`). By
+    /// default no: a model's img2img is diffusers' `Latent.start` (`acceptsStartImage`), whose
+    /// `σ₀·ε + (1 − σ₀)·z₀` at σ₀ = 1 forgets the image. A separate switch, so that Qwen-Image-2.1's
+    /// Turbo may take the « 移除、局部重绘 » workflow's crop while still refusing an img2img image.
+    var acceptsSeededStart: Bool { get }
     /// The update rules its sampler walks (`Solver`). By default Euler alone: the chain refuses
     /// another before any computation rather than render Euler under another name.
     var solvers: [Solver] { get }
@@ -391,6 +402,9 @@ package extension DenoisingModule {
         throw Request.Failure.noCustomSchedule(model: model)
     }
     var acceptsStartImage: Bool { true }
+    /// No model starts from an additive latent unless it says so: the switch is Qwen-Image-2.1's
+    /// workflow path alone (`QwenImage21DenoisingModule.acceptsSeededStart`).
+    var acceptsSeededStart: Bool { false }
     var solvers: [Solver] { [.euler] }
     var acceptsDetail: Bool { true }
 }

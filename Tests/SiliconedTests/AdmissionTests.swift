@@ -143,4 +143,53 @@ final class AdmissionTests: XCTestCase {
             XCTAssertEqual($0 as? Request.Failure, .noCustomSchedule(model: zImage.denoising.model))
         }
     }
+
+    /// **C3**: the additive start (the workflow's crop) is judged with the request, before any
+    /// computation. Qwen-Image-2.1 admits it — with its published 8 σ, the workflow's 9, or a custom
+    /// table — and never halves its first evaluation; its σ₀ is the first node of the schedule the
+    /// render walks, so a table that starts below 1 starts at that value. Z-Image, whose img2img is
+    /// `Latent.start` (`acceptsStartImage`), refuses it, and so does a request that carries both starts.
+    /// Without a seeded start the img2img path is what it was: `seededSigma` nil, the strength's start.
+    func testTheSeededStartIsJudgedBeforeAnyComputation() throws {
+        let crop = ImageRGB(pixels: [Float](repeating: 0.5, count: 3 * 64 * 64), height: 64, width: 64)
+        var seeded = Request("x", resolution: 512)
+        seeded.seededStart = crop
+        let a = try Admission.judge(seeded, chain: qwen, usesANE: false)
+        XCTAssertEqual(a.start, 0, "not img2img: the strength plays no part")
+        XCTAssertEqual(a.seededSigma, 1)
+        seeded.steps = 9
+        XCTAssertEqual(try Admission.judge(seeded, chain: qwen, usesANE: false).seededSigma, 1)
+        seeded.sigmas = QwenImage21Pipeline.manualSigmas
+        seeded.steps = nil
+        XCTAssertEqual(try Admission.judge(seeded, chain: qwen, usesANE: false).seededSigma, 1)
+        seeded.sigmas = [0.9, 0.6, 0.3, 0]
+        let custom = try Admission.judge(seeded, chain: qwen, usesANE: false)
+        XCTAssertEqual(custom.steps, 3)
+        XCTAssertEqual(custom.seededSigma, 0.9, "σ₀ is the table's first node, never assumed to be 1")
+        // A half-size first evaluation would project the crop onto another grid: off, as for an edit.
+        var big = Request("x", resolution: 2048); big.fasterRendering = true
+        XCTAssertGreaterThan(try Admission.judge(big, chain: qwen, usesANE: false).plan.reduced, 0)
+        big.seededStart = crop
+        XCTAssertEqual(try Admission.judge(big, chain: qwen, usesANE: false).plan.reduced, 0)
+        // A model whose img2img is `Latent.start`: refused — and so is a request with both starts.
+        var onZImage = Request("x", resolution: 512); onZImage.seededStart = crop
+        XCTAssertThrowsError(try judge(onZImage)) {
+            guard let failure = $0 as? Request.Failure, case let .seededStart(why) = failure else {
+                return XCTFail("\($0)")
+            }
+            XCTAssertTrue(why.contains(zImage.denoising.model), why)
+        }
+        var both = Request("x", resolution: 512); both.image = crop; both.seededStart = crop
+        XCTAssertThrowsError(try Admission.judge(both, chain: qwen, usesANE: false)) {
+            guard let failure = $0 as? Request.Failure, case let .seededStart(why) = failure else {
+                return XCTFail("\($0)")
+            }
+            XCTAssertTrue(why.contains("one image at most"), why)
+        }
+        // The img2img path, unchanged: no seeded sigma, the strength's own start.
+        var img2img = Request("x", resolution: 512); img2img.image = crop
+        let plain = try judge(img2img)
+        XCTAssertNil(plain.seededSigma)
+        XCTAssertEqual(plain.start, Strength.startStep(steps: plain.steps, strength: img2img.strength))
+    }
 }
