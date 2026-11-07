@@ -107,6 +107,11 @@ package struct Request: Sendable, Equatable {
     /// same pixels as a reference alone removed it (the crop's detail energy 10.95 → 21.76, near the
     /// original's 22.58). Refused without `patch`: there is no crop to start from.
     package var patchSeededStart = false
+    /// **The crop kept alone** (`--crop-only`): false — the workflow's `GH_CropRestore` — lays the
+    /// decoded crop back at its place in the original (`Patch.composited`), so the image delivered is
+    /// the original's size; true returns the crop itself, at the plan's size, to compare the two.
+    /// Refused without `patch`: there is no crop to keep.
+    package var patchCropOnly = false
     /// **The editing reference images** ("change her jacket to red"): the denoiser re-reads them
     /// at each layer, and the generated image starts from noise — nothing to do with `image`,
     /// which is its starting point. Each keeps **its own** aspect ratio, at the size the denoiser

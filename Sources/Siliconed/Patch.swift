@@ -129,10 +129,15 @@ package struct Patch: Sendable, Equatable {
         /// **The crop as z₀, opt-in** (`Request.patchSeededStart`, `--seeded-start`): false — the
         /// default — renders the crop as image 1 alone and starts from noise.
         package var seededStart: Bool
+        /// **The crop laid back over the original** (`Request.patchCropOnly`, `--crop-only`): true — the
+        /// workflow's `GH_CropRestore`, the render at the **original's size**; false keeps the crop alone,
+        /// at the plan's size, for comparison. A redo keeps this (`RenderSettings.patch`).
+        package var paste: Bool
 
         package init(expansion: Expansion = Expansion(), maximumSide: Int = Patch.maximumSide,
-                     seededStart: Bool = false) {
-            self.expansion = expansion; self.maximumSide = maximumSide; self.seededStart = seededStart
+                     seededStart: Bool = false, paste: Bool = true) {
+            self.expansion = expansion; self.maximumSide = maximumSide
+            self.seededStart = seededStart; self.paste = paste
         }
     }
 

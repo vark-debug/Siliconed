@@ -408,6 +408,9 @@ extension AppState {
             // The crop as z₀ only when the entry asked for it (`--seeded-start`): the default render
             // starts from noise, the crop being image 1 alone (`Request.patchSeededStart`).
             request.patchSeededStart = settings.patch?.seededStart ?? false
+            // The crop returns to its place unless the entry asked for the crop alone (`--crop-only`):
+            // the redo reads `settings.patch` too, so a paste is never lost on a redraw.
+            request.patchCropOnly = settings.patch.map { !$0.paste } ?? false
             request.references = references
             request.referenceResolution = settings.referenceResolution
             request.detail = settings.detail

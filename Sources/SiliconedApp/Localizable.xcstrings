@@ -4553,6 +4553,46 @@
     },
     "--ref and --mask don’t go together: the patch’s crop is the edit’s only image" : {},
     "--ref-res 1024 (the default) or 1536 — silicontrol help add" : {},
+    "--crop-only goes with --mask: there is no crop to keep" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--crop-only gehört zu --mask: es gibt keinen Ausschnitt zum Behalten"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--crop-only va con --mask: no hay recorte que conservar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--crop-only va avec --mask : il n’y a pas de découpe à garder"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--crop-only va con --mask: non c’è un ritaglio da conservare"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--crop-only は --mask と一緒に使います。残す切り出しがありません"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--crop-only 需与 --mask 一起使用：没有可保留的裁剪区域"
+          }
+        }
+      }
+    },
     "--ref-res goes with --ref or --mask" : {},
     "--seeded-start goes with --mask: the patch’s crop is the start" : {
       "localizations" : {

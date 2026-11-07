@@ -342,8 +342,16 @@ extension Engine {
                 // as such, rather than handed to the history as a success. In a batch it is skipped, not
                 // the batch: the images after it are still decoded and delivered.
                 guard FiniteImage.isFinite(latent.values, "the final latent", image: n) else { refused = true; continue }
-                let image = try autoreleasepool { try chain.decoding.decode(latent, context: context) }
-                guard FiniteImage.isFinite(image.pixels, "the decoded image", image: n) else { refused = true; continue }
+                let decoded = try autoreleasepool { try chain.decoding.decode(latent, context: context) }
+                guard FiniteImage.isFinite(decoded.pixels, "the decoded image", image: n) else { refused = true; continue }
+                // **The crop returns to its place** (`Patch.composited`, the workflow's
+                // `GH_CropRestore`): scaled back to the crop's pixels, feathered, colour-matched, and
+                // laid over a copy of the original — the image delivered is the original's size.
+                // `--crop-only` keeps the decoded crop, at the plan's size, to compare the two.
+                let image = !request.patchCropOnly
+                    ? patchPlan.flatMap { plan in request.patch.map { $0.composited(decoded, plan: plan) } } ?? decoded
+                    : decoded
+                guard FiniteImage.isFinite(image.pixels, "the image", image: n) else { refused = true; continue }
                 // An image's time: its own text, encoding and denoising, then its decoding.
                 context.timings.total = elapsed + context.timings.decoding
                 context.footprints.end = Arena.processFootprint()

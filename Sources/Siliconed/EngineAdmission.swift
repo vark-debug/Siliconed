@@ -70,6 +70,11 @@ package struct Admission: Sendable {
             throw Request.Failure.seededStart("a seeded start adds the noise to a patch's crop: "
                 + "--seeded-start goes with --mask, and without one the render starts from noise alone")
         }
+        // `--crop-only` keeps a crop alone; without a patch there is no crop to keep.
+        if request.patchCropOnly, request.patch == nil {
+            throw EngineError.invalidPatch(reason: "--crop-only keeps a patch's crop alone: it goes with --mask, "
+                + "and without one there is no crop to keep")
+        }
         if let patch = request.patch {
             guard request.image == nil else {
                 throw EngineError.invalidPatch(reason: "an img2img image (its strength) and a patch (its mask) start two ways: choose one")

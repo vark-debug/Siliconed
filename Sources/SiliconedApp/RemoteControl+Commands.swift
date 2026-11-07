@@ -149,6 +149,9 @@ extension RemoteControl {
         /// `--seeded-start`: the crop is also the render's start (`Request.patchSeededStart`), instead
         /// of the default noise-only start; refused without `--mask`.
         var seededStart = false
+        /// `--crop-only`: the crop alone (`Request.patchCropOnly`), instead of the default where it is
+        /// laid back over the original at the original's size; refused without `--mask`.
+        var cropOnly = false
         /// `nil`: like the app's « Preview at every step » switch.
         var previews: Bool?
         var wait = false

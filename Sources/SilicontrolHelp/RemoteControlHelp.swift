@@ -449,6 +449,10 @@ package enum RemoteControlHelp {
                               green, and that crop is the text encoder's image 1: the prompt says
                               what replaces the region. THE RENDER STARTS FROM NOISE, the crop being
                               a reference alone; --seeded-start also makes it the start.
+                              BY DEFAULT THE CROP IS PASTED BACK, as the workflow's GH_CropRestore
+                              does: scaled to its place with Lanczos, feathered (4 % and 5 % of the
+                              mask's box), colour-matched, and laid over a copy of the original —
+                              the PNG is THE ORIGINAL'S SIZE. --crop-only keeps the crop alone.
                               The crop decides the format (leave it out), so --ref, --strength,
                               a typed format and grid are refused, said. Qwen-Image-2.1 only.
                               A mask of another size, or one with fewer than 10 pixels of region,
@@ -457,6 +461,9 @@ package enum RemoteControlHelp {
                               z₀ + √2·ε (ComfyUI's max_denoise noise), as the workflow's encoded
                               primary latent is. Default: off — noise only, the crop as image 1.
                               Without --mask there is no crop to start from: refused, said.
+          --crop-only        with --mask: the crop alone, at the plan's size, instead of the default
+                              paste — the original's size, the crop at its place. Default: off.
+                              For comparing the paste with the raw crop. Without --mask: refused.
           --expand T,B,L,R    with --mask: the crop's margins, multipliers of the mask's shortest
                               side (1.3: 0.3 × that side above; 1.4: 0.4 below, left, right).
                               Default: 1.3,1.4,1.4,1.4 (the workflow's).
@@ -1796,7 +1803,12 @@ package enum RemoteControlHelp {
                               en vert, et cette découpe est l'image 1 de l'encodeur de texte : le
                               prompt dit ce qui remplace la région. LE RENDU PART DU BRUIT, la
                               découpe n'étant qu'une référence ; --seeded-start en fait aussi le
-                              départ. La découpe décide du format (ne pas le donner), donc --ref,
+                              départ.
+                              PAR DÉFAUT LA DÉCOUPE EST REPOSÉE, comme le GH_CropRestore du
+                              workflow : ramenée à sa place au Lanczos, fondue (4 % et 5 % de la
+                              boîte du masque), recolorée, puis posée sur une copie de l'original —
+                              le PNG EST À LA TAILLE DE L'ORIGINAL. --crop-only garde la découpe.
+                              La découpe décide du format (ne pas le donner), donc --ref,
                               --strength, un format tapé et grid sont refusés, dit. Qwen-Image-2.1
                               seulement. Un masque d'une autre taille, ou de moins de 10 pixels de
                               région, est refusé (erreur "patch", invalid_patch) — pas peint
@@ -1806,6 +1818,10 @@ package enum RemoteControlHelp {
                               latent primaire encodé du workflow. Défaut : désactivé — bruit seul,
                               et la découpe n'est que l'image 1. Sans --mask, il n'y a pas de
                               découpe dont partir : refusé, dit.
+          --crop-only        avec --mask : la découpe seule, à la taille du plan, au lieu de la
+                              pose par défaut — la taille de l'original, la découpe à sa place.
+                              Défaut : désactivé. Pour comparer la pose et la découpe brute.
+                              Sans --mask : refusé, dit.
           --expand T,B,L,R    avec --mask : les marges de la découpe, multiplicateurs du côté le
                               plus court du masque (1.3 : 0.3 × ce côté au-dessus ; 1.4 : 0.4 en
                               dessous, à gauche, à droite). Défaut : 1.3,1.4,1.4,1.4 (celui du
