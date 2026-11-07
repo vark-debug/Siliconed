@@ -149,9 +149,19 @@ extension RemoteControl {
         /// `--seeded-start`: the crop is also the render's start (`Request.patchSeededStart`), instead
         /// of the default noise-only start; refused without `--mask`.
         var seededStart = false
-        /// `--crop-only`: the crop alone (`Request.patchCropOnly`), instead of the default where it is
-        /// laid back over the original at the original's size; refused without `--mask`.
-        var cropOnly = false
+        /// **`--mode remove|redraw`**: the patch's branch (`Patch.Settings.mode`); presets imply it
+        /// when left out, and `.remove` is the default. Refused without `--mask`.
+        var mode: Patch.Mode?
+        /// The presets `--lora remove` / `--lora redraw` named, in order: they imply `mode`, and
+        /// with `--mask` they must agree with it.
+        var presets: [PatchLoRA] = []
+        /// **`--paste` / `--no-paste`** (`--crop-only`, its other spelling): false — the crop alone
+        /// (`Request.patchCropOnly`), instead of the default where it is laid back over the original
+        /// at the original's size; refused without `--mask`.
+        var paste = true
+        /// The value an explicit `--paste` / `--no-paste` / `--crop-only` gave: two spellings that
+        /// disagree are refused rather than one winning.
+        var pasteGiven: Bool?
         /// `--noise-mask` / `--no-noise-mask`: the workflow's `noise_mask` (`Request.patchNoiseMask`),
         /// **on by default** — outside the mask every step keeps the crop's own latent. `nil`: the
         /// default; an explicit switch without `--mask` is refused.

@@ -51,6 +51,7 @@ The tour of the app: [docs/APP.md](docs/APP.md).
 - [docs/ENGINE.md](docs/ENGINE.md): the engine: measuring the Mac, the Neural Engine, numbers, Faster Rendering, Draw Things, memory, the community diagnostic, verification, building from source.
 - [docs/VERIFY.md](docs/VERIFY.md): checking the results against the reference on your Mac.
 - [docs/REMOTE-CONTROL.md](docs/REMOTE-CONTROL.md): `silicontrol`, protocol and internals.
+- [docs/MASK-WORKFLOW.md](docs/MASK-WORKFLOW.md): the mask workflow (mask → crop → paste) from the command line: `--mode`, `--paste`, the two LoRA presets, limits and error codes.
 - [docs/RELEASE-NOTES.md](docs/RELEASE-NOTES.md): what changed in each version.
 - Issues: [diagnostic report, bug, idea](https://github.com/gwenn-ha-dev/Siliconed/issues/new/choose).
 

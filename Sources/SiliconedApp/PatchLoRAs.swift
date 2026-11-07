@@ -33,6 +33,23 @@ enum PatchLoRA: String, CaseIterable, Identifiable {
         }
     }
 
+    /// **The branch this preset carries** (`Patch.Mode`): the remove LoRA goes with the tinted crop,
+    /// the redraw LoRA with the untouched one.
+    var mode: Patch.Mode {
+        switch self {
+        case .remove: return .remove
+        case .redraw: return .redraw
+        }
+    }
+
+    /// The preset a branch carries.
+    static func preset(for mode: Patch.Mode) -> PatchLoRA {
+        switch mode {
+        case .remove: return .remove
+        case .redraw: return .redraw
+        }
+    }
+
     /// The rack's « Add » entry: the preset, with the strength it pins.
     var title: String {
         switch self {

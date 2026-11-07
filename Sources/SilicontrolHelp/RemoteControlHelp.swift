@@ -390,6 +390,8 @@ package enum RemoteControlHelp {
                               Negative LoRA Strengths on in the app's Settings.
                               Qwen-Image-2.1 also takes two presets, at the workflow's own
                               strength: remove (1) and redraw (0.48). A preset names no strength.
+                              With --mask a preset also picks the branch (--mode); without it,
+                              the preset is only that LoRA.
           --steps N           number of steps, 1 to 50. Default: the model's "default_steps". A
                               model may have a schedule for some counts only (Qwen-Image-2.1: 8,
                               and 9 — a ComfyUI graph's ManualSigmas: the published eight, then
@@ -447,18 +449,31 @@ package enum RemoteControlHelp {
                               Default: the model's. Jobs and images say "strength" and "start_image".
           --mask IMAGE|i7     the 「remove」 path (局部重绘): --image is the image to edit, --mask
                               the region to replace — white on black, or the bitmap's alpha — of
-                              the image's size. The mask is filled, cropped with a margin, tinted
-                              green, and that crop is the text encoder's image 1: the prompt says
-                              what replaces the region. THE RENDER STARTS FROM NOISE, the crop being
-                              a reference alone; --seeded-start also makes it the start.
+                              the image's size. The mask is filled, cropped with a margin, and that
+                              crop is the text encoder's image 1: the prompt says what replaces
+                              the region. --mode remove (the default) tints the crop green; --mode
+                              redraw hands it over untouched, and the prompt says what it becomes.
+                              THE RENDER STARTS FROM NOISE, the crop being a reference alone;
+                              --seeded-start also makes it the start.
                               BY DEFAULT THE CROP IS PASTED BACK, as the workflow's GH_CropRestore
                               does: scaled to its place with Lanczos, feathered (4 % and 5 % of the
                               mask's box), colour-matched, and laid over a copy of the original —
-                              the PNG is THE ORIGINAL'S SIZE. --crop-only keeps the crop alone.
+                              the PNG is THE ORIGINAL'S SIZE. --no-paste (--crop-only) keeps the
+                              crop alone.
                               The crop decides the format (leave it out), so --ref, --strength,
                               a typed format and grid are refused, said. Qwen-Image-2.1 only.
                               A mask of another size, or one with fewer than 10 pixels of region,
                               is refused (error "patch", invalid_patch) — not painted over.
+          --mode remove|redraw
+                              with --mask: the workflow's branch. remove — the default — paints the
+                              mask #00FF00 at 0.4 and wires --lora remove (1); redraw — no paint,
+                              the crop as the model's image 1 — wires --lora redraw (0.48). The
+                              crop, --expand, --max-side, --noise-mask and --seeded-start are the
+                              same either way. --lora remove / --lora redraw imply the mode; with
+                              --mode they must agree, a contradiction is refused (error "mode"),
+                              and the two presets exclude each other. The branch's preset is wired
+                              even when --lora names none; naming the same LoRA twice — a preset
+                              and a manual name — is refused. Without --mask: refused.
           --seeded-start     with --mask: the crop is also the render's start — the additive latent
                               z₀ + √2·ε (ComfyUI's max_denoise noise), as the workflow's encoded
                               primary latent is. Default: off — noise only, the crop as image 1.
@@ -466,6 +481,13 @@ package enum RemoteControlHelp {
           --crop-only        with --mask: the crop alone, at the plan's size, instead of the default
                               paste — the original's size, the crop at its place. Default: off.
                               For comparing the paste with the raw crop. Without --mask: refused.
+                              The same switch as --no-paste: two spellings, kept because the first
+                              one is what scripts already pass.
+          --paste, --no-paste
+                              with --mask: whether the crop is laid back over the original. --paste
+                              — the default — pastes; --no-paste (= --crop-only) keeps the crop.
+                              Two spellings that disagree (--paste and --no-paste, say) are refused.
+                              Without --mask: refused.
           --noise-mask, --no-noise-mask
                               with --mask: ComfyUI's noise_mask, as KSamplerX0Inpaint takes it —
                               at every step the estimate outside the mask is the crop's own latent
@@ -1753,6 +1775,8 @@ package enum RemoteControlHelp {
                               > 1 appuie.
                               Qwen-Image-2.1 accepte aussi deux préréglages, à la force du
                               workflow\u{00A0}: remove (1) et redraw (0.48). Un préréglage ne prend pas de force.
+                              Avec --mask, un préréglage choisit aussi la branche (--mode) ; sans,
+                              ce n'est que ce LoRA.
           --steps N           nombre de pas, de 1 à 50. Défaut : "default_steps" du modèle. Un
                               modèle peut n'avoir de calendrier que pour certains (Qwen-Image-2.1 :
                               8, et 9 — le « ManualSigmas » d'un graphe ComfyUI : les huit publiés,
@@ -1813,20 +1837,33 @@ package enum RemoteControlHelp {
                               "start_image".
           --mask IMAGE|i7     la voie « retirer » (局部重绘) : --image est l'image à éditer, --mask
                               la région à remplacer — blanc sur noir, ou l'alpha du bitmap — de la
-                              taille de l'image. Le masque est rempli, découpé avec une marge, teint
-                              en vert, et cette découpe est l'image 1 de l'encodeur de texte : le
-                              prompt dit ce qui remplace la région. LE RENDU PART DU BRUIT, la
-                              découpe n'étant qu'une référence ; --seeded-start en fait aussi le
-                              départ.
+                              taille de l'image. Le masque est rempli, découpé avec une marge, et
+                              cette découpe est l'image 1 de l'encodeur de texte : le prompt dit ce
+                              qui remplace la région. --mode remove (par défaut) teint la découpe
+                              en vert ; --mode redraw la donne telle quelle, et le prompt dit ce
+                              qu'elle devient. LE RENDU PART DU BRUIT, la découpe n'étant qu'une
+                              référence ; --seeded-start en fait aussi le départ.
                               PAR DÉFAUT LA DÉCOUPE EST REPOSÉE, comme le GH_CropRestore du
                               workflow : ramenée à sa place au Lanczos, fondue (4 % et 5 % de la
                               boîte du masque), recolorée, puis posée sur une copie de l'original —
-                              le PNG EST À LA TAILLE DE L'ORIGINAL. --crop-only garde la découpe.
+                              le PNG EST À LA TAILLE DE L'ORIGINAL. --no-paste (--crop-only) garde
+                              la découpe seule.
                               La découpe décide du format (ne pas le donner), donc --ref,
                               --strength, un format tapé et grid sont refusés, dit. Qwen-Image-2.1
                               seulement. Un masque d'une autre taille, ou de moins de 10 pixels de
                               région, est refusé (erreur "patch", invalid_patch) — pas peint
                               par-dessus.
+          --mode remove|redraw
+                              avec --mask : la branche du workflow. remove — par défaut — peint le
+                              masque #00FF00 à 0.4 et câble --lora remove (1) ; redraw — aucune
+                              peinture, la découpe en image 1 telle quelle — câble --lora redraw
+                              (0.48). La découpe, --expand, --max-side, --noise-mask et
+                              --seeded-start sont les mêmes dans les deux. --lora remove et
+                              --lora redraw impliquent le mode ; avec --mode ils doivent s'accorder,
+                              une contradiction est refusée (erreur "mode"), et les deux
+                              préréglages s'excluent. Le préréglage de la branche est câblé même
+                              si --lora n'en nomme aucun ; nommer deux fois le même LoRA — un
+                              préréglage et un nom manuel — est refusé. Sans --mask : refusé.
           --seeded-start     avec --mask : la découpe est aussi le départ du rendu — le latent
                               additif z₀ + √2·ε (le bruit « max_denoise » de ComfyUI), comme le
                               latent primaire encodé du workflow. Défaut : désactivé — bruit seul,
@@ -1835,7 +1872,14 @@ package enum RemoteControlHelp {
           --crop-only        avec --mask : la découpe seule, à la taille du plan, au lieu de la
                               pose par défaut — la taille de l'original, la découpe à sa place.
                               Défaut : désactivé. Pour comparer la pose et la découpe brute.
-                              Sans --mask : refusé, dit.
+                              Sans --mask : refusé, dit. Même interrupteur que --no-paste : deux
+                              graphies, gardées parce que la première est ce que les scripts
+                              passent déjà.
+          --paste, --no-paste
+                              avec --mask : si la découpe est reposée sur l'original. --paste —
+                              par défaut — repose ; --no-paste (= --crop-only) garde la découpe.
+                              Deux graphies qui se contredisent (--paste puis --no-paste, par
+                              exemple) sont refusées. Sans --mask : refusé, dit.
           --noise-mask, --no-noise-mask
                               avec --mask : le noise_mask de ComfyUI, tel que KSamplerX0Inpaint le
                               prend — à chaque pas l'estimation hors du masque est le latent de

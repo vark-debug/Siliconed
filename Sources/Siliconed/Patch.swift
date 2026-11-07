@@ -129,16 +129,28 @@ package struct Patch: Sendable, Equatable {
         }
     }
 
+    /// **The workflow's two branches** (`--mode`): the crop is the same either way — the tint and the
+    /// LoRA differ. `remove` paints the mask `#00FF00` at 0.4 and its prompt says what goes away;
+    /// `redraw` hands the crop to the model untouched, and the prompt says what it becomes.
+    package enum Mode: String, Sendable, CaseIterable {
+        case remove
+        case redraw
+    }
+
     /// The settings an entry keeps, so a redo draws the same crop (`RenderSettings.patch`).
     package struct Settings: Sendable, Equatable {
         package var expansion: Expansion
         package var maximumSide: Int
+        /// **Which branch** (`Patch.Mode`): `.remove` — the default — tints the crop green; `.redraw`
+        /// leaves it as it is. A redo keeps this (`RenderSettings.patch`).
+        package var mode: Mode
         /// **The crop as z₀, opt-in** (`Request.patchSeededStart`, `--seeded-start`): false — the
         /// default — renders the crop as image 1 alone and starts from noise.
         package var seededStart: Bool
-        /// **The crop laid back over the original** (`Request.patchCropOnly`, `--crop-only`): true — the
-        /// workflow's `GH_CropRestore`, the render at the **original's size**; false keeps the crop alone,
-        /// at the plan's size, for comparison. A redo keeps this (`RenderSettings.patch`).
+        /// **The crop laid back over the original** (`Request.patchCropOnly`, `--crop-only` /
+        /// `--no-paste`): true — the workflow's `GH_CropRestore`, the render at the **original's size**;
+        /// false keeps the crop alone, at the plan's size, for comparison. A redo keeps this
+        /// (`RenderSettings.patch`).
         package var paste: Bool
         /// **The workflow's `noise_mask`** (`Request.patchNoiseMask`, `--no-noise-mask` turns it off):
         /// true — the default — replaces, at every step, the estimate outside the mask with the crop's
@@ -149,8 +161,8 @@ package struct Patch: Sendable, Equatable {
         package var noiseMask: Bool
 
         package init(expansion: Expansion = Expansion(), maximumSide: Int = Patch.maximumSide,
-                     seededStart: Bool = false, paste: Bool = true, noiseMask: Bool = true) {
-            self.expansion = expansion; self.maximumSide = maximumSide
+                     mode: Mode = .remove, seededStart: Bool = false, paste: Bool = true, noiseMask: Bool = true) {
+            self.expansion = expansion; self.maximumSide = maximumSide; self.mode = mode
             self.seededStart = seededStart; self.paste = paste; self.noiseMask = noiseMask
         }
     }
@@ -186,10 +198,15 @@ package struct Patch: Sendable, Equatable {
     package var mask: ImageMask
     package var expansion: Expansion
     package var maximumSide: Int
+    /// **Whether the mask is painted before the render** (`Patch.Settings.mode`): true — the
+    /// 「移除」 branch, the mask `#00FF00` at 0.4 inside the crop, as `图像合并（遮罩）` does; false —
+    /// the 「重绘」 branch, the crop handed to the model as it is.
+    package var tint: Bool
 
     package init(image: ImageRGB, mask: ImageMask, expansion: Expansion = Expansion(),
-                 maximumSide: Int = Patch.maximumSide) {
+                 maximumSide: Int = Patch.maximumSide, tint: Bool = true) {
         self.image = image; self.mask = mask; self.expansion = expansion; self.maximumSide = maximumSide
+        self.tint = tint
     }
 
     /// **The crop and the size the render will have**, as `遮罩裁剪V2` then `图像缩放（范围）` make it.
@@ -298,13 +315,15 @@ package struct Patch: Sendable, Equatable {
         }
         let alpha = Self.tintOpacity
         let green = Self.tintColor
-        for y in 0..<crop.height {
-            let sourceRow = (crop.y + y) * mask.width + crop.x
-            for x in 0..<crop.width where filled.values[sourceRow + x] > ImageMask.threshold {
-                let i = y * crop.width + x
-                pixels[i] = pixels[i] * (1 - alpha) + green.0 * alpha
-                pixels[plane + i] = pixels[plane + i] * (1 - alpha) + green.1 * alpha
-                pixels[2 * plane + i] = pixels[2 * plane + i] * (1 - alpha) + green.2 * alpha
+        if tint {
+            for y in 0..<crop.height {
+                let sourceRow = (crop.y + y) * mask.width + crop.x
+                for x in 0..<crop.width where filled.values[sourceRow + x] > ImageMask.threshold {
+                    let i = y * crop.width + x
+                    pixels[i] = pixels[i] * (1 - alpha) + green.0 * alpha
+                    pixels[plane + i] = pixels[plane + i] * (1 - alpha) + green.1 * alpha
+                    pixels[2 * plane + i] = pixels[2 * plane + i] * (1 - alpha) + green.2 * alpha
+                }
             }
         }
         return ImageRGB(pixels: pixels, height: crop.height, width: crop.width)

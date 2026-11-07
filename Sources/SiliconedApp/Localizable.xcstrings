@@ -333,6 +333,46 @@
         }
       }
     },
+    "%@ contradicts the paste switch already given: keep one" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ widerspricht dem bereits gegebenen Einfüge-Schalter: behalten Sie einen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ contradice el interruptor de pegado ya indicado: elija uno"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ contredit l’interrupteur de pose déjà donné : gardez-en un"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ contraddice l’interruttore di incollaggio già dato: tenetene uno"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ はすでに指定した貼り戻しスイッチと矛盾します。どちらか一方にしてください"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 与已给出的回贴开关矛盾：只保留一个"
+          }
+        }
+      }
+    },
     "%@ does no editing by reference (--ref)" : {
       "localizations" : {
         "de" : {
@@ -4374,46 +4414,6 @@
         }
       }
     },
-    "--crop-only goes with --mask: there is no crop to keep" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "--crop-only gehört zu --mask: es gibt keinen Ausschnitt zum Behalten"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "--crop-only va con --mask: no hay recorte que conservar"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "--crop-only va avec --mask : il n’y a pas de découpe à garder"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "--crop-only va con --mask: non c’è un ritaglio da conservare"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "--crop-only は --mask と一緒に使います。残す切り出しがありません"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "--crop-only 需与 --mask 一起使用：没有可保留的裁剪区域"
-          }
-        }
-      }
-    },
     "--detail expects normal, more or most, not \"%@\"" : {
       "localizations" : {
         "de" : {
@@ -4780,6 +4780,46 @@
         }
       }
     },
+    "--lora remove and --lora redraw are exclusive: name one" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--lora remove und --lora redraw schließen sich aus: nennen Sie nur eins"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--lora remove y --lora redraw son exclusivos: nombre solo uno"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--lora remove et --lora redraw s’excluent : n’en nommez qu’un"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--lora remove e --lora redraw si escludono: ne nominate uno solo"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--lora remove と --lora redraw は排他です。どちらか一方だけを指定してください"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--lora remove 与 --lora redraw 互斥：只能指定一个"
+          }
+        }
+      }
+    },
     "--mask goes with --image <the image to edit>" : {
       "localizations" : {
         "de" : {
@@ -4816,6 +4856,166 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "--mask 须与 --image <要编辑的图像> 一起使用"
+          }
+        }
+      }
+    },
+    "--mode %@ contradicts --lora %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--mode %@ widerspricht --lora %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--mode %@ contradice --lora %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--mode %@ contredit --lora %@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--mode %@ contraddice --lora %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--mode %@ は --lora %@ と矛盾します"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--mode %@ 与 --lora %@ 矛盾"
+          }
+        }
+      }
+    },
+    "--mode expects remove or redraw, not \"%@\"" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--mode erwartet remove oder redraw, nicht „%@“"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--mode espera remove o redraw, no «%@»"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--mode attend remove ou redraw, pas « %@ »"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--mode richiede remove o redraw, non «%@»"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--mode は remove または redraw を取ります。「%@」ではありません"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--mode 应为 remove 或 redraw，而不是“%@”"
+          }
+        }
+      }
+    },
+    "--mode goes with --mask: the crop is the branch" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--mode gehört zu --mask: der Ausschnitt ist der Zweig"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--mode va con --mask: el recorte es la rama"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--mode va avec --mask : la découpe est la branche"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--mode va con --mask: il ritaglio è il ramo"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--mode は --mask と一緒に使います。切り出しが分岐です"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--mode 需与 --mask 一起使用：裁剪区域决定分支"
+          }
+        }
+      }
+    },
+    "--mode remove (the default) or redraw — silicontrol help add" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--mode remove (die Voreinstellung) oder redraw — silicontrol help add"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--mode remove (el valor por defecto) o redraw — silicontrol help add"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--mode remove (par défaut) ou redraw — silicontrol help add"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--mode remove (il valore predefinito) o redraw — silicontrol help add"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--mode remove（既定）または redraw — silicontrol help add"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--mode remove（默认）或 redraw — silicontrol help add"
           }
         }
       }
@@ -4896,6 +5096,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "--out 需要一个文件夹"
+          }
+        }
+      }
+    },
+    "--paste, --no-paste and --crop-only go with --mask: there is no crop to paste" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--paste, --no-paste und --crop-only gehören zu --mask: es gibt keinen Ausschnitt zum Einfügen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--paste, --no-paste y --crop-only van con --mask: no hay recorte que pegar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--paste, --no-paste et --crop-only vont avec --mask : il n’y a pas de découpe à reposer"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--paste, --no-paste e --crop-only vanno con --mask: non c’è un ritaglio da incollare"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--paste、--no-paste、--crop-only は --mask と一緒に使います。貼り戻す切り出しがありません"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--paste、--no-paste、--crop-only 需与 --mask 一起使用：没有可回贴的裁剪区域"
           }
         }
       }
@@ -39132,6 +39372,47 @@
         }
       }
     },
+    "The remove and redraw presets are exclusive: keep one in the rack." : {
+      "comment" : "A patch takes one branch of the workflow, not both",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Presets remove und redraw schließen sich aus: behalten Sie eins im Rack."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los preajustes remove y redraw son exclusivos: deje uno en el rack."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les préréglages remove et redraw s’excluent : gardez-en un dans le rack."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I preset remove e redraw si escludono: tenetene uno nel rack."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "remove と redraw のプリセットは排他です。ラックには 1 つだけ残してください。"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "remove 与 redraw 预设互斥：机架中只保留一个。"
+          }
+        }
+      }
+    },
     "The render can start from one image: it keeps its composition, the strength says how far it moves away." : {
       "localizations" : {
         "de" : {
@@ -48940,6 +49221,46 @@
         }
       }
     },
+    "leave --lora out: --mode wires its preset" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "lassen Sie --lora weg: --mode verdrahtet sein Preset"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "omita --lora: --mode conecta su preajuste"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "laissez --lora de côté : --mode câble son préréglage"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "omettete --lora: --mode collega il suo preset"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--lora を省いてください。--mode がそのプリセットを接続します"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "省略 --lora：--mode 会接上对应预设"
+          }
+        }
+      }
+    },
     "leave it out, or render with add — silicontrol help add" : {
       "localizations" : {
         "de" : {
@@ -53160,6 +53481,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "机架中没有起始图像"
+          }
+        }
+      }
+    },
+    "the same LoRA twice: name it once" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "dasselbe LoRA zweimal: nennen Sie es einmal"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "el mismo LoRA dos veces: nómbrelo una vez"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "le même LoRA deux fois : nommez-le une fois"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "lo stesso LoRA due volte: nommatelo una volta"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "同じ LoRA が 2 回あります。1 回だけ指定してください"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "同一个 LoRA 出现两次：只需指定一次"
           }
         }
       }

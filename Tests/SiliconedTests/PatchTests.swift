@@ -102,6 +102,23 @@ final class PatchTests: XCTestCase {
         XCTAssertEqual(unscaled.pixels[10 * 64 + 10], -0.25, "x = 10: masked, the red channel × 0.6 − 0.4")
     }
 
+    /// **The 「重绘」 branch** (`Patch.tint == false`, `--mode redraw`): the same crop, but the image's
+    /// own pixels — no green hole. The geometry is one implementation: the tint alone differs.
+    func testTheRedrawCropIsTheImageItself() {
+        let source = image(64, 64, value: 0.25)
+        let mask = box(64, 64, x: 0, y: 0, w: 32, h: 64)
+        let plan = Patch.Plan(crop: Patch.Crop(x: 0, y: 0, width: 64, height: 64), width: 64, height: 64)
+        let plain = Patch(image: source, mask: mask, tint: false).render(plan)
+        let tinted = Patch(image: source, mask: mask).render(plan)
+        XCTAssertEqual([plain.width, plain.height], [64, 64], "the same crop either way")
+        for (index, name) in [(20 * 64 + 40, "outside the mask"), (10 * 64 + 10, "inside the mask")] {
+            for c in 0..<3 {
+                XCTAssertEqual(plain.pixels[c * 4096 + index], 0.25, "\(name), channel \(c): the image's own")
+            }
+        }
+        XCTAssertEqual(tinted.pixels[10 * 64 + 10], -0.25, "remove tints the same pixel (red channel × 0.6 − 0.4)")
+    }
+
     /// The workflow's tint is `#00FF00` (「图像合并（遮罩）」), which in the model's −1…1 RGB is
     /// `(−1, 1, −1)`, not the yellow-green `(0, 1, −1)` the port used to mix.
     func testTheGreenTintIsTheWorkflowsPureGreen() {

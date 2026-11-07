@@ -423,7 +423,8 @@ extension AppState {
                 return Patch(image: try patchSource.image.imageRGB(),
                              mask: ImageMask(image: try patchSource.mask.imageRGB()),
                              expansion: settings.patch?.expansion ?? Patch.Expansion(),
-                             maximumSide: settings.patch?.maximumSide ?? Patch.maximumSide)
+                             maximumSide: settings.patch?.maximumSide ?? Patch.maximumSide,
+                             tint: settings.patch?.mode != .redraw)
             }.value
             var request = Request(settings.modelPrompt ?? settings.prompt, width: settings.format.width,
                                   height: settings.format.height, seed: job.seeds[0],

@@ -17,6 +17,15 @@ extension RemoteControl {
             i += 1
             return arguments[i]
         }
+        /// `--paste` and its two negative spellings write one value: disagreeing ones are refused
+        /// rather than the last one winning.
+        func setPaste(_ paste: Bool, _ flag: String) throws {
+            if let given = d.pasteGiven, given != paste {
+                throw Refusal("usage", String(localized: "\(flag) contradicts the paste switch already given: keep one"),
+                              help: "silicontrol help add")
+            }
+            d.pasteGiven = paste; d.paste = paste
+        }
         while i < arguments.count {
             let a = arguments[i]
             switch a {
@@ -70,6 +79,7 @@ extension RemoteControl {
                                       help: "silicontrol add --lora remove")
                     }
                     d.loras.append((preset.fileName, preset.strength))
+                    d.presets.append(preset)
                 } else if PatchLoRA.isUnwired(named: name) {
                     throw Refusal("lora", String(localized: "\"expand\" is not a preset: the workflow wires remove and redraw"),
                                   help: "silicontrol add --lora remove")
@@ -103,8 +113,17 @@ extension RemoteControl {
                                   help: "--max-side 2560 (the workflow’s) — silicontrol help add")
                 }
                 d.maximumSide = n
+            case "--mode":
+                let v = try value(a)
+                guard let m = Patch.Mode(rawValue: v.lowercased()) else {
+                    throw Refusal("usage", String(localized: "--mode expects remove or redraw, not \"\(v)\""),
+                                  help: String(localized: "--mode remove (the default) or redraw — silicontrol help add"))
+                }
+                d.mode = m
             case "--seeded-start": d.seededStart = true
-            case "--crop-only": d.cropOnly = true
+            case "--paste": try setPaste(true, "--paste")
+            case "--no-paste": try setPaste(false, "--no-paste")
+            case "--crop-only": try setPaste(false, "--crop-only")
             case "--noise-mask": d.noiseMask = true
             case "--no-noise-mask": d.noiseMask = false
             case "--strength":
@@ -156,15 +175,39 @@ extension RemoteControl {
         if d.seededStart, d.mask == nil {
             throw Refusal("usage", String(localized: "--seeded-start goes with --mask: the patch’s crop is the start"))
         }
-        // `--crop-only` keeps a patch's crop alone: without a mask there is no crop to keep, and the
-        // render would never paste (`Admission` says the same of a request built by the API).
-        if d.cropOnly, d.mask == nil {
-            throw Refusal("usage", String(localized: "--crop-only goes with --mask: there is no crop to keep"))
-        }
         // `noise_mask` keeps a patch's mask: without one there is neither mask nor crop, and both
         // switches would be no-ops (`Admission` says the same of a request built by the API).
         if d.noiseMask != nil, d.mask == nil {
             throw Refusal("usage", String(localized: "--noise-mask and --no-noise-mask go with --mask: there is no mask to keep"))
+        }
+        // `--paste`, `--no-paste` and `--crop-only` lay back or keep a patch's crop: without a mask
+        // there is no crop at all, and the switch would be a no-op (`Admission` says the same of a
+        // request built by the API).
+        if d.pasteGiven != nil, d.mask == nil {
+            throw Refusal("usage", String(localized: "--paste, --no-paste and --crop-only go with --mask: there is no crop to paste"))
+        }
+        // `--mode` picks a patch branch: without a mask there is neither branch to pick.
+        if d.mode != nil, d.mask == nil {
+            throw Refusal("usage", String(localized: "--mode goes with --mask: the crop is the branch"))
+        }
+        // **The branch, once**: with a mask, `--mode` and the presets named must agree, the two
+        // presets exclude each other, and the branch's preset is wired at the workflow's strength
+        // when the user named none — no silent overwrite either way.
+        if d.mask != nil {
+            if d.presets.count > 1 {
+                throw Refusal("mode", String(localized: "--lora remove and --lora redraw are exclusive: name one"),
+                              help: String(localized: "leave --lora out: --mode wires its preset"))
+            }
+            if let explicit = d.mode, let named = d.presets.first, named.mode != explicit {
+                throw Refusal("mode", String(localized: "--mode \(explicit.rawValue) contradicts --lora \(named.rawValue)"),
+                              help: String(localized: "leave --lora out: --mode wires its preset"))
+            }
+            let mode = d.mode ?? d.presets.first?.mode ?? .remove
+            d.mode = mode
+            if d.presets.first?.mode != mode {
+                let preset = PatchLoRA.preset(for: mode)
+                d.loras.append((preset.fileName, preset.strength))
+            }
         }
         return d
     }
@@ -281,8 +324,8 @@ extension RemoteControl {
             d.format = (planned.width, planned.height)
             patchOrigins = (original, mask)
             patchSettings = Patch.Settings(expansion: expansion, maximumSide: maximumSide,
-                                           seededStart: d.seededStart, paste: !d.cropOnly,
-                                           noiseMask: d.noiseMask ?? true)
+                                           mode: d.mode ?? .remove, seededStart: d.seededStart,
+                                           paste: d.paste, noiseMask: d.noiseMask ?? true)
         }
 
         // The starting image (img2img): a model whose chain starts from one, never with references — one or the other.
@@ -383,6 +426,13 @@ extension RemoteControl {
                                                       : String(localized: "compatible: \(list)"))
             }
             return LoRASlot(path: f.path, strength: entry.strength)
+        }
+        // The same LoRA twice — a preset and a manual name that resolve to one file, say — would
+        // stack two strengths of it: refused, not silently resolved either way.
+        let paths = stack.map(\.path)
+        if Set(paths).count != paths.count {
+            throw Refusal("lora", String(localized: "the same LoRA twice: name it once"),
+                          help: String(localized: "leave --lora out: --mode wires its preset"))
         }
         guard grid || app.file.count + alternatives.count <= AppState.maxQueueLength else {
             let max = AppState.maxQueueLength
