@@ -59,7 +59,7 @@ extension AppState {
     /// **Why the form refuses the mask as it stands**, or `nil`. Read by `formBlocker`, so « Generate »
     /// greys out with the sentence instead of letting the engine refuse the request.
     var maskBlocker: String? {
-        guard attachedMask != nil else { return nil }
+        guard let attached = attachedMask else { return nil }
         if mirror != nil {
             return String(localized: "A mask stays on this Mac: stop following another Mac first.",
                            comment: "A patch cannot cross a mirror: its crop and mask are this Mac's")
@@ -68,9 +68,14 @@ extension AppState {
             return String(localized: "\(modelName(identifier)) has no mask workflow: a mask needs a model that edits by reference (Qwen-Image-2.1).",
                            comment: "The model refuses a patch: no additive start, or no image encoder")
         }
-        guard editInputs.first != nil else {
+        guard let image = editInputs.first?.shown else {
             return String(localized: "Attach an image first: the mask must have the image’s size.",
                            comment: "A mask without image 1: there is nothing to patch")
+        }
+        // Image 1 replaced under the mask: the engine would refuse it, said before the click.
+        if image.width != attached.mask.width || image.height != attached.mask.height {
+            return String(localized: "The mask is \(String(attached.mask.width)) × \(String(attached.mask.height)), the image \(String(image.width)) × \(String(image.height)): a mask must be the image’s size — it is never scaled.",
+                           comment: "The mask and image 1 must have the same pixel size")
         }
         if editInputs.count > 1 {
             return String(localized: "A mask edits image 1 alone: remove the other images.",
