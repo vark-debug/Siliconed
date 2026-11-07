@@ -50,7 +50,12 @@ extension AppState {
         originalLoad?.cancel()
         guard comparesOriginal, let e = selectedEntry, canCompareOriginal(e) else { original = nil; return }
         guard original?.id != e.id else { return }
-        let id = e.id, reference = e.references.first, source = e.enlargedFrom, width = e.width, height = e.height
+        // Image 1 of an edit; for an img2img or a pasted 「移除」 patch, the image it started from
+        // (`Entry.start`). A crop-only render is the crop alone: no like-for-like original.
+        let local = e.references.first { if case .remote = $0.source { false } else { true } }
+        let start = e.settings.patch?.paste == false ? nil : e.start
+        let reference = local ?? start.flatMap { ref in if case .remote = ref.source { nil } else { ref } }
+        let id = e.id, source = e.enlargedFrom, width = e.width, height = e.height
         originalLoad = Task { [weak self] in
             let image = await Task.detached(priority: .userInitiated) {
                 Decoded(source.flatMap { SuperResolution.stretched($0, width: width, height: height) }
