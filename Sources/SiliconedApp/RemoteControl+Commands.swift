@@ -138,6 +138,14 @@ extension RemoteControl {
         /// diffusers' (the family's, `StartImage.defaultStrength`, when left out).
         var image: String?
         var strength: Double?
+        /// `--mask MASK`: the 「移除」 path (`Request.patch`) — `--image` is the image to edit, `--mask`
+        /// its region (white on black, or its alpha). The crop decides the format.
+        var mask: String?
+        /// `--expand TOP,BOTTOM,LEFT,RIGHT`: the crop's margins, multipliers of the mask's shortest
+        /// side (`Patch.Expansion`); `nil`, the workflow's 1.3/1.4/1.4/1.4.
+        var expansion: Patch.Expansion?
+        /// `--max-side N`: the crop's longest side, 768–2560 (`Patch.maximumSide`); `nil`, 2560.
+        var maximumSide: Int?
         /// `nil`: like the app's « Preview at every step » switch.
         var previews: Bool?
         var wait = false

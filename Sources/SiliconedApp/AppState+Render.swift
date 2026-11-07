@@ -19,7 +19,10 @@ extension AppState {
         let firstNumber = imposedSeed ?? (fixedSeed ? seed : UInt64.random(in: 0...UInt64(UInt32.max)))
         let format = imposedFormat ?? outputFormat
         guard let prompts = try? alternatives.get().prompts, (try? carried.get()) != nil else { return }
-        if case .success(let g?) = seriesGrid(seed: firstNumber) {
+        // **The 「移除」 path**: one image, not a series; the format comes with the settings (the plan's
+        // size), as a redo gives it (`Admission` takes the plan's anyway).
+        let patch = patchInput
+        if patch == nil, case .success(let g?) = seriesGrid(seed: firstNumber) {
             renderSeries(g, format: format)
             return
         }
@@ -36,15 +39,17 @@ extension AppState {
             // reading the rewrite, the text kept as typed.
             let used = namedJob(expanded, settings: &settings, references: edit, model: model(identifier),
                                 capacity: mirror != nil ? imageCapacity : nil)
-            let start = usedStart
+            let start = patch == nil ? usedStart : nil
             if start != nil { settings.strength = startStrength }
+            if let patch { settings.patch = patch.settings }
             let plan = expectedPlan(steps: steps, format: format, withLoRA: !activeLoRAs.isEmpty || !plainSampling,
-                                    references: used.count, strength: settings.strength)
+                                    references: used.count + (patch == nil ? 0 : 1), strength: settings.strength)
             var job = Job(ordinal: nextJobNumber(), settings: settings,
                           seeds: (0..<max(1, batch)).map { firstNumber &+ UInt64($0) },
                           references: used, previews: previews,
                           defaultSteps: card?.defaultSteps, plan: plan)
             job.start = start
+            job.patch = patch.map { (image: $0.image, mask: $0.mask) }
             return job
         })
     }
@@ -384,11 +389,22 @@ extension AppState {
             // request fills and crops it to the format at once (`Request.image`).
             let startSource = settings.strength == nil ? nil : job.start
             let start = try await Task.detached(priority: .userInitiated) { try startSource?.imageRGB() }.value
+            // The 「移除」 path's two sources, decoded the same way, off the main thread: the image it
+            // edits and its mask, at the size the engine's plan will crop.
+            let patchSource = job.patch
+            let patch = try await Task.detached(priority: .userInitiated) { () -> Patch? in
+                guard let patchSource else { return nil }
+                return Patch(image: try patchSource.image.imageRGB(),
+                             mask: ImageMask(image: try patchSource.mask.imageRGB()),
+                             expansion: settings.patch?.expansion ?? Patch.Expansion(),
+                             maximumSide: settings.patch?.maximumSide ?? Patch.maximumSide)
+            }.value
             var request = Request(settings.modelPrompt ?? settings.prompt, width: settings.format.width,
                                   height: settings.format.height, seed: job.seeds[0],
                                   steps: settings.steps == job.defaultSteps ? nil : settings.steps,
                                   loras: loraEntries, image: start, strength: settings.strength ?? Strength.defaultValue,
                                   previews: job.previews)
+            request.patch = patch
             request.references = references
             request.referenceResolution = settings.referenceResolution
             request.detail = settings.detail
@@ -433,7 +449,7 @@ extension AppState {
                 case .image(_, let renderResult):
                     stageStates[.decoding] = .done
                     // The render against the map's prediction (`RenderLoop`): kept for the report and the next launch.
-                    checkMap(renderResult, model: model, references: references.count + (start == nil ? 0 : 1))
+                    checkMap(renderResult, model: model, references: references.count + (start == nil ? 0 : 1) + (patch == nil ? 0 : 1))
                     // The PNG and the thumbnail are made off the main thread; the engine has already
                     // moved on to the next image of the batch.
                     // A job `silicontrol add "@name"` translated: the PNG keeps the prompt typed, the model's beside it.
@@ -451,7 +467,7 @@ extension AppState {
                                         evaluations: renderResult.evaluations,
                                         settings: { var s = settings; s.offer = renderResult.offer; s.fasterRendering = renderResult.fasterRendering; return s }(),
                                         metadata: named ?? renderResult.metadata, references: job.references,
-                                        start: start == nil ? nil : job.start, owner: job.owner)
+                                        start: start == nil ? job.patch?.image : job.start, mask: job.patch?.mask, owner: job.owner)
                     history.insert(entry, at: 0)
                     saveIfAsked(entry)
                     if followsRender {
@@ -653,6 +669,13 @@ extension AppState {
         } else {
             setStart(nil)
         }
+        // **The 「移除」 path**, as the image's settings say: the image it edited and its mask — « Redo »
+        // draws the same crop from them.
+        if let geometry = entry.settings.patch, let image = entry.start, let mask = entry.mask {
+            patchInput = (image, mask, geometry)
+        } else {
+            patchInput = nil
+        }
         if let g = entry.grid?.grid {
             // A sheet's prompt is the one typed, its groups the grid's axes: not escaped.
             prompt = entry.settings.prompt
@@ -673,6 +696,8 @@ extension AppState {
         loras = r.loras.map(allowedStrength)
         detail = r.detail
         solver = r.solver
+        // A mask's sources are not in the settings: the caller set them (`add`, `restoreSettings(entry)`).
+        if r.patch == nil { patchInput = nil }
     }
 
     /// **A Siliconed PNG dropped on the canvas**: the form takes what its metadata says

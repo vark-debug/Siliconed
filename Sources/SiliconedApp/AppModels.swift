@@ -162,6 +162,9 @@ struct RenderSettings {
     /// **img2img's strength** (`Request.strength`, diffusers'): set when the render starts from an image (`Job.start`), `nil` for
     /// any other. What the PNG writes and « Redo » gives back with the image.
     var strength: Double? = nil
+    /// **The 「移除」 path's margins and bounds** (`Request.patch`): set when the render carries a mask
+    /// (`Job.patch`), `nil` otherwise. What « Redo » needs to draw the same crop.
+    var patch: Patch.Settings? = nil
     var isVariation: Bool { !variations.isEmpty }
 }
 
@@ -188,6 +191,9 @@ struct Entry: Identifiable {
     var references: [ReferenceImage] = []
     /// **The image it started from** (img2img, `RenderSettings.strength`): what « Variations » and « Redo » render again.
     var start: ReferenceImage? = nil
+    /// **The 「移除」 path's mask** (`Request.patch`): the image it edits is `Job.patch.image`. What
+    /// « Redo » hands the engine again.
+    var mask: ReferenceImage? = nil
     /// **A grid's sheet** (`Grid.swift`): its `settings` are what the cells share — the prompt as
     /// typed, braces included —, its `timings` the cells' sum, its `footprints` their peaks.
     var grid: GridInfo? = nil
@@ -311,6 +317,9 @@ struct Job: Identifiable {
     let references: [ReferenceImage]
     /// **The image it starts from** (img2img): re-noised to `settings.strength`, then denoised. `nil`: from noise.
     var start: ReferenceImage? = nil
+    /// **The 「移除」 path's two sources** (`Request.patch`): the image to edit and its mask, the same
+    /// size. `settings.patch` says the margins; the engine's plan decides the format.
+    var patch: (image: ReferenceImage, mask: ReferenceImage)? = nil
     let previews: Bool
     /// The model's default number of steps: `nil` in the request if it was not changed.
     let defaultSteps: Int?
@@ -328,7 +337,7 @@ struct Job: Identifiable {
     /// lengthens the sequence and every evaluation with it), with or without LoRA (the spectral turns off under a LoRA, and the LoRA weighs on
     /// every evaluation).
     var speedKey: String {
-        Speed.key(settings.identifier, settings.format, references: references.count + (start == nil ? 0 : 1), lora: !settings.loras.isEmpty)
+        Speed.key(settings.identifier, settings.format, references: references.count + (start == nil ? 0 : 1) + (patch == nil ? 0 : 1), lora: !settings.loras.isEmpty)
     }
 
     var name: String { "t\(ordinal)" }

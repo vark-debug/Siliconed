@@ -192,4 +192,44 @@ final class AdmissionTests: XCTestCase {
         XCTAssertNil(plain.seededSigma)
         XCTAssertEqual(plain.start, Strength.startStep(steps: plain.steps, strength: img2img.strength))
     }
+
+    /// **C4: the mask's crop is the render's format** (`Request.patch`), and the patch owns the start
+    /// rules — beside an img2img image, a seeded start or references it is refused by `invalid_patch`,
+    /// as is a chain without an additive start; the prompt stays mandatory and an empty mask is refused.
+    func testThePatchDecidesTheFormatAndOwnsTheStart() throws {
+        let pixels = [Float](repeating: 0.2, count: 3 * 64 * 64)
+        let image = ImageRGB(pixels: pixels, height: 64, width: 64)
+        let mask = ImageMask(width: 64, height: 64, values: [Float](repeating: 1, count: 64 * 64))
+        var request = Request("replace the sky", resolution: 512)
+        request.patch = Patch(image: image, mask: mask)
+        let admitted = try Admission.judge(request, chain: qwen, usesANE: false)
+        XCTAssertEqual([admitted.width, admitted.height], [48, 48], "768² from the plan, not the request's 512²")
+        XCTAssertEqual([admitted.patch?.width, admitted.patch?.height], [768, 768])
+        XCTAssertEqual(admitted.seededSigma, 1)
+        XCTAssertEqual(admitted.start, 0)
+        XCTAssertEqual(admitted.plan.reduced, 0, "the crop is never projected onto a half-size grid")
+
+        func refuses(_ request: Request, chain: Chain, _ file: StaticString = #filePath, _ line: UInt = #line) {
+            XCTAssertThrowsError(try Admission.judge(request, chain: chain, usesANE: false), file: file, line: line) {
+                guard let error = $0 as? EngineError, case .invalidPatch = error else {
+                    return XCTFail("\($0)", file: file, line: line)
+                }
+            }
+        }
+        var started = request; started.image = image
+        refuses(started, chain: qwen)
+        var seeded = request; seeded.seededStart = image
+        refuses(seeded, chain: qwen)
+        var referenced = request; referenced.references = [image]
+        refuses(referenced, chain: qwen)
+        refuses(request, chain: zImage) // no additive start
+        var empty = request
+        empty.patch = Patch(image: image, mask: ImageMask(width: 64, height: 64,
+                                                         values: [Float](repeating: 0, count: 64 * 64)))
+        refuses(empty, chain: qwen)
+        var blank = request; blank.prompt = "  \n"
+        XCTAssertThrowsError(try Admission.judge(blank, chain: qwen, usesANE: false)) {
+            XCTAssertEqual($0 as? Request.Failure, .emptyPrompt)
+        }
+    }
 }

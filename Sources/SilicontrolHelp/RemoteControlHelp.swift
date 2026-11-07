@@ -421,7 +421,8 @@ package enum RemoteControlHelp {
                               images by number (« image 1 », « image 2 »): Qwen-Image-2.1 reads
                               them as <image1>, <image2>. Leave the format out: the output then
                               follows image 1 (help edit).
-          --ref-res N         with --ref, Qwen-Image-2.1 only: the area each reference image is
+          --ref-res N         with --ref (or --mask: its crop is image 1), Qwen-Image-2.1 only: the
+                              area each reference image is
                               encoded at — its side R in calculate_dimensions(R², w/h), so about
                               R² pixels, its own ratio kept, sides at 32. 768 to 2560, a multiple
                               of 32. Default: 1024 (~1 MP). Raising it keeps more of the detail
@@ -437,6 +438,20 @@ package enum RemoteControlHelp {
           --strength S        with --image: how far the render moves away from it — diffusers'
                               strength, 0.65 or 65%, above 0 and at most 1 (1 ignores the image).
                               Default: the model's. Jobs and images say "strength" and "start_image".
+          --mask IMAGE|i7     the 「remove」 path (局部重绘): --image is the image to edit, --mask
+                              the region to replace — white on black, or the bitmap's alpha — of
+                              the image's size. The mask is filled, cropped with a margin, tinted
+                              green, and that crop is both the text encoder's image 1 and the
+                              render's start (z₀ + σ·ε): the prompt says what replaces the region.
+                              The crop decides the format (leave it out), so --ref, --strength,
+                              a typed format and grid are refused, said. Qwen-Image-2.1 only.
+                              A mask of another size, or one with fewer than 10 pixels of region,
+                              is refused (error "patch", invalid_patch) — not painted over.
+          --expand T,B,L,R    with --mask: the crop's margins, multipliers of the mask's shortest
+                              side (1.3: 0.3 × that side above; 1.4: 0.4 below, left, right).
+                              Default: 1.3,1.4,1.4,1.4 (the workflow's).
+          --max-side N        with --mask: the crop's longest side after scaling, 768 to 2560, a
+                              multiple of 32. Default: 2560 (the workflow's slider).
           --preview, --no-preview
                               a preview at every step in the app (writes nothing). Default: the
                               app's « Preview at every step » switch.
@@ -477,7 +492,8 @@ package enum RemoteControlHelp {
           With --wait: one "type": "added" line per job, then the lines of « wait » for all.
 
         FAILURES: usage, prompt, model, solver, detail, accelerators, lora, format, steps, edit, ref, img2img
-        (--image on a model that does not start from an image, or a strength that leaves no step), subject (a named subject the prompt cites, help
+        (--image on a model that does not start from an image, or a strength that leaves no step), patch (--mask on a model
+        without an additive start, a mask of another size or with fewer than 10 pixels, --ref/--strength/grid with --mask), subject (a named subject the prompt cites, help
         subjects), queue_full (64 waiting, or not enough room for every alternative), busy (an
         installation is running: no render until it is done), write.
 
@@ -1740,7 +1756,8 @@ package enum RemoteControlHelp {
                               images par leur numéro (« image 1 », « image 2 ») : Qwen-Image-2.1
                               les lit comme <image1>, <image2>. Ne pas donner de format : la sortie
                               suit alors l'image 1 (help edit).
-          --ref-res N         avec --ref, Qwen-Image-2.1 seulement : la surface où chaque image de
+          --ref-res N         avec --ref (ou --mask : sa découpe est l'image 1), Qwen-Image-2.1
+                              seulement : la surface où chaque image de
                               référence est encodée — son côté R dans calculate_dimensions(R², w/h),
                               donc environ R² pixels, son propre rapport gardé, les côtés à 32.
                               768 à 2560, un multiple de 32. Défaut : 1024 (~1 MP). L'augmenter
@@ -1758,6 +1775,22 @@ package enum RemoteControlHelp {
                               diffusers, 0.65 ou 65%, au-dessus de 0 et au plus 1 (1 ignore
                               l'image). Défaut : celle du modèle. Travaux et images disent "strength" et
                               "start_image".
+          --mask IMAGE|i7     la voie « retirer » (局部重绘) : --image est l'image à éditer, --mask
+                              la région à remplacer — blanc sur noir, ou l'alpha du bitmap — de la
+                              taille de l'image. Le masque est rempli, découpé avec une marge, teint
+                              en vert, et cette découpe est à la fois l'image 1 de l'encodeur de
+                              texte et le départ du rendu (z₀ + σ·ε) : le prompt dit ce qui
+                              remplace la région. La découpe décide du format (ne pas le donner),
+                              donc --ref, --strength, un format tapé et grid sont refusés, dit.
+                              Qwen-Image-2.1 seulement. Un masque d'une autre taille, ou de moins
+                              de 10 pixels de région, est refusé (erreur "patch", invalid_patch) —
+                              pas peint par-dessus.
+          --expand T,B,L,R    avec --mask : les marges de la découpe, multiplicateurs du côté le
+                              plus court du masque (1.3 : 0.3 × ce côté au-dessus ; 1.4 : 0.4 en
+                              dessous, à gauche, à droite). Défaut : 1.3,1.4,1.4,1.4 (celui du
+                              workflow).
+          --max-side N        avec --mask : le plus long côté de la découpe après mise à l'échelle,
+                              768 à 2560, multiple de 32. Défaut : 2560 (le curseur du workflow).
           --preview, --no-preview
                               un aperçu à chaque pas dans l'app (n'écrit rien). Défaut : l'interrupteur
                               « Aperçu à chaque pas » de l'app.
@@ -1799,7 +1832,8 @@ package enum RemoteControlHelp {
           Avec --wait : une ligne "type": "added" par travail, puis les lignes de « wait » pour tous.
 
         ÉCHECS : usage, prompt, model, solver, detail, accelerators, lora, format, steps, edit, ref, img2img
-        (--image sur un modèle qui ne part pas d'une image, ou une force qui ne laisse aucun pas), subject (un sujet nommé que le prompt cite,
+        (--image sur un modèle qui ne part pas d'une image, ou une force qui ne laisse aucun pas), patch (--mask sur un modèle
+        sans départ additif, un masque d'une autre taille ou de moins de 10 pixels, --ref/--strength/grid avec --mask), subject (un sujet nommé que le prompt cite,
         help subjects), queue_full (64 en attente, ou pas assez de place pour toutes les
         alternatives), busy (une installation tourne : pas de rendu avant qu'elle soit finie), write.
 

@@ -273,11 +273,21 @@ package struct QwenImage21Need {
         references.map(\.prepared).max { $0.width * $0.height < $1.width * $1.height }
     }
 
-    /// The VAE encoder, one reference at a time (`QwenImage21EncodingModule`, which dies on return):
-    /// the RGBA array the module builds and hands in (`rgba`, `[4, H, W]`), and the encoder's two heaps
+    /// The pixels the VAE encoder is planned for — the largest of the prepared references and the
+    /// additive start (`MemoryNeed.Request.seededStart`, a patch's crop, encoded at its own size for
+    /// z₀ beside the prepared copy the text encoder reads). Each encode dies on return; the two are
+    /// charged as one, the larger.
+    private var largestEncoded: (width: Int, height: Int)? {
+        guard let prepared = largestReference else { return request.seededStart }
+        guard let seeded = request.seededStart else { return prepared }
+        return prepared.width * prepared.height >= seeded.width * seeded.height ? prepared : seeded
+    }
+
+    /// The VAE encoder, one image at a time (`QwenImage21EncodingModule`, which dies on return): the
+    /// RGBA array the module builds and hands in (`rgba`, `[4, H, W]`), and the encoder's two heaps
     /// and host copies (`QwenImage21VAEEncoder.plan`).
     package var referencesPhase: MemoryNeed.Phase? {
-        guard let largest = largestReference else { return nil }
+        guard let largest = largestEncoded else { return nil }
         return .init(kind: .references, terms: [Term("rgba", vae.inChannels * largest.width * largest.height * 4)]
             + MemoryNeed.vae("Qwen encoder", QwenImage21VAEEncoder.plan(config: vae, height: largest.height,
                                                                          width: largest.width)))

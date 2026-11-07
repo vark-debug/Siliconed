@@ -91,6 +91,13 @@ package struct Request: Sendable, Equatable {
     /// (`sigmas`), σ₀ is its first value — which need not be 1, and `z₀ + σ₀·ε` is then the start
     /// as defined, not a rescaled one.
     package var seededStart: ImageRGB? = nil
+    /// **A 「移除」 patch** (`Patch`): the image, its mask and the crop's margins, as the ComfyUI
+    /// workflow's mask branch. The engine crops the image, tints the crop green, and hands **the same
+    /// pixels** to the text encoder (as its first image) and to the additive start (`z₀`) — the render's
+    /// format is the plan's size, whatever `width` and `height` say (`Admission` takes the plan's).
+    /// Refused beside `image`, `seededStart` or `references`, and by a denoiser without `acceptsSeededStart`
+    /// (Qwen-Image-2.1's Turbo). `nil`: the path is not taken, and nothing else changes.
+    package var patch: Patch? = nil
     /// **The editing reference images** ("change her jacket to red"): the denoiser re-reads them
     /// at each layer, and the generated image starts from noise — nothing to do with `image`,
     /// which is its starting point. Each keeps **its own** aspect ratio, at the size the denoiser

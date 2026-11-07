@@ -24,6 +24,9 @@ package struct Admission: Sendable {
     /// table when it gave one (whose first value need not be 1), the family's otherwise. `nil`: no additive start (`Latent.seeded`
     /// is never called); the img2img path keeps reading `plan.startSigma`, untouched.
     package let seededSigma: Float?
+    /// **The 「移除」 patch's crop** (`Request.patch`): the box in the original's pixels and the size the render will have —
+    /// the render draws the green crop from it, for both z₀ and the text encoder's first image.
+    package let patch: Patch.Plan?
     /// **What the denoiser may compute on beyond fp32**: the switch asked (`Request.accelerators`), the Neural Engine where the plan
     /// offers it (`usesANE`); off, fp32 throughout.
     package let accelerators: Accelerators
@@ -37,7 +40,7 @@ package struct Admission: Sendable {
             throw Request.Failure.emptyPrompt
         }
         let denoising = chain.denoising, space = denoising.space
-        let height = request.height / space.factor, width = request.width / space.factor
+        var height = request.height / space.factor, width = request.width / space.factor
         var steps = request.steps ?? denoising.defaultSteps
         // **A σ table the request supplies** (`Request.sigmas`): the steps follow it (`steps + 1`
         // values, the shape checked — strictly decreasing, the last 0), and the denoiser's own
@@ -54,6 +57,34 @@ package struct Admission: Sendable {
         // The references' area is a shape of its own (Qwen-Image-2.1 alone reads it): judged here,
         // before the memory that charges it (`QwenImage21Need`).
         try Request.admit(referenceResolution: request.referenceResolution)
+        // **The 「移除」 patch** (`Request.patch`): its crop decides the render's format, and it is its
+        // own start rule — the crop is z₀ and the text encoder's image 1. Judged here, before img2img,
+        // references and an additive start, which it cannot share the request with. `patch.plan()` throws
+        // `EngineError.invalidPatch` for a mask of another size, an empty one, or an unusable crop.
+        var seededSigma: Float?
+        var patchPlan: Patch.Plan?
+        if let patch = request.patch {
+            guard request.image == nil else {
+                throw EngineError.invalidPatch(reason: "an img2img image (its strength) and a patch (its mask) start two ways: choose one")
+            }
+            guard request.seededStart == nil else {
+                throw EngineError.invalidPatch(reason: "a seeded start and a patch, not both: the patch's crop is the start")
+            }
+            guard request.references.isEmpty else {
+                throw EngineError.invalidPatch(reason: "a patch is the edit's only image: its crop is the text encoder's image 1")
+            }
+            guard chain.encoding != nil else {
+                throw EngineError.invalidPatch(reason: "this chain has no image encoder to turn the patch's crop into z₀")
+            }
+            guard denoising.acceptsSeededStart else {
+                throw EngineError.invalidPatch(reason: "\(denoising.model) starts from no additive latent (Qwen-Image-2.1's patch workflow is the one)")
+            }
+            let planned = try patch.plan()
+            patchPlan = planned
+            width = planned.width / space.factor
+            height = planned.height / space.factor
+            seededSigma = (request.sigmas ?? denoising.sigmas(steps: steps)).first
+        }
         // **img2img is judged before any computation, too**: an out-of-range strength, a chain
         // without an encoder, a strength that leaves no evaluation all throw here.
         var start = 0
@@ -77,7 +108,6 @@ package struct Admission: Sendable {
         // beside it (two start rules in one request) throws before any computation. Its σ₀ is the
         // schedule's first node as the render will walk it — a custom table's first value may be below 1,
         // and `z₀ + σ₀·ε` (`Latent.seeded`) is then the start as defined.
-        var seededSigma: Float?
         if request.seededStart != nil {
             guard request.image == nil else {
                 throw Request.Failure.seededStart("a request starts from one image at most: "
@@ -107,7 +137,7 @@ package struct Admission: Sendable {
         let faster = request.fasterRendering
         var plan = denoising.plan(height: height, width: width, steps: steps, start: start,
                                   withLoRA: !request.loras.isEmpty || request.detail != .normal, faster: faster)
-        if !request.references.isEmpty || request.seededStart != nil { plan = plan.unreduced }
+        if !request.references.isEmpty || request.seededStart != nil || patchPlan != nil { plan = plan.unreduced }
         guard plan.evaluations > 0 else {
             // The floor: the last start that keeps an evaluation, `d`, is reached as soon as
             // `N − N·s < d + 1`, i.e. `s > (N − d − 1)/N`.
@@ -119,7 +149,7 @@ package struct Admission: Sendable {
                                                 floor: Double(scheduled - last - 1) / Double(scheduled))
         }
         return Admission(space: space, height: height, width: width, steps: steps, start: start, plan: plan,
-                         seededSigma: seededSigma,
+                         seededSigma: seededSigma, patch: patchPlan,
                          accelerators: Accelerators(requested: request.accelerators, usesANE: usesANE), fasterRendering: faster)
     }
 }

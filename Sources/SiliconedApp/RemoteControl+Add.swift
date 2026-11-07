@@ -73,6 +73,24 @@ extension RemoteControl {
             case "--wait": d.wait = true
             case "--no-sheet": d.sheet = false
             case "--image": d.image = try value(a)
+            case "--mask": d.mask = try value(a)
+            case "--expand":
+                let v = try value(a)
+                let parts = v.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+                let factors = parts.compactMap { Double($0) }
+                guard parts.count == 4, factors.count == 4, factors.allSatisfy({ $0.isFinite && $0 >= 1 }) else {
+                    throw Refusal("usage", String(localized: "--expand expects four multipliers above 1, top,bottom,left,right, not \"\(v)\""),
+                                  help: "--expand 1.3,1.4,1.4,1.4 (the workflow’s) — silicontrol help add")
+                }
+                d.expansion = Patch.Expansion(top: factors[0], bottom: factors[1], left: factors[2], right: factors[3])
+            case "--max-side":
+                let v = try value(a)
+                let bounds = Patch.minimumSide...Patch.maximumSide
+                guard let n = Int(v), bounds ~= n else {
+                    throw Refusal("usage", String(localized: "\(a) expects \(bounds.lowerBound) to \(bounds.upperBound), not \"\(v)\""),
+                                  help: "--max-side 2560 (the workflow’s) — silicontrol help add")
+                }
+                d.maximumSide = n
             case "--strength":
                 let v = try value(a)
                 guard let s = StartImage.strength(v) else {
@@ -185,12 +203,60 @@ extension RemoteControl {
             throw Refusal("prompt", p.title, help: p.suggestion)
         }
 
+        // **The 「移除」 path** (`--mask`): `--image` is the image to edit, not a start. The mask's crop
+        // decides the format, so a typed format, `--strength`, `--ref` and a grid are refused — said,
+        // not ignored. The crop's plan is the honest check: a mask of another size or one too empty
+        // is refused here, before a job is queued.
+        var patchOrigins: (image: ReferenceImage, mask: ReferenceImage)?
+        var patchSettings: Patch.Settings?
+        if let maskWord = d.mask {
+            guard !grid else {
+                throw Refusal("patch", String(localized: "grid does not take --mask"),
+                              help: String(localized: "render one patch with add — silicontrol help add"))
+            }
+            guard let imageWord = d.image else {
+                throw Refusal("patch", String(localized: "--mask goes with --image <the image to edit>"),
+                              help: String(localized: "--image photo.jpg --mask photo-mask.png — silicontrol help add"))
+            }
+            guard d.strength == nil else {
+                throw Refusal("patch", String(localized: "--strength and --mask don’t go together: the patch starts from its crop"),
+                              help: String(localized: "leave out --strength"))
+            }
+            guard d.references.isEmpty else {
+                throw Refusal("patch", String(localized: "--ref and --mask don’t go together: the patch’s crop is the edit’s only image"),
+                              help: String(localized: "leave out --ref"))
+            }
+            guard d.format == nil else {
+                throw Refusal("format", String(localized: "a mask decides the format: leave 1024 / WxH out"),
+                              help: String(localized: "the crop’s size follows the mask — silicontrol help add"))
+            }
+            guard model.chain.denoising.acceptsSeededStart, model.chain.encoding != nil else {
+                let name = card?.name ?? model.name
+                throw Refusal("patch", String(localized: "\(name) has no additive start for a mask (--mask)"),
+                              help: String(localized: "models that do have \"seeded_start\": true in \"silicontrol models\""))
+            }
+            let original = try startImage(imageWord, cwd: cwd)
+            let mask = try startImage(maskWord, cwd: cwd)
+            let expansion = d.expansion ?? Patch.Expansion()
+            let maximumSide = d.maximumSide ?? Patch.maximumSide
+            let patch = Patch(image: try original.imageRGB(), mask: ImageMask(image: try mask.imageRGB()),
+                              expansion: expansion, maximumSide: maximumSide)
+            let planned: Patch.Plan
+            do { planned = try patch.plan() } catch {
+                let p = Problem(error)
+                throw Refusal("patch", p.title, help: p.suggestion ?? "silicontrol help add")
+            }
+            d.format = (planned.width, planned.height)
+            patchOrigins = (original, mask)
+            patchSettings = Patch.Settings(expansion: expansion, maximumSide: maximumSide)
+        }
+
         // The starting image (img2img): a model whose chain starts from one, never with references — one or the other.
         var start: ReferenceImage?
         if d.strength != nil, d.image == nil {
             throw Refusal("usage", String(localized: "--strength goes with --image"), help: "silicontrol help add")
         }
-        if let word = d.image {
+        if let word = d.image, d.mask == nil {
             guard model.chain.entries.contains(where: { $0.kind == .image }) else {
                 let name = card?.name ?? model.name
                 throw Refusal("img2img", String(localized: "\(name) doesn’t start from an image (--image)"),
@@ -252,8 +318,8 @@ extension RemoteControl {
         }
         // `--ref-res`: the area the references are encoded at — an edit's parameter, Qwen-Image-2.1's
         // alone (a model with "max_references" > 0). Its value was checked by `parse`.
-        if d.referenceResolution != nil, references.isEmpty {
-            throw Refusal("usage", String(localized: "--ref-res goes with --ref"), help: "silicontrol add --ref IMAGE --ref-res 1536 …")
+        if d.referenceResolution != nil, references.isEmpty, d.mask == nil {
+            throw Refusal("usage", String(localized: "--ref-res goes with --ref or --mask"), help: "silicontrol add --ref IMAGE --ref-res 1536 …")
         }
 
         let (width, height) = d.format ?? (1024, 1024)
@@ -328,6 +394,14 @@ extension RemoteControl {
             return
         }
         let variants = alternatives.variants
+        // A patch reads one image — its crop — so a prompt that cites a subject (whose picture would
+        // become a reference) is refused, not silently thinned.
+        if patchOrigins != nil {
+            for v in variants where app.rewrite(v.prompt, model: model, editImages: 0) != nil {
+                throw Refusal("subject", String(localized: "a mask’s prompt does not cite named subjects yet"),
+                              help: "silicontrol add")
+            }
+        }
         // Named subjects (`Subjects.swift`): each expanded prompt rewritten, its
         // subjects' pictures after the --ref images — refused whole if one expansion is.
         for v in variants {
@@ -343,15 +417,18 @@ extension RemoteControl {
                                           solver: d.solver)
             settings.strength = strength
             settings.referenceResolution = d.referenceResolution
+            settings.patch = patchSettings
             let used = app.namedJob(v.prompt, settings: &settings, references: references, model: model)
             var job = Job(ordinal: app.nextJobNumber(), settings: settings,
                           seeds: (0..<d.batch).map { firstNumber &+ UInt64($0) },
                           references: used, previews: d.previews ?? app.previews,
-                          // Subjects' pictures make the plan unreduced (as `AppState.expectedPlan`); without
-                          // them, the plan as it was.
-                          defaultSteps: defaultSteps, plan: used.count > references.count ? plan.unreduced : plan)
+                          // Subjects' pictures, or a mask's crop, make the plan unreduced (as `AppState.expectedPlan`);
+                          // without them, the plan as it was.
+                          defaultSteps: defaultSteps,
+                          plan: used.count > references.count || patchOrigins != nil ? plan.unreduced : plan)
             job.accelerators = d.accelerators
             job.start = start
+            job.patch = patchOrigins
             return job
         }
         app.enqueue(jobs)
@@ -361,8 +438,10 @@ extension RemoteControl {
         app.restoreSettings(jobs[0].settings)
         app.prompt = prompt
         app.setEditImages(references)
-        // The starting image too, or none: « Generate » would queue the same request.
+        // The starting image too, or none: « Generate » would queue the same request. A mask's two
+        // sources go to the rack as they are — the app only hands them on.
         app.setStart(start)
+        if let patchOrigins, let patchSettings { app.patchInput = (patchOrigins.image, patchOrigins.mask, patchSettings) }
         if let strength { app.startStrength = strength }
         // A seed drawn here is a Random render, as after a click: the rack must not keep showing an old Fixed one.
         if let seed = d.seed { app.fixedSeed = true; app.seed = seed } else { app.fixedSeed = false }

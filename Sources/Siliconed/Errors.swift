@@ -78,6 +78,9 @@ package enum EngineError: Error, Equatable, Sendable, Codable, LocalizedError, C
     /// none, an img2img image beside it, or an encoded crop whose latent grid is not the render's.
     /// `reason` says which.
     case invalidSeededStart(reason: String)
+    /// **A 「移除」 patch the workflow cannot crop** (`Request.patch`): a mask of another size than
+    /// the image, one too empty to edit, or margins and bounds that leave no size. `reason` says which.
+    case invalidPatch(reason: String)
     /// A reference resolution outside the bounds the references are prepared at (`Request.referenceResolution`).
     /// `reason` says what is wrong with it.
     case invalidReferenceResolution(reason: String)
@@ -254,6 +257,7 @@ package enum EngineError: Error, Equatable, Sendable, Codable, LocalizedError, C
         case .invalidSteps: return "invalid_steps"
         case .invalidSchedule: return "invalid_schedule"
         case .invalidSeededStart: return "invalid_seeded_start"
+        case .invalidPatch: return "invalid_patch"
         case .invalidReferenceResolution: return "invalid_reference_resolution"
         case .tooManyReferences: return "too_many_references"
         case .imageTooSmall: return "image_too_small"
@@ -332,6 +336,8 @@ package enum EngineError: Error, Equatable, Sendable, Codable, LocalizedError, C
             return "The σ table is refused: \(reason)."
         case let .invalidSeededStart(reason):
             return "The seeded start is refused: \(reason)."
+        case let .invalidPatch(reason):
+            return "The patch is refused: \(reason)."
         case let .invalidReferenceResolution(reason):
             return "The reference resolution is refused: \(reason)."
         case let .tooManyReferences(count, max):
@@ -440,6 +446,8 @@ package enum EngineError: Error, Equatable, Sendable, Codable, LocalizedError, C
             return "Leave the σ table out, or give the one this model walks (Qwen-Image-2.1-Turbo: its published 8 or the workflow's 9 steps)."
         case .invalidSeededStart:
             return "Leave the seeded start out, or hand the crop at the render's format (Qwen-Image-2.1's patch workflow)."
+        case .invalidPatch:
+            return "Paint the mask over the region to replace, white on black (or its alpha), at the image's size — with at least 10 pixels — and hand the image and its mask together."
         case .invalidReferenceResolution:
             return "Leave the reference resolution out (1024), or choose 768 to 2560, a multiple of 32."
         case .tooManyReferences(_, let max) where max == 0:
@@ -634,6 +642,7 @@ package enum EngineError: Error, Equatable, Sendable, Codable, LocalizedError, C
         .invalidSchedule(reason: "a σ table that does not strictly decrease"),
         .invalidReferenceResolution(reason: "1000 px is not a multiple of 32"),
         .invalidSeededStart(reason: "the encoded crop is 24×32 latent cells, the noise 32×32"),
+        .invalidPatch(reason: "the mask is empty or has fewer than 10 pixels to replace"),
     ]
 }
 

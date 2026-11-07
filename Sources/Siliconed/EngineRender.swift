@@ -71,6 +71,12 @@ extension Engine {
         // never called — on every path that is not the workflow's; the img2img start keeps reading
         // `plan.startSigma`, untouched.
         let seededSigma = admitted.seededSigma
+        // **The patch's crop decides the pixels** (`Admission.patch`): the plan's size, where the
+        // workflow's scaling leaves it. Every other path renders the request's own format.
+        let patchPlan = admitted.patch
+        let pixelWidth = patchPlan?.width ?? request.width
+        let pixelHeight = patchPlan?.height ?? request.height
+        let referenceCount = patchPlan == nil ? request.references.count : 1
         // Installed, license, format, memory, no other render: the first that fails throws. The
         // lock is held until this function returns, the whole batch.
         // B, this Mac's budget (`MemoryBudget`): the preflight judges the floor against it, and the
@@ -85,17 +91,21 @@ extension Engine {
         OperatorFootprint.bringUp()
         Arena.returnFreedPages()
         var memoryRequest = model.card.memoryRequest(
-            width: request.width, height: request.height,
-            references: (request.image.map { [$0] } ?? request.references).map { ($0.width, $0.height) },
+            width: pixelWidth, height: pixelHeight,
+            references: patchPlan.map { [($0.width, $0.height)] }
+                ?? (request.image.map { [$0] } ?? request.references).map { ($0.width, $0.height) },
             promptTokens: MemoryNeed.Request.promptTokens(request.prompt, family: model.card.family,
-                                                           references: request.references.count))
+                                                           references: referenceCount))
+        // The crop is encoded twice — once at its own size for z₀ (`Latent.seeded`), once at the
+        // references' resolution for the text encoder: the VAE encoder is charged for the larger.
+        memoryRequest.seededStart = patchPlan.map { ($0.width, $0.height) }
         memoryRequest.solver = request.solver
         memoryRequest.referenceResolution = request.referenceResolution
         memoryRequest.accelerators = admitted.accelerators
         memoryRequest.batch = seeds.count
         memoryRequest.library = model.library ?? .processWide
-        let lock = try Preflight.run(model, width: request.width, height: request.height,
-                                     references: request.references.count, ceiling: ceiling, memory: memoryRequest)
+        let lock = try Preflight.run(model, width: pixelWidth, height: pixelHeight,
+                                     references: referenceCount, ceiling: ceiling, memory: memoryRequest)
         defer { withExtendedLifetime(lock) {} }
         // The stack opens BEFORE any computation: an unreadable map throws here, not after a
         // minute — and so does a LoRA forged for another model. The DiTs apply a LoRA only to the
@@ -116,12 +126,12 @@ extension Engine {
         context.accelerators = admitted.accelerators
         context.fasterRendering = admitted.fasterRendering
         context.detail = request.detail
-        context.detailScale = Detail.scale(width: request.width, height: request.height)
+        context.detailScale = Detail.scale(width: pixelWidth, height: pixelHeight)
         context.solver = request.solver
         context.sigmas = request.sigmas
         // The workflow's crop: the denoiser keeps its spectral schedule off (`Context.seededStart`),
         // as for an edit — a half-size first evaluation would project z₀ onto another grid.
-        context.seededStart = request.seededStart != nil
+        context.seededStart = request.seededStart != nil || request.patch != nil
         // The library's warnings become events for the duration of the render (and go to
         // `Warnings.outsideRender` without `onProgress`: a "✗ step 3: the VELOCITY carries …" is not lost),
         // and memory is returned to the system on exit — **including on a cancellation**: the
@@ -153,13 +163,22 @@ extension Engine {
             PhaseBoundary.mark("start")
             context.emit(.start(Plan(
                 denoising: plan, seeds: seeds,
-                stages: request.image != nil || request.seededStart != nil || !request.references.isEmpty
+                stages: request.image != nil || request.seededStart != nil || request.patch != nil || !request.references.isEmpty
                     ? [.text, .image, .denoising, .decoding] : [.text, .denoising, .decoding])))
 
+            // ── The patch's crop, made once (`Patch.render`): the tinted green crop is the text
+            //    encoder's image 1 **and** z₀ below — the same pixels, the workflow's `#204`. ──
+            let patchCrop = patchPlan.flatMap { plan in request.patch.map { $0.render(plan) } }
             // ── The references at the denoiser's size, once: a text stage that reads images and the
-            //    image encoder below receive this same copy. ──
-            let prepared = request.references.isEmpty ? [] : try chain.denoising.preparedReferences(
-                request.references, referenceResolution: request.referenceResolution)
+            //    image encoder below receive this same copy. A patch has one — its crop. ──
+            let prepared: [ImageRGB]
+            if let patchCrop {
+                prepared = try chain.denoising.preparedReferences([patchCrop], referenceResolution: request.referenceResolution)
+            } else if request.references.isEmpty {
+                prepared = []
+            } else {
+                prepared = try chain.denoising.preparedReferences(request.references, referenceResolution: request.referenceResolution)
+            }
 
             // ── The text, once for the whole batch. The module returns its memory on exit. ──
             try context.check()
@@ -212,25 +231,28 @@ extension Engine {
             // ── The additive start (the « 移除、局部重绘 » workflow's crop), once: the same encoder,
             //    its latent kept **under** the noise (`Latent.seeded`, z₀ + σ₀·ε) rather than mixed
             //    away by `Latent.start` at σ₀ = 1. Admission refuses it beside `image` and on a chain
-            //    without an encoder, so at most one of the two blocks runs. ──
+            //    without an encoder, so at most one of the two blocks runs. A patch renders its crop
+            //    at the plan's size: the same pixels the text encoder read, at the latent's own size. ──
             var seeded: Latent? = nil
-            if let image = request.seededStart, let encoding = chain.encoding {
+            if let image = patchCrop ?? request.seededStart, let encoding = chain.encoding {
                 try context.check()
                 context.emit(.stage(.image, image: 0))
                 let seedingStart = Date()
                 // Fitted to the render's format, as img2img fits its image: z₀ then comes out at the
                 // noise's grid, and `Latent.seeded` says by name if a pipeline ever gives another.
                 seeded = try autoreleasepool {
-                    try encode(image.fitted(width: request.width, height: request.height), with: encoding, context: context)
+                    try encode(image.fitted(width: pixelWidth, height: pixelHeight), with: encoding, context: context)
                 }
                 context.timings.encoding = Date().timeIntervalSince(seedingStart)
                 context.emit(.encoding(seconds: context.timings.encoding))
                 PhaseBoundary.mark("image")
             }
 
-            // ── The references (editing), once: same encoder, each at its own size. ──
+            // ── The references (editing), once: same encoder, each at its own size. A patch has none:
+            //    its crop is z₀ and the text encoder's image 1, not an image the denoiser re-reads
+            //    (the workflow wires it to the encoder only). ──
             var references: [Latent] = []
-            if !prepared.isEmpty, let encoding = chain.encoding {
+            if patchPlan == nil, !prepared.isEmpty, let encoding = chain.encoding {
                 try context.check()
                 context.emit(.stage(.image, image: 0))
                 let referencesStart = Date()
@@ -336,10 +358,10 @@ extension Engine {
             guard let need else { return renderResults }
             let check = MemoryCheck(need: need, marks: PhaseBoundary.end())
             for defect in check.defects {
-                MemoryCheck.log.error("\(defect, privacy: .public) — \(model.card.id, privacy: .public) \(request.width)×\(request.height), \(request.references.count) reference(s)")
+                MemoryCheck.log.error("\(defect, privacy: .public) — \(model.card.id, privacy: .public) \(pixelWidth)×\(pixelHeight), \(referenceCount) reference(s)")
             }
             for slack in check.slack {
-                MemoryCheck.log.info("\(slack, privacy: .public) — \(model.card.id, privacy: .public) \(request.width)×\(request.height)")
+                MemoryCheck.log.info("\(slack, privacy: .public) — \(model.card.id, privacy: .public) \(pixelWidth)×\(pixelHeight)")
             }
             return renderResults.map { var r = $0; r.memory = check; return r }
         } }
