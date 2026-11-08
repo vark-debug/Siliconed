@@ -558,6 +558,7 @@ final class MainWindow: NSObject, NSWindowDelegate {
                 return nil
             }
             if app.cropping != nil { return cropKey(event) ? nil : event }
+            if app.paintingMask != nil { return maskKey(event) ? nil : event }
             // ⌘V by its character (AZERTY): an image on the pasteboard goes to the Images box.
             if Self.chord(event) == .command,
                event.charactersIgnoringModifiers?.lowercased() == "v" {
@@ -587,6 +588,29 @@ final class MainWindow: NSObject, NSWindowDelegate {
         case 53: app.cancelCrop()                                       // Esc
         case 123, 124, 125, 126, 115, 119, 49, 51, 117: break            // ← → ↓ ↑ Home End Space ⌫ ⌦
         default: return event.charactersIgnoringModifiers?.lowercased() == "c"
+        }
+        return true
+    }
+
+    /// **The keys while the brush is up**: Return uses the mask, Esc leaves, ⌘Z and ⌫ take back the last
+    /// stroke, B and E pick the tool; the strip's keys stay out of it — a stroke is not a selection.
+    private func maskKey(_ event: NSEvent) -> Bool {
+        let mods = Self.chord(event)
+        if mods == .command, event.charactersIgnoringModifiers?.lowercased() == "z" {
+            app.undoMaskStroke()
+            return true
+        }
+        guard mods.isEmpty else { return false }
+        switch Int(event.keyCode) {
+        case 36, 76: app.commitMaskPainting()                  // Return, Enter
+        case 53: app.cancelMaskPainting()                      // Esc
+        case 51: app.undoMaskStroke()                          // ⌫
+        default:
+            switch event.charactersIgnoringModifiers?.lowercased() {
+            case "b": app.setMaskTool(.brush)
+            case "e": app.setMaskTool(.eraser)
+            default: break
+            }
         }
         return true
     }

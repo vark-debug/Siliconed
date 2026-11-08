@@ -270,7 +270,8 @@ final class AppState {
     var chosenStartStrength: Double?
     /// **The 「移除」 path's sources** (`Request.patch`) are a value of one render (`PatchInput`, passed
     /// to `render`) — a redo's —, never a state of the form: a mask that outlived its job would be
-    /// rendered again by the next ordinary click. The app draws no brush and no curtain.
+    /// rendered again by the next ordinary click. The mask itself is painted in the canvas
+    /// (`MaskEditor`) or imported as a PNG (`chooseMask`), then attached the same way.
     var steps = 8
     /// **More detail** (`Detail`): Normal is the render as the model makes it. What a render takes is
     /// `effectiveDetail`: on a model that offers none (Anima, Krea 2: `DenoisingModule.acceptsDetail`), Normal.
@@ -509,6 +510,9 @@ final class AppState {
     var enlargeSpeed: Double?
     /// **The crop being made** (`CropEditor.swift`): the frame over an image of the history or an edit's reference.
     var cropping: CropSession?
+    /// **The mask being painted** (`MaskPainter.swift`): image 1 under the brush, in the canvas's place.
+    /// Its strokes become a white-on-black mask of image 1's size, attached like an imported PNG's.
+    var paintingMask: MaskSession?
     /// The session's finished jobs, their outcome, their images (even removed from the history
     /// since) and the engine's warnings during their render: `wait t3` afterwards still returns the answer.
     private(set) var completed: [Int: (job: Job, issue: Issue, images: [Int], warnings: [String])] = [:]

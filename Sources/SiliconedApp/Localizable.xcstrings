@@ -6790,42 +6790,42 @@
         }
       }
     },
-    "A mask the size of image 1: white is what changes, black what stays" : {
+    "A mask the size of image 1: white is what changes, black what stays — painted or imported" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Eine Maske in der Größe von Bild 1: Weiß ist das, was sich ändert, Schwarz das, was bleibt"
+            "value" : "Eine Maske in der Größe von Bild 1: Weiß ändert sich, Schwarz bleibt — gemalt oder importiert"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Una máscara del tamaño de la imagen 1: el blanco es lo que cambia, el negro lo que se queda"
+            "value" : "Una máscara del tamaño de la imagen 1: el blanco cambia, el negro permanece — pintada o importada"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Un masque à la taille de l’image 1 : le blanc est ce qui change, le noir ce qui reste"
+            "value" : "Un masque à la taille de l’image 1 : le blanc est ce qui change, le noir ce qui reste — peint ou importé"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Una maschera della dimensione dell’immagine 1: il bianco è ciò che cambia, il nero ciò che resta"
+            "value" : "Una maschera della dimensione dell’immagine 1: il bianco è ciò che cambia, il nero ciò che resta — dipinta o importata"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "画像 1 と同じサイズのマスク。白が変わる部分、黒が残る部分です"
+            "value" : "画像1と同じサイズのマスクです。白が変わる領域、黒が残る領域で、塗ったものでも読み込んだものでも同じです。"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "与图像 1 同尺寸的遮罩：白色为改动区，黑色为保留区"
+            "value" : "和图像 1 同尺寸的遮罩：白色是改动区域，黑色是保留区域，涂抹和导入都一样。"
           }
         }
       }
@@ -10077,6 +10077,86 @@
         }
       }
     },
+    "Brush" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pinsel"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pincel"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pinceau"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pennello"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "筆"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "画笔"
+          }
+        }
+      }
+    },
+    "Brush paints the area, eraser takes it back (B / E)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Pinsel malt die Fläche, der Radierer nimmt sie zurück (B / E)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El pincel pinta la zona, la goma la recupera (B / E)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le pinceau peint la zone, la gomme la reprend (B / E)"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il pennello dipinge l’area, la gomma la riprende (B / E)"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "筆は領域を塗り、消しゴムは塗りを戻します（B / E）"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "画笔涂抹改动区域，橡皮擦擦除 (B / E)"
+          }
+        }
+      }
+    },
     "Budget %@" : {
       "localizations" : {
         "de" : {
@@ -11873,6 +11953,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "在文本中引用"
+          }
+        }
+      }
+    },
+    "Clear" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alles löschen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Borrar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Effacer"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancella"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "クリア"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "清空"
           }
         }
       }
@@ -18840,6 +18960,47 @@
         }
       }
     },
+    "Image 1 changed: the painted mask has no image to fit" : {
+      "comment" : "Image 1 was replaced while its mask was being painted",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bild 1 wurde geändert: Die gemalte Maske passt zu keinem Bild mehr"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La imagen 1 cambió: la máscara pintada ya no tiene imagen a la que ajustarse"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’image 1 a changé : le masque peint n’a plus d’image à épouser"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’immagine 1 è cambiata: la maschera dipinta non ha più un’immagine su cui adattarsi"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "画像1が変わりました。塗ったマスクに合わせる画像がありません。"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "图像 1 已更换：涂好的遮罩没有可对应的图像。"
+          }
+        }
+      }
+    },
     "Image 1 is the one edited and gives the format. The rack takes 3 images at most." : {
       "localizations" : {
         "de" : {
@@ -21401,6 +21562,46 @@
         }
       }
     },
+    "Leave without a mask (Esc)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ohne Maske verlassen (Esc)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salir sin máscara (Esc)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Partir sans masque (Échap)"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esci senza maschera (Esc)"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マスクなしで終了（Esc）"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不保留遮罩，直接退出 (Esc)"
+          }
+        }
+      }
+    },
     "Leave without cropping (Esc)" : {
       "localizations" : {
         "de" : {
@@ -22397,6 +22598,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "遮罩"
+          }
+        }
+      }
+    },
+    "Mask brush" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maskenpinsel"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pincel de máscara"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pinceau de masque"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pennello della maschera"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マスクの筆"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "遮罩画笔"
           }
         }
       }
@@ -24800,6 +25041,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "取消包围"
+          }
+        }
+      }
+    },
+    "No prompt: this render removes the marked area." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein Prompt: Dieser Render entfernt die markierte Fläche."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin prompt: este render elimina la zona marcada."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas de prompt : ce rendu retire la zone marquée."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nessun prompt: questo render rimuove l’area contrassegnata."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プロンプトなし。この描画はマークした領域を削除します。"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "没有提示词：本次生成会移除标记的区域。"
           }
         }
       }
@@ -27378,42 +27659,203 @@
         }
       }
     },
-    "PNG, image 1’s size: white changes, black stays." : {
+    "PNG or brush: image 1’s size. White changes, black stays." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "PNG in der Größe von Bild 1: Weiß ändert sich, Schwarz bleibt."
+            "value" : "PNG oder Pinsel: in der Größe von Bild 1. Weiß ändert, Schwarz bleibt."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "PNG, del tamaño de la imagen 1: el blanco cambia, el negro se queda."
+            "value" : "PNG o pincel: del tamaño de la imagen 1. El blanco cambia, el negro permanece."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "PNG, à la taille de l’image 1 : le blanc change, le noir reste."
+            "value" : "PNG ou pinceau : à la taille de l’image 1. Le blanc change, le noir reste."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "PNG, della dimensione dell’immagine 1: il bianco cambia, il nero resta."
+            "value" : "PNG o pennello: della dimensione dell’immagine 1. Il bianco cambia, il nero resta."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "PNG、画像 1 と同じサイズ。白が変わる部分、黒が残る部分です"
+            "value" : "PNG でも筆でも、画像1と同じサイズ。白が変わる所、黒が残る所です。"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "PNG，与图像 1 同尺寸：白色为改动区，黑色为保留区。"
+            "value" : "PNG 或画笔：都是图像 1 的尺寸。白色是改动，黑色是保留。"
+          }
+        }
+      }
+    },
+    "Paint Mask…" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maske malen…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pintar la máscara…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peindre le masque…"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dipingi la maschera…"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マスクを描く…"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "涂抹遮罩…"
+          }
+        }
+      }
+    },
+    "Paint over image 1 again: the stroke you commit replaces this mask" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Malen Sie erneut auf Bild 1: Die übernommenen Striche ersetzen diese Maske"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vuelve a pintar sobre la imagen 1: los trazos confirmados reemplazan esta máscara"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peignez de nouveau sur l’image 1 : les traits validés remplacent ce masque"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dipingi di nuovo sull’immagine 1: i tratti confermati sostituiscono questa maschera"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "画像1をもう一度塗ります。確定した線がこのマスクと入れ替わります。"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在图像 1 上重新涂抹：确认后的笔画会替换这个遮罩。"
+          }
+        }
+      }
+    },
+    "Paint the area to change first" : {
+      "comment" : "An empty painted mask: there is nothing to replace",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Malen Sie zuerst die zu ändernde Fläche"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pinta primero la zona que quieres cambiar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peignez d’abord la zone à changer"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dipingi prima l’area da cambiare"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "先に変える領域を塗ってください"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请先涂抹要改动的区域"
+          }
+        }
+      }
+    },
+    "Paint the mask over image 1 with a brush and an eraser" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Malen Sie die Maske mit Pinsel und Radierer auf Bild 1"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pinta la máscara sobre la imagen 1 con pincel y goma"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peignez le masque sur l’image 1 au pinceau et à la gomme"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dipingi la maschera sull’immagine 1 con pennello e gomma"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "画像1に筆と消しゴムでマスクを描きます"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "用画笔和橡皮擦在图像 1 上涂出遮罩"
           }
         }
       }
@@ -27494,6 +27936,47 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "请用黑底白字涂出要改动的区域，然后重新附加。"
+          }
+        }
+      }
+    },
+    "Painted mask" : {
+      "comment" : "The name a mask painted in the Prompt Lab is attached under",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gemalte Maske"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Máscara pintada"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Masque peint"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maschera dipinta"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "塗ったマスク"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "涂抹的遮罩"
           }
         }
       }
@@ -29106,6 +29589,47 @@
         }
       }
     },
+    "Redraw needs a prompt: say what the marked area becomes." : {
+      "comment" : "The redraw branch cannot fill one in: only the remove branch has a default",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neuzeichnen braucht einen Prompt: Sagen Sie, was aus der markierten Fläche wird."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Redibujar necesita un prompt: di qué llega a ser la zona marcada."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le redessin demande un prompt : dites ce que devient la zone marquée."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ridisegnare richiede un prompt: dì cosa diventa l’area contrassegnata."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再描画にはプロンプトが必要です。マークした領域が何になるかを書いてください。"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "局部重绘需要提示词：请写明标记区域要变成什么。"
+          }
+        }
+      }
+    },
     "Redraw preset (0.48)" : {
       "localizations" : {
         "de" : {
@@ -29983,6 +30507,47 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "请移除这些 LoRA，或改变模型以外的其他项。"
+          }
+        }
+      }
+    },
+    "Remove the green area from the image." : {
+      "comment" : "The prompt a masked remove fills in when the field is empty; the workflow's own sentence",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entferne den grünen Bereich aus dem Bild."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elimina la zona verde de la imagen."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retirez la zone verte de l’image."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rimuovi l’area verde dall’immagine."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "画像から緑色の領域を削除します。"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除图像中的绿色区域。"
           }
         }
       }
@@ -35426,6 +35991,86 @@
         }
       }
     },
+    "Take back every stroke" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle Striche zurücknehmen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deshacer todos los trazos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reprendre tous les traits"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annulla tutti i tratti"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すべての線を取り消す"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "撤销全部笔画"
+          }
+        }
+      }
+    },
+    "Take back the last stroke (⌘Z)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Den letzten Strich zurücknehmen (⌘Z)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deshacer el último trazo (⌘Z)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reprendre le dernier trait (⌘Z)"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annulla l’ultimo tratto (⌘Z)"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最後の線を取り消す（⌘Z）"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "撤销上一笔 (⌘Z)"
+          }
+        }
+      }
+    },
     "Text" : {
       "localizations" : {
         "de" : {
@@ -36148,6 +36793,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "提示词实验室的文本为空：没有可改写的内容。"
+          }
+        }
+      }
+    },
+    "The brush's size" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Größe des Pinsels"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El tamaño del pincel"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La taille du pinceau"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La dimensione del pennello"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "筆の大きさ"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "画笔大小"
           }
         }
       }
@@ -38248,6 +38933,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "遮罩为 %1$@ × %2$@，图像为 %3$@ × %4$@：遮罩必须与图像同尺寸，绝不缩放。"
+          }
+        }
+      }
+    },
+    "The mask will be this size — image 1's" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Maske bekommt diese Größe — die von Bild 1"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La máscara tendrá este tamaño: el de la imagen 1"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le masque aura cette taille — celle de l’image 1"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La maschera avrà questa dimensione: quella dell’immagine 1"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マスクはこのサイズになります。画像1のサイズです。"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "遮罩就是这个尺寸，与图像 1 相同"
           }
         }
       }
@@ -42403,6 +43128,86 @@
         }
       }
     },
+    "This mask could not be painted" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diese Maske konnte nicht gemalt werden"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo pintar esta máscara"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce masque n’a pas pu être peint"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Questa maschera non è stata dipinta"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このマスクを描けませんでした"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这个遮罩没能画出来"
+          }
+        }
+      }
+    },
+    "This mask edits image 1 once (↩)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diese Maske bearbeitet Bild 1 einmal (↩)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta máscara edita la imagen 1 una vez (↩)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce masque édite l’image 1 une fois (↩)"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Questa maschera modifica l’immagine 1 una volta (↩)"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このマスクは画像1を一度だけ編集します（↩）"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这个遮罩只改一次图像 1 (↩)"
+          }
+        }
+      }
+    },
     "This measures “%@”, the Mac that computes for you." : {
       "localizations" : {
         "de" : {
@@ -43479,6 +44284,46 @@
         }
       }
     },
+    "Tool" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Werkzeug"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Herramienta"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Outil"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Strumento"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "道具"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "工具"
+          }
+        }
+      }
+    },
     "Total" : {
       "localizations" : {
         "de" : {
@@ -44039,6 +44884,46 @@
         }
       }
     },
+    "Undo" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zurück"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deshacer"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annuler"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annulla"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取り消し"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "撤销"
+          }
+        }
+      }
+    },
     "Unfold the Prompt Lab" : {
       "localizations" : {
         "de" : {
@@ -44361,6 +45246,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "使用 %@ × %@"
+          }
+        }
+      }
+    },
+    "Use Mask" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maske verwenden"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usar la máscara"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Utiliser le masque"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usa la maschera"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マスクを使う"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用遮罩"
           }
         }
       }
@@ -51827,6 +52752,46 @@
         }
       }
     },
+    "redraw needs a prompt: say what the marked area becomes" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neuzeichnen braucht einen Prompt: Sagen Sie, was aus der markierten Fläche wird"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "redibujar necesita un prompt: di qué llega a ser la zona marcada"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "le redessin demande un prompt : dites ce que devient la zone marquée"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ridisegnare richiede un prompt: dì cosa diventa l’area contrassegnata"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再描画にはプロンプトが必要です。マークした領域が何になるかを書いてください"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "局部重绘需要提示词：请写明标记区域要变成什么"
+          }
+        }
+      }
+    },
     "refused: that Mac forgot this one; pair again" : {
       "localizations" : {
         "de" : {
@@ -54801,6 +55766,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "词"
+          }
+        }
+      }
+    },
+    "write the sentence the area becomes — or --mode remove, whose prompt the mask fills" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schreiben Sie den Satz, der die Fläche wird — oder --mode remove, dessen Prompt die Maske füllt"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "escribe la frase en la que se convierte la zona — o --mode remove, cuyo prompt rellena la máscara"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "écrivez la phrase que la zone devient — ou --mode remove, dont le prompt est rempli par le masque"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "scrivi la frase in cui diventa l’area — oppure --mode remove, il cui prompt è riempito dalla maschera"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "領域が何になるかの文を書いてください。または --mode remove ではマスクがプロンプトを埋めます"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请写明该区域要变成什么；或用 --mode remove，由遮罩自动填写提示词"
           }
         }
       }

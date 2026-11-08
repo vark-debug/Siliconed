@@ -11,7 +11,7 @@
 //   No Role) or names it. Full (three images with the cited subjects), a newcomer comes in without a role and says so.
 // - **Under Z-Image, Anima, Krea 2, MOSS** an image comes in without a role: « Start From This Image » makes it the start
 //   (its tile then carries the rack's strength), Describe writes what it shows into the text.
-// - **Right-click**: Crop…, Replace…, Name…, Reuse These Settings (a PNG Siliconed wrote), Remove.
+// - **Right-click**: Crop…, Paint Mask… (on image 1), Replace…, Name…, Reuse These Settings (a PNG Siliconed wrote), Remove.
 // - A **subject** (`SubjectSheet.swift`) goes only when the text cites it by `@name`, after the images the roles send.
 
 import AppKit
@@ -74,6 +74,10 @@ struct LabImages: View {
         if model.pictures.isEmpty && model.subjects.all.isEmpty {
             return "Drop images here. The first one is the image to edit; a name makes a picture citable as @name in the text."
         }
+        if model.rack.attachedMask != nil, model.rack.patchMode == .remove,
+           model.rack.prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return "No prompt: this render removes the marked area."
+        }
         return "Image 1 is the one edited and gives the format. The rack takes 3 images at most."
     }
 
@@ -111,10 +115,11 @@ enum LabTile {
     }
 }
 
-/// **The mask attached to image 1** — the minimal entry to the 「移除」 path (`AppState+Mask.swift`). A tile beside
-/// the images: « Attach Mask… » opens a PNG picker; once attached it shows the file's thumbnail, its name, the crop's
-/// plan size, and « Remove Mask ». With a mask attached, « Generate » edits image 1 through the workflow; the mask
-/// goes with that one click and the next is an ordinary render.
+/// **The mask attached to image 1** — the entry to the 「移除」 path (`AppState+Mask.swift`). A tile beside
+/// the images: « Attach Mask… » opens a PNG picker, « Paint Mask… » opens the brush over image 1 (`MaskEditor`);
+/// once attached it shows the mask's thumbnail, its name, the crop's plan size, and « Remove Mask ». With a
+/// mask attached, « Generate » edits image 1 through the workflow; the mask goes with that one click and the
+/// next is an ordinary render. A brush-made mask and a PNG become the same `ImageMask`.
 private struct MaskTile: View {
     let model: LabModel
     private var rack: AppState { model.rack }
@@ -142,6 +147,10 @@ private struct MaskTile: View {
                         .help(attached.mask.name)
                     Text(verbatim: "\(attached.mask.width) × \(attached.mask.height) → \(attached.plan.width) × \(attached.plan.height)")
                         .font(.caption2).foregroundStyle(.secondary).lineLimit(1)
+                    Button("Paint Mask…") { rack.beginMaskPainting() }
+                        .controlSize(.small)
+                        .disabled(!rack.canAttachMask)
+                        .help("Paint over image 1 again: the stroke you commit replaces this mask")
                     Button("Remove Mask") { rack.removeMask() }
                         .controlSize(.small)
                         .help("The next render is an ordinary one again, at the format the form shows")
@@ -149,17 +158,22 @@ private struct MaskTile: View {
                     Button("Attach Mask…") { rack.chooseMask() }
                         .controlSize(.small)
                         .disabled(!rack.canAttachMask)
-                    Text("PNG, image 1’s size: white changes, black stays.")
+                    Button("Paint Mask…") { rack.beginMaskPainting() }
+                        .controlSize(.small)
+                        .disabled(!rack.canAttachMask)
+                        .help("Paint the mask over image 1 with a brush and an eraser")
+                    Text("PNG or brush: image 1’s size. White changes, black stays.")
                         .font(.caption2).foregroundStyle(.secondary).lineLimit(3)
                         .fixedSize(horizontal: false, vertical: true)
                         .help(rack.canAttachMask
-                              ? Text("A mask the size of image 1: white is what changes, black what stays")
+                              ? Text("A mask the size of image 1: white is what changes, black what stays — painted or imported")
                               : Text("A mask edits image 1 alone: one image in the lab, its size"))
                 }
             }
             .frame(width: LabTile.meta, alignment: .leading)
         }
         .contextMenu {
+            Button("Paint Mask…") { rack.beginMaskPainting() }.disabled(!rack.canAttachMask)
             if rack.attachedMask == nil {
                 Button("Attach Mask…") { rack.chooseMask() }.disabled(!rack.canAttachMask)
             } else {
@@ -288,6 +302,7 @@ private struct PictureTile: View {
         }
         // Image 1's mask, beside the image it edits (`AppState+Mask.swift`).
         if rack.canPatchMask, rack.editInputs.first?.id == picture.id {
+            Button("Paint Mask…") { rack.beginMaskPainting() }.disabled(!rack.canAttachMask)
             if rack.attachedMask == nil {
                 Button("Attach Mask…") { rack.chooseMask() }.disabled(!rack.canAttachMask)
             } else {

@@ -1,13 +1,16 @@
-// **`AppState`: the mask attached in the Prompt Lab** — the minimal entry to the 「移除」 path
-// (`Patch`): one PNG the size of image 1, attached to the next click only.
+// **`AppState`: the mask attached in the Prompt Lab** — the entry to the 「移除」 path (`Patch`):
+// painted over image 1 (`MaskEditor`) or imported as a PNG, attached to the next click only.
 //
-//     Prompt Lab ── « Attach Mask… », a PNG the size of image 1 ──▶ attachedMask (mask, plan)
+//     Prompt Lab ── painted strokes / « Attach Mask… », the size of image 1 ──▶ attachedMask (mask, plan)
 //                                                                        │
 //     render() ── image 1 + that mask ──▶ PatchInput ──▶ the job ──▶ crop, tint, noise_mask, paste
 //
+// - **Both entries make the same mask**: the painted strokes become a white-on-black bitmap of image
+//   1's pixels, then `attachMask` reads it through `ImageMask` exactly as it reads a PNG — one size
+//   check, one `> 0.1`, one hole filling, one `Patch.plan`. There is no second mask geometry.
 // - **It belongs to one render**: `render` takes it before the jobs are made and clears it, so the
 //   next click is an ordinary render unless the user attaches it again — the leak the 0.20 fix
-//   (`a08e33f`) closed, now with the entry that needs it.
+//   (`a08e33f`) closed, now with the entries that need it.
 // - **Its size is the image's**, never scaled here: a mask of another size is refused with both
 //   sizes said. The crop, its margins and the plan are the engine's (`Patch.plan`), the defaults
 //   the command line's (`Patch.Settings()`: 1.3/1.4/1.4/1.4, 2560, `noise_mask` on).
@@ -15,7 +18,7 @@
 //   and the job read the plan's dimensions.
 // - **A redo keeps its image's own mask** (`entry.mask`, `entry.settings.patch`); the lab's
 //   attachment never enters a redo — the entry decides what it renders.
-// - **Incognito**: the mask lives in memory, read from the file at attach time; nothing is written.
+// - **Incognito**: the mask lives in memory, read from the file or painted there; nothing is written.
 
 import AppKit
 import Siliconed
@@ -167,6 +170,78 @@ extension AppState {
         // Nine was the mask's: back to the model's default when the form still holds it — a count the
         // user chose while attached stays theirs.
         if steps == Patch.defaultSteps { steps = card?.defaultSteps ?? 8 }
+    }
+
+    // MARK: Painting
+
+    /// **« Paint Mask… »** (`MaskEditor`): image 1 decoded at its own size, under a brush and an
+    /// eraser. The strokes stay in the image's frame, so the mask is image 1's size — the PNG's.
+    func beginMaskPainting() {
+        guard paintingMask == nil, canAttachMask, let image = editInputs.first?.shown else { return }
+        let id = image.id, width = image.width, height = image.height
+        MainWindow.shared.releaseTextFocus()
+        Task {
+            let decoded = await Task.detached(priority: .userInitiated) {
+                Decoded(image.displayed(width: width, height: height))
+            }.value
+            guard let cg = decoded.image, paintingMask == nil, editInputs.first?.shown.id == id else { return }
+            MainWindow.shared.releaseTextFocus()
+            showsExploration = false
+            followsRender = false
+            comparesOriginal = false
+            zoom = 1
+            paintingMask = MaskSession(image: cg, imageID: id)
+        }
+    }
+
+    /// **Esc**: leave without a mask — the strokes are not kept.
+    func cancelMaskPainting() { paintingMask = nil }
+
+    func setMaskTool(_ tool: MaskSession.Tool) { paintingMask?.tool = tool }
+
+    func setMaskBrush(_ brush: CGFloat) {
+        paintingMask?.brush = min(max(brush, MaskSession.brushRange.lowerBound), MaskSession.brushRange.upperBound)
+    }
+
+    func addMaskStroke(_ stroke: MaskSession.Stroke) { paintingMask?.strokes.append(stroke) }
+
+    func undoMaskStroke() {
+        guard paintingMask?.strokes.isEmpty == false else { return }
+        paintingMask?.strokes.removeLast()
+    }
+
+    func clearMaskStrokes() { paintingMask?.strokes.removeAll() }
+
+    /// **« Use Mask » / Return**: the strokes become a white-on-black bitmap of image 1's size, then
+    /// the attachment every mask goes through — the size check, `ImageMask`, hole filling, the plan.
+    func commitMaskPainting() {
+        guard let session = paintingMask else { return }
+        guard !session.isEmpty else {
+            flash(String(localized: "Paint the area to change first",
+                         comment: "An empty painted mask: there is nothing to replace"))
+            return
+        }
+        guard let image = editInputs.first?.shown, image.id == session.imageID else {
+            paintingMask = nil
+            flash(String(localized: "Image 1 changed: the painted mask has no image to fit",
+                         comment: "Image 1 was replaced while its mask was being painted"))
+            return
+        }
+        paintingMask = nil
+        Task {
+            let painted = await Task.detached(priority: .userInitiated) { session.maskImage() }.value
+            guard let cg = painted else {
+                flash(String(localized: "This mask could not be painted"))
+                return
+            }
+            let vignette = FinishedImage.reduce(cg, side: 240) ?? cg
+            let mask = ReferenceImage(source: .image(cg),
+                                      vignette: NSImage(cgImage: vignette, size: .zero),
+                                      name: String(localized: "Painted mask",
+                                                   comment: "The name a mask painted in the Prompt Lab is attached under"),
+                                      width: cg.width, height: cg.height)
+            await attachMask(mask, to: image)
+        }
     }
 
     // MARK: One render's

@@ -33,6 +33,8 @@ struct SceneView: View {
         ZStack {
             if let crop = app.cropping {
                 CropEditor(app: app, session: crop)
+            } else if let painting = app.paintingMask {
+                MaskEditor(app: app, session: painting)
             } else if let job = app.currentJob, app.followsRender || app.history.isEmpty {
                 inProgress(job)
             } else if app.showsOriginal, let original = app.original, let selected = app.selectedImage,
