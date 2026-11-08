@@ -80,6 +80,13 @@ The region is filled, cropped with a margin, and that **crop is image 1** for th
 (and the denoiser's reference block). The prompt says what happens in it. The render starts from
 **noise** unless `--seeded-start` asks otherwise (section 5).
 
+**The GUI paints the same mask** (`MaskPainter.swift`): the brush and the eraser over image 1 draw
+white on black at image 1's own pixels, and that bitmap is handed to the same `ImageMask` — the
+same `> 0.1` threshold, hole filling (`filled()`), 10 px floor and `Patch.plan` geometry — as an
+imported PNG. Either entry (« Paint Mask… » or « Attach Mask… ») lands in the same attachment.
+No zoom, no pan, no redo: undo is one stroke, « Clear » is all of them, and a stroke committed
+replaces whatever mask was attached before.
+
 ## 4. The default: `--mode remove`
 
 ```sh
@@ -89,6 +96,13 @@ silicontrol add --model qwen-image-2.1 --image photo.jpg --mask photo-mask.png \
 
 `--mode` left out is `.remove`: the crop is tinted `#00FF00` at 0.4 inside the mask (the
 workflow's `图像合并（遮罩）`), and `--lora remove` (1.0) is wired for you.
+
+**A mask may leave the prompt out — in the GUI and on the CLI alike**: `silicontrol add --image
+photo.jpg --mask photo-mask.png` with no sentence (the positional is optional with `--mask`) fills
+in « Remove the green area from the image. », the same localised string (six languages) the app's
+field shows; the same `add` with `--mode redraw` and no sentence is refused (`error: "prompt"`),
+never filled — the program cannot know what the marked area should become. Without `--mask` an
+empty prompt is still refused (`error: "usage"`).
 
 ## 5. The two branches: `--mode remove | redraw`
 
@@ -196,11 +210,12 @@ A patch entry keeps `settings.patch` (`mode`, `expansion`, `maximumSide`, `seede
 - **The crop decides the format**: with `--mask`, `--ref`, `--strength`, a typed format and
   `--grid` are refused (`error: "format"` / `"ref"` / `"grid"`).
 - **`--mask` is Qwen-Image-2.1 only** (`error: "patch"` on other models).
-- **GUI × CLI**: the GUI takes a mask **PNG** attached beside image 1 in the Prompt Lab — there is
-  no brush; it does not expose `--expand`, `--max-side`, `--seeded-start`, `--noise-mask` or
-  `--no-paste` (defaults apply), and its branch comes from the rack's **Add menu** presets
-  (`Remove preset (1.0)` / `Redraw preset (0.48)`) — the same `Patch.Settings.mode` the CLI writes.
-  A rack holding both presets is refused before the click.
+- **GUI × CLI**: the GUI takes a mask **painted over image 1** (brush + eraser, `MaskPainter.swift`)
+  or attached as a **PNG** in the Prompt Lab — two entries, one `ImageMask`; it does not expose
+  `--expand`, `--max-side`, `--seeded-start`, `--noise-mask` or `--no-paste` (defaults apply), and
+  its branch comes from the rack's **Add menu** presets (`Remove preset (1.0)` / `Redraw preset
+  (0.48)`) — the same `Patch.Settings.mode` the CLI writes. A rack holding both presets is refused
+  before the click. The painted mask, like an imported one, lives for **one** render (`a08e33f`).
 
 ## 10. Error codes, and what to do
 
@@ -208,7 +223,8 @@ The CLI refusals (`ok:false`, `error`) come before a job is queued:
 
 | code | seen with | do |
 |---|---|---|
-| `usage` | `--mode` / `--paste` / `--no-paste` / `--crop-only` without `--mask`; two disagreeing spellings; an unknown `--mode` value | add the missing flag, keep one spelling, use `remove` or `redraw` |
+| `usage` | `--mode` / `--paste` / `--no-paste` / `--crop-only` without `--mask`; two disagreeing spellings; an unknown `--mode` value; an empty prompt without `--mask` | add the missing flag, keep one spelling, use `remove` or `redraw` |
+| `prompt` | `--mode redraw` with an empty prompt beside `--mask` | write the sentence the area becomes, or `--mode remove`, whose prompt the mask fills |
 | `patch` | mask of another size than image 1; an empty region; a crop that renders under 448 px on its short side; a model without the mask workflow; a mask with `--ref` on a non-Qwen model | fix the PNG, widen the mask or make the crop less elongated, or use Qwen-Image-2.1 |
 | `mode` | `--mode` against the other branch's preset; both presets | name one branch |
 | `lora` | a preset with `:strength`; `--lora expand`; the same LoRA twice; an uninstalled preset | `--lora remove` / `--lora redraw` bare; install it (`silicontrol models`) |
@@ -239,3 +255,39 @@ The engine's codes arrive as a job's failure (`add --wait`, `status`, `follow`):
 5. `--wait --out out` and read the last JSON line; on failure see section 10.
 6. Compare: the pasted entry's compare button shows the original beside the result; for the raw
    crop, rerun with `--no-paste`.
+
+## 12. `--mode redraw` against the workflow's redraw branch
+
+The graph's branch test is node 22 (`DF_Text_Box`): empty → 270 (remove, node 118); non-empty →
+274 (redraw). The redraw path, from the JSON: `GH_MaskCropV2`(249, 原像素) → `图像缩放（范围）`(247,
+long side 768–2560, ÷32) → `Get Image Size`(248) → `图像缩放V2`(250, 拉伸, width/height from 248) →
+`TextEncodeQwenImage21GH`(255) → `SamplerCustomAdvanced`(274; model 258 = consistency LoRA 0.48;
+`KSamplerSelect`(268) euler; `ManualSigmas`(271)).
+
+| item | workflow | this app (`--mode redraw`) | alignment |
+|---|---|---|---|
+| start | `latent_image` = 255's latent output (empty latent) + `RandomNoise`(267) | `Latent.noise` at the plan's size; `seededStart` off by default | **aligned** — pure noise |
+| `noise_mask` | 250 and 255 take the crop's mask (`249[2]`); there is no separate mask node | `Patch.Settings.noiseMask` = true, applied in both modes (`EngineRender` → `Context.Inpaint`) | **aligned by design**; the JSON proves the mask enters 250, the hand-off inside the encode node is not inspectable here |
+| reference size | `image_01` = 250[0]: the crop stretched exactly to the 247 size (250's «将边缩放到 1024» is superseded by 248's width/height) | the same plan size; `Patch.render` → `fitted` is **cover + centre crop**; `primaryMatchesTarget` (≤64 px cut) passes it as is, otherwise `--ref-res` (768–2560, ÷32) | **near** — the size agrees; resampling differs (cover vs stretch, ≤16 px a side from the ÷32 rounding), and a crop whose cover cut exceeds 64 px gets a different encoder size |
+| steps | `ManualSigmas` 9 steps (10 σ: 1.0 … 0) | `Patch.defaultSteps` = 9; `sigmas(steps: 9)` = the same table | **aligned** |
+| LoRA | 258 consistency, 0.48 | `--lora redraw` preset 0.48 | **aligned** |
+| crop geometry | 249 at 原像素, expansion 1.3/1.4/1.4/1.4, 倍数取整 0; 247 long side 768–2560, ÷32 | `Patch.plan`: margins from the box's shortest side, same long-side bounds, same ÷32 scheme | **aligned** |
+| paste | `GH_CropRestore`(252): 4 % / 5 % / 1, seam `249[0]`, crop `256` | `Patch.composited` (`Paste.swift`): 4/5/1, original as background, same feather / colour match / dither, output at the original's size | **aligned** in parameters and maths; the seam is rebuilt from the original + filled mask instead of read from a node |
+| sampler | `KSamplerSelect` euler | Euler (the default solver) | **aligned** |
+| prompt | `提示词优化`(179: I2I gguf, seed 666, `image_01` = the crop) → 277 → 255 | the user's sentence, verbatim | **not aligned** |
+
+**What the two unaligned items look like**:
+
+- **Prompt optimizer**: the same sentence reaches the model as the workflow's rewritten prompt
+  (usually longer, often English, staged from the crop's content) versus the sentence as typed.
+  The redraw follows the typed wording literally and less predictably.
+- **Cover vs stretch**: at most a few pixels of scale/shift when the ÷32 plan rounds the crop —
+  sub-pixel at 9 steps, no visible change of content. For an elongated crop (cover cut > 64 px)
+  the encoder reads it at `--ref-res`, where the workflow stretches it to the plan: fine
+  texture/geometry of the reference can differ; the paste itself is unaffected.
+
+One more difference, on the other branch: node 118's prompt is the fixed
+« 移除图像中的绿色区域 », so the workflow's remove ignores a user sentence; here
+`--mode remove "remove the lamp"` sends it. With no sentence the app fills that same fixed
+string, so the workflow's own behaviour is the default.
+
