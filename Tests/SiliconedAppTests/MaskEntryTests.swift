@@ -68,17 +68,17 @@ final class MaskEntryTests: XCTestCase {
         XCTAssertEqual(app.attachedMaskPlan, RecommendedFormat(plan.width, plan.height),
                        "the render's size is the crop's plan")
 
-        // The job this click makes.
-        let input = app.attachedMaskInput(for: image)
+        // The job this click makes: the prompt reads as the remove branch (its own verb).
+        let input = app.attachedMaskInput(for: image, prompt: "remove the lamp")
         XCTAssertNotNil(input, "the attachment is image 1's mask")
         let jobs = app.renderJobs(seed: 7, format: app.attachedMaskPlan!, patch: input,
-                                  prompts: ["a cat"], edit: [])
+                                  prompts: ["remove the lamp"], edit: [])
         XCTAssertEqual(jobs.count, 1)
         XCTAssertNotNil(jobs[0].patch, "with a mask the job is the 「移除」 path")
         XCTAssertEqual(jobs[0].settings.steps, Patch.defaultSteps,
                        "the job walks the nine the form shows — display and plan, one number")
         XCTAssertEqual(jobs[0].settings.patch, Patch.Settings(),
-                       "expand 1.3/1.4/1.4/1.4, max side 2560, noise_mask on: the command line's defaults")
+                       "expand 1.3/1.4/1.4/1.4, max side 2560, noise_mask on: the remove branch's defaults")
         XCTAssertEqual(jobs[0].settings.format, RecommendedFormat(plan.width, plan.height),
                        "the job renders at the plan's size, not image 1's")
         XCTAssertEqual(jobs[0].references.count, 0, "a patch reads image 1 alone")
@@ -86,12 +86,13 @@ final class MaskEntryTests: XCTestCase {
         // The click takes it — once (`render`), and the form is ordinary again.
         XCTAssertNotNil(app.takeAttachedMask())
         XCTAssertNil(app.attachedMask)
-        XCTAssertNil(app.attachedMaskInput(for: image))
+        XCTAssertNil(app.attachedMaskInput(for: image, prompt: "remove the lamp"))
         XCTAssertNil(app.attachedMaskPlan)
 
         let chosen = RecommendedFormat(512, 512)
         app.format = chosen
-        let plain = app.renderJobs(seed: 8, format: chosen, patch: app.attachedMaskInput(for: image),
+        let plain = app.renderJobs(seed: 8, format: chosen,
+                                   patch: app.attachedMaskInput(for: image, prompt: "remove the lamp"),
                                    prompts: ["a cat"], edit: [])
         XCTAssertNil(plain[0].patch, "the next click carries no mask, hence no green tint")
         XCTAssertNil(plain[0].settings.patch)
@@ -160,7 +161,7 @@ final class MaskEntryTests: XCTestCase {
         XCTAssertNil(MaskPrompt.blocker(prompt: "", masked: true, mode: .remove),
                      "with a mask the prompt may be left empty")
 
-        guard let plan = app.attachedMaskPlan, let input = app.attachedMaskInput(for: image) else {
+        guard let plan = app.attachedMaskPlan, let input = app.attachedMaskInput(for: image, prompt: "") else {
             return XCTFail("no attachment")
         }
         let jobs = app.renderJobs(seed: 1, format: plan, patch: input, prompts: [""], edit: [])
@@ -168,8 +169,10 @@ final class MaskEntryTests: XCTestCase {
                        "the remove branch fills in the workflow's sentence")
         XCTAssertEqual(jobs[0].settings.patch?.mode, .remove)
 
-        let typed = app.renderJobs(seed: 2, format: plan, patch: input, prompts: ["a cat"], edit: [])
-        XCTAssertEqual(typed[0].settings.prompt, "a cat", "a prompt the user wrote is not replaced")
+        let typed = app.attachedMaskInput(for: image, prompt: "a cat")
+        let typedJobs = app.renderJobs(seed: 2, format: plan, patch: typed, prompts: ["a cat"], edit: [])
+        XCTAssertEqual(typedJobs[0].settings.prompt, "a cat", "a prompt the user wrote is not replaced")
+        XCTAssertEqual(typedJobs[0].settings.patch?.mode, .redraw, "no removal verb: the sentence is redraw")
 
         app.removeMask()
         app.prompt = ""
@@ -261,21 +264,23 @@ final class MaskEntryTests: XCTestCase {
     }
 
     /// **The redraw preset's branch reaches the job** (`AppState+Render.swift`): its card switched on in
-    /// the rack gives `Patch.Settings.mode == .redraw` — the engine's `tint: mode != .redraw` false, so
-    /// the crop is not painted green — and the stack holds one LoRA at the workflow's 0.48.
+    /// the rack names the branch the prompt also reads as — `Patch.Settings.mode == .redraw`, the
+    /// engine's `tint: mode != .redraw` false, so the crop is not painted green — and the stack holds
+    /// one LoRA at the workflow's 0.48.
     func testARedrawPresetRendersTheRedrawBranch() async {
         let app = form()
         let redraw = loraCard(.redraw)
         app.compatibleLoras = [redraw]
         app.loras = [LoRASlot(path: redraw.path, strength: PatchLoRA.redraw.strength)]
         let image = await attachAMask(to: app)
-        XCTAssertEqual(app.patchMode, .redraw, "the rack's card picks the branch")
+        XCTAssertEqual(app.rackPresetMode, .redraw, "the rack's card names the branch")
 
-        guard let plan = app.attachedMaskPlan, let input = app.attachedMaskInput(for: image) else {
+        guard let plan = app.attachedMaskPlan,
+              let input = app.attachedMaskInput(for: image, prompt: "make it a red jacket") else {
             return XCTFail("no attachment")
         }
         XCTAssertEqual(input.settings.mode, .redraw, "the click takes the rack's branch, not the default")
-        let jobs = app.renderJobs(seed: 7, format: plan, patch: input, prompts: ["a red jacket"], edit: [])
+        let jobs = app.renderJobs(seed: 7, format: plan, patch: input, prompts: ["make it a red jacket"], edit: [])
         XCTAssertEqual(jobs[0].settings.patch?.mode, .redraw)
         XCTAssertEqual(jobs[0].settings.loras.count, 1, "one LoRA: the preset's, never a remove one beside it")
         XCTAssertEqual(jobs[0].settings.loras.first?.strength, PatchLoRA.redraw.strength)
@@ -289,9 +294,10 @@ final class MaskEntryTests: XCTestCase {
         app.compatibleLoras = [remove]
         app.loras = [LoRASlot(path: remove.path, strength: PatchLoRA.remove.strength)]
         let image = await attachAMask(to: app)
-        XCTAssertEqual(app.patchMode, .remove)
+        XCTAssertEqual(app.rackPresetMode, .remove)
 
-        guard let plan = app.attachedMaskPlan, let input = app.attachedMaskInput(for: image) else {
+        guard let plan = app.attachedMaskPlan,
+              let input = app.attachedMaskInput(for: image, prompt: "remove the lamp") else {
             return XCTFail("no attachment")
         }
         XCTAssertEqual(input.settings.mode, .remove)
@@ -321,8 +327,8 @@ final class MaskEntryTests: XCTestCase {
                           "a card switched off is not stacked, so no conflict")
     }
 
-    /// **A preset card switched off does not pick the branch** (`patchMode` reads `activeLoRAs`): redraw
-    /// off is remove, on is redraw; the remove card beside it keeps remove.
+    /// **A preset card switched off names no branch** (`rackPresetMode` reads `activeLoRAs`): redraw off
+    /// names nothing, on names redraw; the remove card beside it names remove.
     func testATurnedOffPresetDoesNotPickTheBranch() {
         let app = form()
         let remove = loraCard(.remove), redraw = loraCard(.redraw)
@@ -330,12 +336,12 @@ final class MaskEntryTests: XCTestCase {
         var slot = LoRASlot(path: redraw.path, strength: PatchLoRA.redraw.strength)
         slot.on = false
         app.loras = [slot]
-        XCTAssertEqual(app.patchMode, .remove, "switched off: not in the stack")
+        XCTAssertNil(app.rackPresetMode, "switched off: names nothing")
         app.loras[0].on = true
-        XCTAssertEqual(app.patchMode, .redraw)
+        XCTAssertEqual(app.rackPresetMode, .redraw)
         app.loras[0].on = false
         app.loras.append(LoRASlot(path: remove.path, strength: PatchLoRA.remove.strength))
-        XCTAssertEqual(app.patchMode, .remove, "the remove card alone")
+        XCTAssertEqual(app.rackPresetMode, .remove, "the remove card alone")
     }
 
     /// **A painted mask with the redraw preset leaves the crop untinted**: the brush's bitmap goes
@@ -362,12 +368,63 @@ final class MaskEntryTests: XCTestCase {
         await app.attachMask(mask, to: image)
         XCTAssertNotNil(app.attachedMask, "the painted mask is attached")
 
-        guard let plan = app.attachedMaskPlan, let input = app.attachedMaskInput(for: image) else {
+        guard let plan = app.attachedMaskPlan,
+              let input = app.attachedMaskInput(for: image, prompt: "make it a red jacket") else {
             return XCTFail("no attachment")
         }
         XCTAssertEqual(input.settings.mode, .redraw, "the painted entry takes the rack's branch")
-        let jobs = app.renderJobs(seed: 9, format: plan, patch: input, prompts: ["a red jacket"], edit: [])
+        let jobs = app.renderJobs(seed: 9, format: plan, patch: input, prompts: ["make it a red jacket"], edit: [])
         XCTAssertEqual(jobs[0].settings.patch?.mode, .redraw,
                        "redraw: the engine leaves the painted crop as it is (no green)")
+    }
+
+    /// **A prompt alone picks the branch, and the same decision wires the LoRA** — no preset card in the
+    /// rack: a removal sentence is remove (tinted, remove 1.0); any other sentence is redraw (untinted,
+    /// consistency 0.48). These are the workflow's presets, installed in the library but not stacked.
+    func testAPromptPicksItsBranchAndItsLoRA() async {
+        let app = form()
+        app.compatibleLoras = [loraCard(.remove), loraCard(.redraw)]
+        XCTAssertTrue(app.loras.isEmpty, "no preset card in the rack")
+        let image = await attachAMask(to: app)
+        let plan = app.attachedMaskPlan!
+
+        let removal = "remove the lamp and continue the room"
+        let removeInput = app.attachedMaskInput(for: image, prompt: removal)!
+        XCTAssertEqual(app.patchDecision(prompt: removal).mode, .remove)
+        XCTAssertEqual(removeInput.settings.mode, .remove, "tint: the engine paints the crop green")
+        let removeJob = app.renderJobs(seed: 11, format: plan, patch: removeInput, prompts: [removal], edit: [])[0]
+        XCTAssertEqual(removeJob.settings.patch?.mode, .remove)
+        XCTAssertEqual(removeJob.settings.loras.count, 1, "the branch's one LoRA, wired automatically")
+        XCTAssertEqual(removeJob.settings.loras.first?.strength, PatchLoRA.remove.strength)
+
+        let drawing = "make it a red leather jacket"
+        let redrawInput = app.attachedMaskInput(for: image, prompt: drawing)!
+        XCTAssertEqual(app.patchDecision(prompt: drawing).mode, .redraw)
+        XCTAssertEqual(redrawInput.settings.mode, .redraw, "no tint: the crop reaches the model as it is")
+        let redrawJob = app.renderJobs(seed: 12, format: plan, patch: redrawInput, prompts: [drawing], edit: [])[0]
+        XCTAssertEqual(redrawJob.settings.patch?.mode, .redraw)
+        XCTAssertEqual(redrawJob.settings.loras.count, 1)
+        XCTAssertEqual(redrawJob.settings.loras.first?.strength, PatchLoRA.redraw.strength,
+                       "redraw never carries the remove LoRA, or the reverse")
+    }
+
+    /// **A card and a prompt that disagree are refused, not silently resolved** (`maskBlocker`): the
+    /// redraw card switched on beside a removal sentence asks for two branches. The prompt alone would
+    /// be remove; the card alone redraw. Switching the card off lets the prompt decide.
+    func testThePromptAndTheRacksCardDisagreeIsRefused() async {
+        let app = form()
+        let redraw = loraCard(.redraw), remove = loraCard(.remove)
+        app.compatibleLoras = [remove, redraw]
+        app.loras = [LoRASlot(path: redraw.path, strength: PatchLoRA.redraw.strength)]
+        app.prompt = "remove the lamp"
+        await attachAMask(to: app)
+
+        let blocker = app.maskBlocker
+        XCTAssertTrue(blocker?.contains("contradicts") == true,
+                      "the redraw card beside a removal prompt is two branches — got \(blocker ?? "nil")")
+
+        app.loras[0].on = false
+        XCTAssertNotEqual(app.maskBlocker?.contains("contradicts"), true, "the card switched off names nothing")
+        XCTAssertEqual(app.patchDecision(prompt: "remove the lamp").mode, .remove, "the prompt decides")
     }
 }

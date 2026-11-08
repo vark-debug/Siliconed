@@ -80,7 +80,8 @@ extension AppState {
         if missing != nil { return String(localized: "This model isn’t installed.") }
         // **An empty prompt with a mask is the remove sentence** (`MaskPrompt.blocker`): the marked area
         // says what changes. A redraw cannot invent what the area becomes, so it asks for a sentence.
-        if let blocker = MaskPrompt.blocker(prompt: prompt, masked: attachedMask != nil, mode: patchMode) {
+        if let blocker = MaskPrompt.blocker(prompt: prompt, masked: attachedMask != nil,
+                                            mode: patchDecision(prompt: prompt).mode) {
             return blocker
         }
         if case .failure(let e) = alternatives { return Problem(e).text }

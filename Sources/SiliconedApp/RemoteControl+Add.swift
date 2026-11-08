@@ -202,7 +202,8 @@ extension RemoteControl {
         }
         // **The branch, once**: with a mask, `--mode` and the presets named must agree, the two
         // presets exclude each other, and the branch's preset is wired at the workflow's strength
-        // when the user named none — no silent overwrite either way.
+        // when the user named none — no silent overwrite either way. With neither named, the prompt
+        // reads its own branch (`PatchBranch`, the GUI's rule); an empty prompt is remove's.
         if d.mask != nil {
             // **A `--lora` naming a preset's own installed LoRA is that preset** — its file name as
             // the header spells it, or a path to it. Left a bare LoRA it would keep the default
@@ -229,7 +230,7 @@ extension RemoteControl {
                 throw Refusal("mode", String(localized: "--mode \(explicit.rawValue) contradicts --lora \(named.rawValue)"),
                               help: String(localized: "leave --lora out: --mode wires its preset"))
             }
-            let mode = d.mode ?? d.presets.first?.mode ?? .remove
+            let mode = d.mode ?? d.presets.first?.mode ?? PatchBranch.mode(for: d.prompt ?? "")
             d.mode = mode
             if d.presets.first?.mode != mode {
                 let preset = PatchLoRA.preset(for: mode)

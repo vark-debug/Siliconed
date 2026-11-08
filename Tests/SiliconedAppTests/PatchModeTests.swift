@@ -3,8 +3,10 @@
 //
 // What these tests keep:
 //
-// - `--mode` left out is `.remove`: the tinted crop and the remove LoRA at the workflow's 1.0;
-// - `--mode redraw` is `.redraw`: no tint, the redraw LoRA at 0.48 — geometry unchanged;
+// - with a mask and no `--mode` / preset, the prompt reads the branch (`PatchBranch`, the GUI's
+//   rule): a removal sentence is `.remove` (tinted, remove LoRA 1.0), another sentence is `.redraw`
+//   (no tint, redraw LoRA 0.48); an empty prompt is remove's;
+// - `--mode` is the explicit override: it wins over the prompt's reading, and over a preset;
 // - a preset implies the mode, and `--mode` with the other branch's preset is refused, never
 //   silently overridden;
 // - `--no-paste` and `--crop-only` are one switch, and `--paste` against them is refused;
@@ -33,6 +35,44 @@ final class PatchModeTests: XCTestCase {
             guard let refusal = error as? RemoteControl.Refusal else { return XCTFail("\(error)", line: line) }
             XCTAssertEqual(refusal.code, code, refusal.message, line: line)
         }
+    }
+
+    /// **The prompt picks the branch when neither `--mode` nor a preset does**: a removal sentence is
+    /// the remove branch — tinted, the remove LoRA at 1.0 — and any other sentence is redraw, the
+    /// redraw LoRA at 0.48. The mode and the LoRA are one reading, not two.
+    func testAPromptPicksTheBranchWithoutAMode() throws {
+        let remove = try parse(["--image", "photo.png", "--mask", "mask.png", "remove the lamp"])
+        XCTAssertEqual(remove.mode, .remove)
+        XCTAssertEqual(remove.loras.count, 1, "the branch's preset alone")
+        XCTAssertEqual(remove.loras.first?.name, PatchLoRA.remove.fileName)
+        XCTAssertEqual(try XCTUnwrap(remove.loras.first?.strength), PatchLoRA.remove.strength)
+
+        let redraw = try parse(["--image", "photo.png", "--mask", "mask.png", "make it a red jacket"])
+        XCTAssertEqual(redraw.mode, .redraw)
+        XCTAssertEqual(redraw.loras.count, 1)
+        XCTAssertEqual(redraw.loras.first?.name, PatchLoRA.redraw.fileName)
+        XCTAssertEqual(try XCTUnwrap(redraw.loras.first?.strength), PatchLoRA.redraw.strength)
+    }
+
+    /// **A removal that continues is still a removal** — the first group's sentences.
+    func testARemovalThatContinuesStaysRemove() throws {
+        let d = try parse(["--image", "photo.png", "--mask", "mask.png",
+                           "remove the cup, then rebuild the table around it"])
+        XCTAssertEqual(d.mode, .remove)
+        XCTAssertEqual(d.loras.map(\.name), [PatchLoRA.remove.fileName])
+    }
+
+    /// **`--mode` is the explicit override**: it wins over what the prompt would have read, both ways.
+    func testAnExplicitModeOverridesThePromptsReading() throws {
+        let forcedRemove = try parse(["--image", "photo.png", "--mask", "mask.png",
+                                      "--mode", "remove", "make it a red jacket"])
+        XCTAssertEqual(forcedRemove.mode, .remove)
+        XCTAssertEqual(forcedRemove.loras.map(\.name), [PatchLoRA.remove.fileName])
+
+        let forcedRedraw = try parse(["--image", "photo.png", "--mask", "mask.png",
+                                      "--mode", "redraw", "remove the lamp"])
+        XCTAssertEqual(forcedRedraw.mode, .redraw)
+        XCTAssertEqual(forcedRedraw.loras.map(\.name), [PatchLoRA.redraw.fileName])
     }
 
     /// **The default is the workflow's own**: no `--mode`, no preset — the crop tinted, the remove

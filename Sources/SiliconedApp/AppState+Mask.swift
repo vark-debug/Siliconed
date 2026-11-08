@@ -68,9 +68,9 @@ extension AppState {
                            comment: "A patch cannot cross a mirror: its crop and mask are this Mac's")
         }
         // **The two presets are two branches of one workflow**: switched on together, neither is the
-        // mask's — refused before the click. A card switched off is not in the stack (`patchMode`
-        // reads the same `activeLoRAs`). The stack is read before the model's own refusal: it is the
-        // rack's, whatever shape the mask workflow has here.
+        // mask's — refused before the click. A card switched off is not in the stack
+        // (`rackPresetMode` reads the same `activeLoRAs`). The stack is read before the model's own
+        // refusal: it is the rack's, whatever shape the mask workflow has here.
         if let remove = PatchLoRA.card(for: .remove, in: compatibleLoras)?.path,
            let redraw = PatchLoRA.card(for: .redraw, in: compatibleLoras)?.path,
            activeLoRAs.contains(where: { $0.path == remove }),
@@ -78,9 +78,24 @@ extension AppState {
             return String(localized: "The remove and redraw presets are exclusive: keep one in the rack.",
                            comment: "A patch takes one branch of the workflow, not both")
         }
+        // **The prompt and the rack's card are two statements of one branch**: the card is the user's
+        // explicit choice, the prompt's reading a guess — when they disagree neither wins silently.
+        let reading = PatchBranch.mode(for: prompt)
+        if !prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+           let cardMode = rackPresetMode, cardMode != reading {
+            return String(localized: "The \(cardMode.rawValue) preset in the rack contradicts the prompt, which reads as \(reading.rawValue): switch the card off to follow the prompt.",
+                           comment: "A rack preset and the prompt's own reading disagree")
+        }
         guard canPatchMask else {
             return String(localized: "\(modelName(identifier)) has no mask workflow: a mask needs a model that edits by reference (Qwen-Image-2.1).",
                            comment: "The model refuses a patch: no additive start, or no image encoder")
+        }
+        // **The branch's LoRA must be there to be wired** (`patchLoras`): an automatic branch the
+        // library cannot supply would render the branch without its preset — refused, said.
+        let decision = patchDecision(prompt: prompt)
+        if PatchLoRA.card(for: decision.preset, in: compatibleLoras) == nil {
+            return String(localized: "The \(decision.preset.rawValue) preset’s LoRA isn’t installed: install \(decision.preset.fileName) to use this branch.",
+                           comment: "The workflow's branch needs its own LoRA, which the library does not hold")
         }
         guard let image = editInputs.first?.shown else {
             return String(localized: "Attach an image first: the mask must have the image’s size.",
@@ -249,23 +264,40 @@ extension AppState {
 
     // MARK: One render's
 
-    /// **The mask the click takes with `image`** — `nil` without an attachment. The attachment stays
-    /// until `takeAttachedMask` is called: what `render` does as it queues its jobs.
-    func attachedMaskInput(for image: ReferenceImage) -> PatchInput? {
+    /// **The mask the click takes with `image`** — `nil` without an attachment. `prompt`: what the
+    /// click reads as the branch (`patchDecision`). The attachment stays until `takeAttachedMask` is
+    /// called: what `render` does as it queues its jobs.
+    func attachedMaskInput(for image: ReferenceImage, prompt: String) -> PatchInput? {
         guard let attachedMask else { return nil }
-        return (image, attachedMask.mask, Patch.Settings(mode: patchMode))
+        return (image, attachedMask.mask, Patch.Settings(mode: patchDecision(prompt: prompt).mode))
     }
 
-    /// **The branch the rack's LoRA stack picks** (`Patch.Settings.mode`): the redraw preset's card
-    /// switched **on** → redraw; anything else — the remove card included, and a card switched off —
-    /// remove, the default. The Add menu's two presets and the command line's `--mode` / `--lora`
-    /// write this one notion, never two paths.
-    var patchMode: Patch.Mode {
-        guard let redraw = PatchLoRA.card(for: .redraw, in: compatibleLoras)?.path,
-              activeLoRAs.contains(where: { $0.path == redraw }) else {
-            return .remove
-        }
-        return .redraw
+    /// **The branch a masked click takes** — `mode` and `preset` together, one decision (`PatchBranch`):
+    /// the rack's one preset card switched **on** is the user's explicit choice; with none, the prompt
+    /// decides (empty → remove, whose sentence the mask fills in). The prompt and the card disagreeing
+    /// is refused (`maskBlocker`), never silently overridden; `--mode` / `--lora` are the CLI's say.
+    func patchDecision(prompt: String) -> PatchDecision {
+        let mode = rackPresetMode ?? PatchBranch.mode(for: prompt)
+        return PatchDecision(mode: mode, preset: PatchLoRA.preset(for: mode))
+    }
+
+    /// **The preset the rack names explicitly** — its one card switched on; a card switched off names
+    /// nothing (the prompt decides). Both on is the ambiguity `maskBlocker` refuses first.
+    var rackPresetMode: Patch.Mode? {
+        if let redraw = PatchLoRA.card(for: .redraw, in: compatibleLoras)?.path,
+           activeLoRAs.contains(where: { $0.path == redraw }) { return .redraw }
+        if let remove = PatchLoRA.card(for: .remove, in: compatibleLoras)?.path,
+           activeLoRAs.contains(where: { $0.path == remove }) { return .remove }
+        return nil
+    }
+
+    /// **The stack a masked job carries**: the rack's slots, with the branch's preset wired when it is
+    /// not there — from the same mode `patchDecision` set, so the tint and the LoRA cannot disagree.
+    func patchLoras(for mode: Patch.Mode) -> [LoRASlot] {
+        let preset = PatchLoRA.preset(for: mode)
+        guard let card = PatchLoRA.card(for: preset, in: compatibleLoras),
+              !activeLoRAs.contains(where: { $0.path == card.path }) else { return activeLoRAs }
+        return activeLoRAs + [LoRASlot(path: card.path, strength: preset.strength)]
     }
 
     /// **Takes the attachment for one render, and clears it**: the mask belongs to the job it is queued

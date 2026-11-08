@@ -87,15 +87,34 @@ imported PNG. Either entry (« Paint Mask… » or « Attach Mask… ») lands i
 No zoom, no pan, no redo: undo is one stroke, « Clear » is all of them, and a stroke committed
 replaces whatever mask was attached before.
 
-## 4. The default: `--mode remove`
+## 4. The default: the prompt's own reading
 
 ```sh
 silicontrol add --model qwen-image-2.1 --image photo.jpg --mask photo-mask.png \
   --steps 9 --wait --out out "remove the lamp and its cable"
 ```
 
-`--mode` left out is `.remove`: the crop is tinted `#00FF00` at 0.4 inside the mask (the
-workflow's `图像合并（遮罩）`), and `--lora remove` (1.0) is wired for you.
+**With a mask and neither `--mode` nor a preset, the prompt picks the branch** — the GUI and the
+CLI alike (`PatchBranch`, one table, no similarity score). A sentence that asks to remove something
+is `.remove`: the crop is tinted `#00FF00` at 0.4 inside the mask (the workflow's `图像合并（遮罩）`),
+and `--lora remove` (1.0) is wired for you. Any other sentence is `.redraw`; an empty one is
+remove's.
+
+| prompt | branch | crop | LoRA |
+|---|---|---|---|
+| empty | remove | tinted | remove 1.0 |
+| has a non-negated removal verb: `remove`, `erase`, `delete`, `take out`, `clean up`, `get rid of`, `wipe out`, `eliminate`, `移除`, `删除`, `去掉`, `擦掉`, `消除`, … | remove | tinted | remove 1.0 |
+| anything else (`change X into Y`, `make it Y`, `replace X with Y`, a bare noun) | redraw | untouched | consistency 0.48 |
+
+- A removal **anywhere** is a removal: `remove X and continue Y`, `remove X, then rebuild Y` still
+  remove. A negated one is not: `do not remove`, `don't erase`, `without removing`, `不要删除` read
+  redraw.
+- **Redraw is the uncertain default**: a non-empty sentence describes what the area becomes;
+  removal is the only action with an explicit vocabulary.
+- An explicit `--mode` (or `--lora remove|redraw`) wins over the prompt's reading; on the GUI the
+  rack's one **on** preset card is that explicit say. A card and a prompt that disagree are refused
+  before the click (`maskBlocker`), never silently resolved — switch the card off to let the prompt
+  decide.
 
 **A mask may leave the prompt out — in the GUI and on the CLI alike**: `silicontrol add --image
 photo.jpg --mask photo-mask.png` with no sentence (the positional is optional with `--mask`) fills
@@ -106,7 +125,7 @@ empty prompt is still refused (`error: "usage"`).
 
 ## 5. The two branches: `--mode remove | redraw`
 
-| | `remove` (default) | `redraw` |
+| | `remove` (prompt says removal, or empty) | `redraw` (any other prompt) |
 |---|---|---|
 | crop | tinted green inside the mask | handed to the model untouched |
 | prompt | says what **goes away** | says what it **becomes** |
@@ -217,9 +236,10 @@ A patch entry keeps `settings.patch` (`mode`, `expansion`, `maximumSide`, `seede
 - **GUI × CLI**: the GUI takes a mask **painted over image 1** (brush + eraser, `MaskPainter.swift`)
   or attached as a **PNG** in the Prompt Lab — two entries, one `ImageMask`; it does not expose
   `--expand`, `--max-side`, `--seeded-start`, `--noise-mask` or `--no-paste` (defaults apply), and
-  its branch comes from the rack's **Add menu** presets (`Remove preset (1.0)` / `Redraw preset
-  (0.48)`) — the same `Patch.Settings.mode` the CLI writes. A rack holding both presets is refused
-  before the click. The painted mask, like an imported one, lives for **one** render (`a08e33f`).
+  its branch is **read from the prompt** (`PatchBranch`, the CLI's rule) — no preset card needed;
+  the rack's **Add menu** presets (`Remove preset (1.0)` / `Redraw preset (0.48)`) are the explicit
+  say instead, and a card disagreeing with the prompt is refused before the click, as is a rack
+  holding both presets. The painted mask, like an imported one, lives for **one** render (`a08e33f`).
 
 ## 10. Error codes, and what to do
 

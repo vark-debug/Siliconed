@@ -36391,6 +36391,88 @@
         }
       }
     },
+    "The %@ preset in the rack contradicts the prompt, which reads as %@: switch the card off to follow the prompt." : {
+      "comment" : "A rack preset and the prompt's own reading disagree",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Preset %@ im Rack widerspricht dem Prompt, der als %@ gelesen wird: schalten Sie die Karte aus, um dem Prompt zu folgen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El preajuste %@ del rack contradice el prompt, que se lee como %@: desactive la tarjeta para seguir el prompt."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le préréglage %@ du rack contredit le prompt, qui se lit comme %@ : éteignez la carte pour suivre le prompt."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il preset %@ nel rack contraddice il prompt, che viene letto come %@: disattivate la scheda per seguire il prompt."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ プリセットがラック内でプロンプト（%@ と判定）と矛盾しています。カードをオフにしてプロンプトに従ってください。"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "机架中的 %@ 预设与提示词判定的 %@ 分支矛盾：关闭该卡片以按提示词执行。"
+          }
+        }
+      }
+    },
+    "The %@ preset’s LoRA isn’t installed: install %@ to use this branch." : {
+      "comment" : "The workflow's branch needs its own LoRA, which the library does not hold",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die LoRA des Presets %@ ist nicht installiert: Installieren Sie %@, um diesen Zweig zu verwenden."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La LoRA del preajuste %@ no está instalada: instale %@ para usar esta rama."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La LoRA du préréglage %@ n’est pas installée : installez %@ pour utiliser cette branche."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La LoRA del preset %@ non è installata: installate %@ per usare questo ramo."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ プリセットの LoRA がインストールされていません。このブランチを使うには %@ をインストールしてください。"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 预设的 LoRA 尚未安装：安装 %@ 后才能使用该分支。"
+          }
+        }
+      }
+    },
     "The DiT, encoder and VAE are deleted; installing again downloads them again." : {
       "localizations" : {
         "de" : {

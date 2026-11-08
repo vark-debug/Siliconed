@@ -21,9 +21,10 @@ extension AppState {
     /// its entry decides what it renders, the lab's attachment never enters it.
     /// **Something varies** (`Series.swift`): the series' grid, one finished image per cell.
     ///
-    /// **A mask in the lab is this click's**: taken (`takeAttachedMask`), given image 1 and the rack's branch
-    /// (`Patch.Settings(mode: patchMode)` — a redraw preset leaves the crop untinted), and the render's format
-    /// becomes the crop's plan. The next click is ordinary again.
+    /// **A mask in the lab is this click's**: taken (`takeAttachedMask`), given image 1 and the branch
+    /// the prompt (or the rack's one preset card, or neither) reads as (`patchDecision` — a redraw
+    /// branch leaves the crop untinted), and the render's format becomes the crop's plan. The next
+    /// click is ordinary again.
     func render(imposedSeed: UInt64? = nil, imposedFormat: RecommendedFormat? = nil, patch: PatchInput? = nil,
                 ignoresAttachedMask: Bool = false) {
         guard canRender else { return }
@@ -33,7 +34,7 @@ extension AppState {
         let attached = ignoresAttachedMask ? nil : takeAttachedMask()
         var patch = patch
         if patch == nil, let attached, let image = editInputs.first?.shown {
-            patch = (image, attached.mask, Patch.Settings(mode: patchMode))
+            patch = (image, attached.mask, Patch.Settings(mode: patchDecision(prompt: prompts.first ?? "").mode))
         }
         // Everything that reads the state is taken here: the job no longer depends on the form.
         let firstNumber = imposedSeed ?? (fixedSeed ? seed : UInt64.random(in: 0...UInt64(UInt32.max)))
@@ -67,8 +68,11 @@ extension AppState {
             && prompts.allSatisfy { $0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
             ? [MaskPrompt.standard] : prompts
         return prompts.map { expanded in
+            // **The patch's stack is the branch's** (`patchLoras`): the rack's slots plus the preset
+            // the same `mode` decided — a redraw job never carries the remove LoRA, or the reverse.
+            let loras = patch.map { patchLoras(for: $0.settings.mode) } ?? activeLoRAs
             var settings = RenderSettings(identifier: identifier, modelName: card?.name ?? identifier, prompt: expanded,
-                                          format: format, steps: steps, loras: activeLoRAs,
+                                          format: format, steps: steps, loras: loras,
                                           references: edit.count, variations: variations, detail: effectiveDetail,
                                           solver: effectiveSolver)
             // **The subjects the text cites, translated here** (`namedJob`): their pictures after the edit's, the model
@@ -78,7 +82,7 @@ extension AppState {
             let start = patch == nil ? usedStart : nil
             if start != nil { settings.strength = startStrength }
             if let patch { settings.patch = patch.settings }
-            let plan = expectedPlan(steps: steps, format: format, withLoRA: !activeLoRAs.isEmpty || !plainSampling,
+            let plan = expectedPlan(steps: steps, format: format, withLoRA: !settings.loras.isEmpty || !plainSampling,
                                     references: used.count + (patch == nil ? 0 : 1), strength: settings.strength)
             var job = Job(ordinal: nextJobNumber(), settings: settings,
                           seeds: (0..<max(1, batch)).map { seed &+ UInt64($0) },

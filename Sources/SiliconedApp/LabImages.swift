@@ -74,7 +74,7 @@ struct LabImages: View {
         if model.pictures.isEmpty && model.subjects.all.isEmpty {
             return "Drop images here. The first one is the image to edit; a name makes a picture citable as @name in the text."
         }
-        if model.rack.attachedMask != nil, model.rack.patchMode == .remove,
+        if model.rack.attachedMask != nil, model.rack.patchDecision(prompt: "").mode == .remove,
            model.rack.prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             return "No prompt: this render removes the marked area."
         }
