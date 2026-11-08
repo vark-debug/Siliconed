@@ -182,10 +182,10 @@ A patch entry keeps `settings.patch` (`mode`, `expansion`, `maximumSide`, `seede
   `Spectral.minimumSide × 8`). **A patch's own crop may go down to 448 px** on its short side
   (`Patch.minimumRenderSide`), and only there: its long side is 768–2560, a multiple of 32. This is
   not a workflow limit — `图像缩放（范围）` bounds the long side alone and `遮罩裁剪V2` has no
-  short-side rule — nor a model one: 448 px is 28 latent cells (VAE ×16) and 14 DiT patch pairs
-  (×2), so it encodes and denoises as any other size, without a spectral schedule (its half, 224,
-  is under the floor). 768×448 (12:7) is the smallest long-side crop; a crop under 448 is refused
-  as `invalid_patch`, with its crop and plan sizes, rather than silently upscaled.
+  short-side rule — nor a model one: 448 px is 28 latent cells (VAE ×16) and 14 steps of the
+  32-px multiple, so it encodes and denoises as any other size, without a spectral schedule (its
+  half, 224, is under the floor). 768×448 (12:7) is the smallest long-side crop; a crop under 448
+  is refused as `invalid_patch`, with its crop and plan sizes, rather than silently upscaled.
   **The old "ratio > 1.5" rule was wrong**: the test is the short side, not the ratio — 2048×448
   (4.57:1) is accepted, 768×416 (1.85:1) is refused.
 - **Area**: an ordinary edit (an image, no mask, no typed size) is capped at **1024 × 1536**
