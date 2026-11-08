@@ -464,6 +464,10 @@ package enum RemoteControlHelp {
                               a typed format and grid are refused, said. Qwen-Image-2.1 only.
                               A mask of another size, or one with fewer than 10 pixels of region,
                               is refused (error "patch", invalid_patch) — not painted over.
+                              The crop's long side is 768–2560, a multiple of 32; its short side
+                              may go to 448 px — the patch path's floor, under the regular 512 —
+                              and under it the crop is refused, with its sizes, not silently
+                              enlarged.
           --mode remove|redraw
                               with --mask: the workflow's branch. remove — the default — paints the
                               mask #00FF00 at 0.4 and wires --lora remove (1); redraw — no paint,
@@ -1852,7 +1856,10 @@ package enum RemoteControlHelp {
                               --strength, un format tapé et grid sont refusés, dit. Qwen-Image-2.1
                               seulement. Un masque d'une autre taille, ou de moins de 10 pixels de
                               région, est refusé (erreur "patch", invalid_patch) — pas peint
-                              par-dessus.
+                              par-dessus. Le plus long côté de la découpe va de 768 à 2560, multiple
+                              de 32 ; son côté court peut descendre à 448 px — le plancher de la
+                              voie patch, sous les 512 px ordinaires — et en dessous la découpe est
+                              refusée, avec ses tailles, pas agrandie en silence.
           --mode remove|redraw
                               avec --mask : la branche du workflow. remove — par défaut — peint le
                               masque #00FF00 à 0.4 et câble --lora remove (1) ; redraw — aucune

@@ -64,10 +64,15 @@ final class PatchTests: XCTestCase {
         XCTAssertThrowsError(try sparse.plan()) {
             guard case .invalidPatch = $0 as? EngineError else { return XCTFail("\($0)") }
         }
-        // Ten is enough: the workflow's threshold, said.
+        // Ten clears the workflow's pixel count — but not the patch's 448 floor: a 10×1 box renders
+        // 768×64, which no render path may do, said with its numbers.
         var ten = five
         for i in 5..<10 { ten[i + 10] = 1 }
-        XCTAssertNoThrow(try Patch(image: image(64, 64), mask: ImageMask(width: 64, height: 64, values: ten)).plan())
+        XCTAssertThrowsError(try Patch(image: image(64, 64), mask: ImageMask(width: 64, height: 64, values: ten)).plan()) {
+            guard let error = $0 as? EngineError, case .invalidPatch(let reason) = error else { return XCTFail("\($0)") }
+            XCTAssertFalse(reason.contains("fewer than 10 pixels"), "the count is not the refusal: \(reason)")
+            XCTAssertTrue(reason.contains("768×64"), "the floor is: \(reason)")
+        }
     }
 
     /// **A mask of another size is refused by name**, before any crop: the mask is the image's grid.
@@ -248,5 +253,60 @@ final class PatchTests: XCTestCase {
         XCTAssertEqual(seq.textRows.count, 19)
         XCTAssertEqual(seq.textRows.prefix(8).map { $0.joint }, Array(0..<8))
         XCTAssertEqual(seq.textRows.suffix(11).map { $0.joint }, Array(4040..<4051))
+    }
+
+    // ── the short side: the patch path's own floor, 448 ─────────────────────────────────────────
+
+    /// **A crop at 1.665:1 renders at 768×448** — the case the 512 floor used to refuse. The mask is
+    /// 203×100 at (100, 100) in 512×512: the margins are 30 above and 39 elsewhere, so the crop is
+    /// 281×169 (1.663:1); the workflow's long side is under 768, so `target` takes it to 768×462,
+    /// and the 32-multiple nearest in area is **768×448** (the other scheme, 736×448, is 24 320 px
+    /// off against 10 752). That is the patch's floor exactly, and `Format.check` accepts it there —
+    /// while the regular floor still refuses it.
+    func testAnElongatedCropRendersAtThePatchFloor() throws {
+        let patch = Patch(image: image(512, 512), mask: box(512, 512, x: 100, y: 100, w: 203, h: 100))
+        let plan = try patch.plan()
+        XCTAssertEqual([plan.crop.x, plan.crop.y, plan.crop.width, plan.crop.height], [61, 70, 281, 169])
+        XCTAssertEqual([plan.width, plan.height], [768, 448], "the workflow's smallest long side, 12:7")
+        XCTAssertEqual(Patch.minimumRenderSide, 448)
+        XCTAssertNoThrow(try Format.check(width: plan.width, height: plan.height,
+                                         family: .qwenImage21, minimumSide: Patch.minimumRenderSide))
+        XCTAssertThrowsError(try Format.check(width: plan.width, height: plan.height,
+                                              family: .qwenImage21)) {
+            XCTAssertEqual($0 as? EngineError, .imageTooSmall(side: 448, minimum: Format.minimumSide),
+                           "a regular render at 448 is still refused")
+        }
+    }
+
+    /// **The floor's edges, one by one**: 512 passes the regular floor and 511 does not; 448 passes
+    /// the patch floor and 447 does not. The floor comes first in `Format.check`, so 511 under the
+    /// regular rule is `imageTooSmall`, not `notMultiple` — 511 is no 32-multiple either way, but
+    /// the useful error is the one reported.
+    func testTheFloorsEdgesAre512And448() throws {
+        XCTAssertNoThrow(try Format.check(width: 768, height: 512, family: .qwenImage21))
+        XCTAssertThrowsError(try Format.check(width: 768, height: 511, family: .qwenImage21)) {
+            XCTAssertEqual($0 as? EngineError, .imageTooSmall(side: 511, minimum: 512))
+        }
+        XCTAssertNoThrow(try Format.check(width: 768, height: 448,
+                                          family: .qwenImage21, minimumSide: Patch.minimumRenderSide))
+        XCTAssertThrowsError(try Format.check(width: 768, height: 447,
+                                              family: .qwenImage21, minimumSide: Patch.minimumRenderSide)) {
+            XCTAssertEqual($0 as? EngineError, .imageTooSmall(side: 447, minimum: 448))
+        }
+    }
+
+    /// **A crop under the floor is refused, with its numbers** — a 301×169 (1.78:1) crop renders at
+    /// 768×416, under 448: the patch's floor, not a ratio rule. The refusal names both sides and
+    /// the floor, and says ordinary renders keep 512.
+    func testACropUnderTheFloorIsRefusedWithItsNumbers() {
+        let patch = Patch(image: image(512, 512), mask: box(512, 512, x: 100, y: 100, w: 223, h: 100))
+        XCTAssertThrowsError(try patch.plan()) { error in
+            guard case let EngineError.invalidPatch(reason) = error else {
+                return XCTFail("expected invalidPatch, got \(error)")
+            }
+            XCTAssertTrue(reason.contains("768×416"), "the plan's size: \(reason)")
+            XCTAssertTrue(reason.contains("under the patch path's 448 px floor"), "the floor: \(reason)")
+            XCTAssertTrue(reason.contains("regular renders keep 512"), "the contrast: \(reason)")
+        }
     }
 }

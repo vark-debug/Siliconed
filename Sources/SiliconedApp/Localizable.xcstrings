@@ -27418,42 +27418,42 @@
         }
       }
     },
-    "Paint the mask over the region to replace, white on black (or its alpha), at the image’s size — at least 10 pixels — and hand the image with its mask." : {
+    "Paint the mask over the region to replace, white on black (or its alpha), at the image’s size — at least 10 pixels, and a crop that renders at 448 px or more on its short side — and hand the image with its mask." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Malen Sie die Maske über den zu ersetzenden Bereich, Weiß auf Schwarz (oder dessen Alpha), in der Größe des Bildes — mindestens 10 Pixel — und geben Sie das Bild mit seiner Maske an."
+            "value" : "Malen Sie die Maske über den zu ersetzenden Bereich, Weiß auf Schwarz (oder dessen Alpha), in der Größe des Bildes — mindestens 10 Pixel, und eine Freistellung, die mindestens 448 px an ihrer kurzen Seite ergibt — und geben Sie das Bild mit seiner Maske an."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pinta la máscara sobre la región que se va a reemplazar, blanco sobre negro (o su alfa), al tamaño de la imagen — al menos 10 píxeles — y entrega la imagen con su máscara."
+            "value" : "Pinta la máscara sobre la región que se va a reemplazar, blanco sobre negro (o su alfa), al tamaño de la imagen — al menos 10 píxeles, y un recorte que se renderice con al menos 448 px en su lado corto — y entrega la imagen con su máscara."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Peignez le masque sur la région à remplacer, en blanc sur noir (ou son alpha), à la taille de l’image — au moins 10 pixels — et donnez l’image avec son masque."
+            "value" : "Peignez le masque sur la région à remplacer, en blanc sur noir (ou son alpha), à la taille de l’image — au moins 10 pixels, et une découpe qui rend au moins 448 px sur son petit côté — et donnez l’image avec son masque."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dipingi la maschera sulla regione da sostituire, bianco su nero (o il suo alfa), alla dimensione dell’immagine — almeno 10 pixel — e consegna l’immagine con la sua maschera."
+            "value" : "Dipingi la maschera sulla regione da sostituire, bianco su nero (o il suo alfa), alla dimensione dell’immagine — almeno 10 pixel, e un ritaglio che renderizzi almeno 448 px sul lato corto — e fornisci l’immagine con la sua maschera."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "置き換える領域にマスクを黒地に白（またはそのアルファ）で描き、画像と同じサイズ — 最低 10 ピクセル — で、そのマスクとともに画像を渡してください。"
+            "value" : "置き換える領域に、画像と同じ大きさで、黒地に白（またはそのアルファ）でマスクを描いてください。少なくとも 10 ピクセル、短辺が 448 px 以上になるトリミングが必要です。マスクと一緒に画像を渡してください。"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "请在要替换的区域上以黑底白（或其 alpha）绘制遮罩，尺寸与图像一致——至少 10 像素——并将图像连同遮罩一起提供。"
+            "value" : "请在要替换的区域上以黑底白（或其 alpha）绘制遮罩，尺寸与图像一致——至少 10 像素，且裁剪后的短边不少于 448 px——并将图像连同遮罩一起提供。"
           }
         }
       }

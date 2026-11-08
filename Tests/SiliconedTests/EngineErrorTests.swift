@@ -157,6 +157,17 @@ final class EngineErrorTests: XCTestCase {
         XCTAssertThrowsError(try preflight(.zImage, 8224, 512)) {
             XCTAssertEqual($0 as? EngineError, .formatRefused(width: 8224, height: 512, reason: .sideTooLong, bound: Format.maximumSide))
         }
+        // **A patch's crop is the one exception to 512**: 768×448 is refused at the regular floor
+        // and accepted at `Patch.minimumRenderSide` — the floor `EngineRender` passes for a
+        // `Request.patch` alone. So a 12:7 crop runs; an ordinary render at 448 does not.
+        let qwenCard = ModelCard.qwenImage21, patchMemory = request(qwenCard, 768, 448)
+        XCTAssertThrowsError(try Preflight.check(card: qwenCard, width: 768, height: 448, installed: true,
+                                                 licenseAccepted: true, ceiling: sixteen, memory: patchMemory)) {
+            XCTAssertEqual($0 as? EngineError, .imageTooSmall(side: 448, minimum: Format.minimumSide))
+        }
+        XCTAssertNoThrow(try Preflight.check(card: qwenCard, width: 768, height: 448, installed: true,
+                                             licenseAccepted: true, ceiling: sixteen, memory: patchMemory,
+                                             minimumSide: Patch.minimumRenderSide))
         // The family's own rules, at the preflight: Qwen-Image-2.1's 32 (848×1216 used to die after the
         // encoder), Anima's 2048 px a side (its reference's RoPE table) — whatever B.
         XCTAssertThrowsError(try preflight(.qwenImage21, 848, 1216, memory: .max)) {

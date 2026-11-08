@@ -270,7 +270,7 @@ struct Problem: Equatable, Sendable {
         case .invalidSeededStart:
             return String(localized: "Hand the crop at the render’s format, or leave the seeded start out.")
         case .invalidPatch:
-            return String(localized: "Paint the mask over the region to replace, white on black (or its alpha), at the image’s size — at least 10 pixels — and hand the image with its mask.")
+            return String(localized: "Paint the mask over the region to replace, white on black (or its alpha), at the image’s size — at least 10 pixels, and a crop that renders at 448 px or more on its short side — and hand the image with its mask.")
         case .referenceSequence:
             return String(localized: "Choose a chain whose text encoder reads images and whose denoiser reads references, like Qwen-Image-2.1: a patch needs the two together.")
         case .tooManyReferences(_, let max) where max == 0:

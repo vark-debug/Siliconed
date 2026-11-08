@@ -12,7 +12,12 @@ import Foundation
 ///    (`Spectral.minimumSide`), read **per side** and not per area: 832×1216 has the area of
 ///    1024², but a 416×608 would have that of 512² with one side outside the models' domain. The
 ///    floor applies to *every* evaluation — hence the spectral schedule's rule, which goes down
-///    only if both half-sizes stay at the floor (`Spectral.divisible`).
+///    only if both half-sizes stay at the floor (`Spectral.divisible`). **A patch's own render**
+///    (`Request.patch`) is the one exception, and only there: its crop renders at
+///    `Patch.minimumRenderSide` (448 px) at least — the workflow's `图像缩放（范围）` floors the
+///    *long* side at 768 and has no short-side rule, and a 768-long crop at 12:7 is 768×448. Such a
+///    patch simply has no spectral schedule (its half would be under the floor). Ordinary renders,
+///    edits and crops keep 512.
 /// 2. **Each side a multiple of 16**: the VAE divides by 8, the DiTs' patch by 2.
 /// 3. **Each side at most `maximumSide(for:)`**: what a position table or a 32-bit index can address,
 ///    not what memory can hold. It is the guard against an absurd request (`99 999 999 984²` would
@@ -74,12 +79,17 @@ package enum Format {
     }
 
     /// **Throws if `family` does not render the format** — the general rules, then the family's own:
-    /// what the preflight checks, what the app's size field judges.
-    package static func check(width: Int, height: Int, family: Family) throws(EngineError) {
-        try check(width: width, height: height, multiple: multiple(for: family), maximumSide: maximumSide(for: family))
+    /// what the preflight checks, what the app's size field judges. `minimumSide` is the floor the
+    /// caller applies: `Format.minimumSide` (512) everywhere, `Patch.minimumRenderSide` (448) for a
+    /// patch's own crop (`Request.patch`) alone — never for an ordinary render or edit.
+    package static func check(width: Int, height: Int, family: Family,
+                              minimumSide: Int = Format.minimumSide) throws(EngineError) {
+        try check(width: width, height: height, multiple: multiple(for: family),
+                  maximumSide: maximumSide(for: family), minimumSide: minimumSide)
     }
 
-    private static func check(width: Int, height: Int, multiple: Int, maximumSide side: Int) throws(EngineError) {
+    private static func check(width: Int, height: Int, multiple: Int, maximumSide side: Int,
+                              minimumSide: Int = Format.minimumSide) throws(EngineError) {
         guard width >= minimumSide, height >= minimumSide else {
             throw .imageTooSmall(side: min(width, height), minimum: minimumSide)
         }

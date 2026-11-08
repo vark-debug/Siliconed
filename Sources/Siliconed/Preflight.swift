@@ -35,12 +35,15 @@ package enum Preflight {
     /// `memory`: the request's own inputs (prompt, references' sizes); without it, the references
     /// at the output's size and a typical prompt. `checksMemory`: false for a hand-composed chain,
     /// whose modules are its caller's — the need describes the published families' constructors only.
+    /// `minimumSide`: the floor `Format.check` applies — `Format.minimumSide` (512), or
+    /// `Patch.minimumRenderSide` (448) for a request whose pixels are a patch's own crop.
     package static func check(card: ModelCard, width: Int, height: Int, references: Int = 0, installed: Bool,
                               licenseAccepted: Bool, ceiling: Int,
-                              memory: MemoryNeed.Request? = nil, checksMemory: Bool = true) throws(EngineError) {
+                              memory: MemoryNeed.Request? = nil, checksMemory: Bool = true,
+                              minimumSide: Int = Format.minimumSide) throws(EngineError) {
         guard installed else { throw .modelNotInstalled(model: card.id) }
         guard licenseAccepted else { throw .licenseNotAccepted(model: card.id) }
-        try Format.check(width: width, height: height, family: card.family)
+        try Format.check(width: width, height: height, family: card.family, minimumSide: minimumSide)
         guard checksMemory else { return }
         if let memory {
             try card.checkMemory(memory, ceiling: ceiling)
@@ -52,12 +55,13 @@ package enum Preflight {
     /// **All five, for a model about to render**: the lock comes back held, released when dropped.
     package static func run(_ model: Model, width: Int, height: Int, references: Int = 0,
                             ceiling: Int = MemoryBudget.machineCeiling(),
-                            memory: MemoryNeed.Request? = nil) throws(EngineError) -> RenderLock? {
+                            memory: MemoryNeed.Request? = nil,
+                            minimumSide: Int = Format.minimumSide) throws(EngineError) -> RenderLock? {
         let library = model.library
         try check(card: model.card, width: width, height: height, references: references,
                   installed: library.map { model.card.missing(in: $0) == nil } ?? true,
                   licenseAccepted: library.map { Licenses.implicit || $0.isLicenseAccepted(model.card) } ?? true,
-                  ceiling: ceiling, memory: memory, checksMemory: library != nil)
+                  ceiling: ceiling, memory: memory, checksMemory: library != nil, minimumSide: minimumSide)
         return library == nil ? nil : try RenderLock.acquire(RenderLock.machine)
     }
 }

@@ -178,12 +178,19 @@ A patch entry keeps `settings.patch` (`mode`, `expansion`, `maximumSide`, `seede
 - **Mask size**: exactly image 1's; anything else is `invalid_patch`. The GUI says it before the
   click too.
 - **Region**: at least 10 pixels of mask.
-- **Short side**: render and edit sizes stay **≥ 512 px** per side (`Format.minimumSide`), raised
-  keeping the ratio; the patch's own crop sides are **768–2560**, multiples of 32, longest side
-  `--max-side`.
-- **Area, and the 1.5 ratio**: an edit's area is capped at **1024 × 1536** (ratio 1.5). Beyond it
-  the **long side is cut**, keeping multiples of 32 — so a crop more elongated than 3:2 loses
-  detail rather than growing memory.
+- **Short side**: ordinary renders and edits stay **≥ 512 px** per side (`Format.minimumSide` =
+  `Spectral.minimumSide × 8`). **A patch's own crop may go down to 448 px** on its short side
+  (`Patch.minimumRenderSide`), and only there: its long side is 768–2560, a multiple of 32. This is
+  not a workflow limit — `图像缩放（范围）` bounds the long side alone and `遮罩裁剪V2` has no
+  short-side rule — nor a model one: 448 px is 28 latent cells (VAE ×16) and 14 DiT patch pairs
+  (×2), so it encodes and denoises as any other size, without a spectral schedule (its half, 224,
+  is under the floor). 768×448 (12:7) is the smallest long-side crop; a crop under 448 is refused
+  as `invalid_patch`, with its crop and plan sizes, rather than silently upscaled.
+  **The old "ratio > 1.5" rule was wrong**: the test is the short side, not the ratio — 2048×448
+  (4.57:1) is accepted, 768×416 (1.85:1) is refused.
+- **Area**: an ordinary edit (an image, no mask, no typed size) is capped at **1024 × 1536**
+  (ratio 1.5); beyond it the **long side is cut**, keeping multiples of 32. A patch is **not**
+  capped: its plan's size is the workflow's and the 448 short side is its only floor.
 - **The crop decides the format**: with `--mask`, `--ref`, `--strength`, a typed format and
   `--grid` are refused (`error: "format"` / `"ref"` / `"grid"`).
 - **`--mask` is Qwen-Image-2.1 only** (`error: "patch"` on other models).
@@ -200,7 +207,7 @@ The CLI refusals (`ok:false`, `error`) come before a job is queued:
 | code | seen with | do |
 |---|---|---|
 | `usage` | `--mode` / `--paste` / `--no-paste` / `--crop-only` without `--mask`; two disagreeing spellings; an unknown `--mode` value | add the missing flag, keep one spelling, use `remove` or `redraw` |
-| `patch` | mask of another size than image 1; an empty region; a model without the mask workflow; a mask with `--ref` on a non-Qwen model | fix the PNG, or use Qwen-Image-2.1 |
+| `patch` | mask of another size than image 1; an empty region; a crop that renders under 448 px on its short side; a model without the mask workflow; a mask with `--ref` on a non-Qwen model | fix the PNG, widen the mask or make the crop less elongated, or use Qwen-Image-2.1 |
 | `mode` | `--mode` against the other branch's preset; both presets | name one branch |
 | `lora` | a preset with `:strength`; `--lora expand`; the same LoRA twice; an uninstalled preset | `--lora remove` / `--lora redraw` bare; install it (`silicontrol models`) |
 | `ref` | `--ref-res` without `--ref`, or a value out of 768–2560 / not ×32 | give a valid `--ref` and `N` |

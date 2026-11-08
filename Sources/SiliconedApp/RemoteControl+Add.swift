@@ -400,7 +400,9 @@ extension RemoteControl {
         }
 
         let (width, height) = d.format ?? (1024, 1024)
-        do { try Format.check(width: width, height: height, family: model.card.family) } catch {
+        // A mask's format is its crop's plan: that render alone clears 512 at `Patch.minimumRenderSide`.
+        do { try Format.check(width: width, height: height, family: model.card.family,
+                              minimumSide: d.mask == nil ? Format.minimumSide : Patch.minimumRenderSide) } catch {
             let p = Problem(error)
             throw Refusal("format", p.title, help: p.suggestion)
         }

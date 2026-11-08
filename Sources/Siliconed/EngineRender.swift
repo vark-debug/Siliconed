@@ -112,7 +112,8 @@ extension Engine {
         memoryRequest.batch = seeds.count
         memoryRequest.library = model.library ?? .processWide
         let lock = try Preflight.run(model, width: pixelWidth, height: pixelHeight,
-                                     references: referenceCount, ceiling: ceiling, memory: memoryRequest)
+                                     references: referenceCount, ceiling: ceiling, memory: memoryRequest,
+                                     minimumSide: patchPlan == nil ? Format.minimumSide : Patch.minimumRenderSide)
         defer { withExtendedLifetime(lock) {} }
         // The stack opens BEFORE any computation: an unreadable map throws here, not after a
         // minute — and so does a LoRA forged for another model. The DiTs apply a LoRA only to the

@@ -92,11 +92,22 @@ package struct ImageMask: Sendable, Equatable {
 ///
 /// The constants are the workflow's (`Goohaitools-comfyui`, 「移除、局部重绘 Turbo」): the crop
 /// grows by `(factor − 1) × the box's shortest side` on each side — 0.3 above, 0.4 right, below and
-/// left — and the long side lands between 768 and `maximumSide`, a multiple of 32.
+/// left — and the long side lands between 768 and `maximumSide`, a multiple of 32; its short side
+/// stays at least `minimumRenderSide` (448), the patch path's own floor.
 package struct Patch: Sendable, Equatable {
     /// `图像缩放（范围）`'s bounds, as the workflow's slider sets them: long side 768–2560.
     package static let minimumSide = 768
     package static let maximumSide = 2560
+    /// **The short side a patch's crop renders at, 448 px** — the patch path's own floor, under
+    /// `Format.minimumSide` (512), which ordinary renders, edits and crops keep. It is **not a model
+    /// or workflow limit**: `图像缩放（范围）` bounds the **long** side only (768–`maximumSide`) and
+    /// `遮罩裁剪V2` has no short-side rule, so ComfyUI runs such a crop; the engine needs multiples
+    /// of 32 (`Format`) and nothing else, and 448 px is 28 latent cells (VAE ×16) and 14 DiT
+    /// patches (×2). A 448-px patch has no spectral schedule — its half, 224 px, is under the 512
+    /// floor — so it evaluates at full size throughout. 448 is the short side of the workflow's
+    /// smallest long side (768) at 12:7; a crop under it keeps too little of the region and is
+    /// refused, said.
+    package static let minimumRenderSide = 448
     /// `整除数`: both sides of the crop are multiples of 32.
     package static let multiple = 32
     /// The workflow tints the crop with `#00FF00` at 0.4, over the mask only. In the model's
@@ -269,6 +280,12 @@ package struct Patch: Sendable, Equatable {
         guard w >= Self.multiple, h >= Self.multiple else {
             throw EngineError.invalidPatch(reason:
                 "the crop \(crop.width)×\(crop.height) has no whole \(Self.multiple) size — its proportions are too narrow")
+        }
+        // **The patch path's own floor** (`minimumRenderSide`, 448): under it a crop keeps too
+        // little of the region. Regular renders, edits and crops keep `Format.minimumSide` (512).
+        guard min(w, h) >= Self.minimumRenderSide else {
+            throw EngineError.invalidPatch(reason:
+                "the crop \(crop.width)×\(crop.height) renders at \(w)×\(h), its short side under the patch path's \(Self.minimumRenderSide) px floor (regular renders keep \(Format.minimumSide)): widen the mask or use a less elongated crop")
         }
         return Plan(crop: crop, width: w, height: h)
     }
