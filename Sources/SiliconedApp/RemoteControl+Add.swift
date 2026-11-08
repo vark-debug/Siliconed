@@ -84,6 +84,11 @@ extension RemoteControl {
                     throw Refusal("lora", String(localized: "\"expand\" is not a preset: the workflow wires remove and redraw"),
                                   help: "silicontrol add --lora remove")
                 } else {
+                    // A preset's own installed name: kept as the LoRA it is without a mask; `--mask`
+                    // reads `presetFiles` and makes it the preset (its branch and pinned strength).
+                    if let preset = PatchLoRA.preset(fileNamed: name) {
+                        d.presetFiles.append((preset, strength))
+                    }
                     d.loras.append((name, strength ?? 1))
                 }
             case "--ref": d.references.append(try value(a))
@@ -199,6 +204,23 @@ extension RemoteControl {
         // presets exclude each other, and the branch's preset is wired at the workflow's strength
         // when the user named none — no silent overwrite either way.
         if d.mask != nil {
+            // **A `--lora` naming a preset's own installed LoRA is that preset** — its file name as
+            // the header spells it, or a path to it. Left a bare LoRA it would keep the default
+            // `remove` branch and stack its remove preset beside the redraw LoRA: the branch is the
+            // preset's, at the strength the workflow pinned.
+            for named in d.presetFiles {
+                guard named.strength == nil else {
+                    throw Refusal("lora", String(localized: "a preset's strength is fixed: name it without a strength"),
+                                  help: "silicontrol add --lora \(named.preset.rawValue)")
+                }
+                if !d.presets.contains(named.preset) { d.presets.append(named.preset) }
+            }
+            if !d.presetFiles.isEmpty {
+                d.loras = d.loras.map { entry in
+                    guard let preset = PatchLoRA.preset(fileNamed: entry.name) else { return entry }
+                    return (preset.fileName, preset.strength)
+                }
+            }
             if d.presets.count > 1 {
                 throw Refusal("mode", String(localized: "--lora remove and --lora redraw are exclusive: name one"),
                               help: String(localized: "leave --lora out: --mode wires its preset"))

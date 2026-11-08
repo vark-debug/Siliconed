@@ -21,8 +21,9 @@ extension AppState {
     /// its entry decides what it renders, the lab's attachment never enters it.
     /// **Something varies** (`Series.swift`): the series' grid, one finished image per cell.
     ///
-    /// **A mask in the lab is this click's**: taken (`takeAttachedMask`), given image 1 and the command line's defaults
-    /// (`Patch.Settings()`), and the render's format becomes the crop's plan. The next click is ordinary again.
+    /// **A mask in the lab is this click's**: taken (`takeAttachedMask`), given image 1 and the rack's branch
+    /// (`Patch.Settings(mode: patchMode)` — a redraw preset leaves the crop untinted), and the render's format
+    /// becomes the crop's plan. The next click is ordinary again.
     func render(imposedSeed: UInt64? = nil, imposedFormat: RecommendedFormat? = nil, patch: PatchInput? = nil,
                 ignoresAttachedMask: Bool = false) {
         guard canRender else { return }
@@ -32,7 +33,7 @@ extension AppState {
         let attached = ignoresAttachedMask ? nil : takeAttachedMask()
         var patch = patch
         if patch == nil, let attached, let image = editInputs.first?.shown {
-            patch = (image, attached.mask, Patch.Settings())
+            patch = (image, attached.mask, Patch.Settings(mode: patchMode))
         }
         // Everything that reads the state is taken here: the job no longer depends on the form.
         let firstNumber = imposedSeed ?? (fixedSeed ? seed : UInt64.random(in: 0...UInt64(UInt32.max)))

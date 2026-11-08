@@ -234,4 +234,140 @@ final class MaskEntryTests: XCTestCase {
         XCTAssertNil(app.redoPatch(plainEntry), "an ordinary image's redo stays ordinary")
         XCTAssertNotNil(app.attachedMask, "a redo neither takes nor clears the lab's attachment")
     }
+
+    /// A gray square: image 1 as the painter decodes it.
+    private func square(_ side: Int) -> CGImage {
+        let context = CGContext(data: nil, width: side, height: side, bitsPerComponent: 8, bytesPerRow: 0,
+                                space: CGColorSpace(name: CGColorSpace.sRGB)!,
+                                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
+        context.setFillColor(CGColor(gray: 0.2, alpha: 1))
+        context.fill(CGRect(x: 0, y: 0, width: side, height: side))
+        return context.makeImage()!
+    }
+
+    /// The workflow's preset as the library holds it: a card whose `nom` is the preset's file name.
+    private func loraCard(_ preset: PatchLoRA) -> LoRACard {
+        LoRACard(header: ["kind": "lora", "cible": ["modele": PatchLoRA.workflow], "nom": preset.fileName],
+                 path: "/tmp/\(preset.rawValue).lora.silicon")!
+    }
+
+    /// Image 1 with its mask attached — the size and the pixels a click takes (`attachMask`).
+    @discardableResult
+    private func attachAMask(to app: AppState, side: Int = 256) async -> ReferenceImage {
+        let image = picture(side, white: nil, name: "image.png")
+        await app.attachMask(picture(side, white: CGRect(x: 100, y: 100, width: 40, height: 40), name: "mask.png"),
+                             to: image)
+        return image
+    }
+
+    /// **The redraw preset's branch reaches the job** (`AppState+Render.swift`): its card switched on in
+    /// the rack gives `Patch.Settings.mode == .redraw` — the engine's `tint: mode != .redraw` false, so
+    /// the crop is not painted green — and the stack holds one LoRA at the workflow's 0.48.
+    func testARedrawPresetRendersTheRedrawBranch() async {
+        let app = form()
+        let redraw = loraCard(.redraw)
+        app.compatibleLoras = [redraw]
+        app.loras = [LoRASlot(path: redraw.path, strength: PatchLoRA.redraw.strength)]
+        let image = await attachAMask(to: app)
+        XCTAssertEqual(app.patchMode, .redraw, "the rack's card picks the branch")
+
+        guard let plan = app.attachedMaskPlan, let input = app.attachedMaskInput(for: image) else {
+            return XCTFail("no attachment")
+        }
+        XCTAssertEqual(input.settings.mode, .redraw, "the click takes the rack's branch, not the default")
+        let jobs = app.renderJobs(seed: 7, format: plan, patch: input, prompts: ["a red jacket"], edit: [])
+        XCTAssertEqual(jobs[0].settings.patch?.mode, .redraw)
+        XCTAssertEqual(jobs[0].settings.loras.count, 1, "one LoRA: the preset's, never a remove one beside it")
+        XCTAssertEqual(jobs[0].settings.loras.first?.strength, PatchLoRA.redraw.strength)
+    }
+
+    /// **The remove preset's branch**: its card gives `mode == .remove` — the tinted crop — and its
+    /// one LoRA at the workflow's 1.0.
+    func testARemovePresetRendersTheRemoveBranch() async {
+        let app = form()
+        let remove = loraCard(.remove)
+        app.compatibleLoras = [remove]
+        app.loras = [LoRASlot(path: remove.path, strength: PatchLoRA.remove.strength)]
+        let image = await attachAMask(to: app)
+        XCTAssertEqual(app.patchMode, .remove)
+
+        guard let plan = app.attachedMaskPlan, let input = app.attachedMaskInput(for: image) else {
+            return XCTFail("no attachment")
+        }
+        XCTAssertEqual(input.settings.mode, .remove)
+        let jobs = app.renderJobs(seed: 8, format: plan, patch: input, prompts: ["remove the lamp"], edit: [])
+        XCTAssertEqual(jobs[0].settings.patch?.mode, .remove)
+        XCTAssertEqual(jobs[0].settings.loras.count, 1)
+        XCTAssertEqual(jobs[0].settings.loras.first?.strength, PatchLoRA.remove.strength)
+    }
+
+    /// **Both presets switched on are refused before a job is made** (`maskBlocker`): neither branch is
+    /// the mask's. Switching one off leaves the other's, so the refusal goes.
+    func testTwoPresetsOnAreRefusedBeforeGenerate() async {
+        let app = form()
+        let remove = loraCard(.remove), redraw = loraCard(.redraw)
+        app.compatibleLoras = [remove, redraw]
+        app.loras = [LoRASlot(path: remove.path, strength: PatchLoRA.remove.strength),
+                     LoRASlot(path: redraw.path, strength: PatchLoRA.redraw.strength)]
+        await attachAMask(to: app)
+
+        let blocker = app.maskBlocker
+        XCTAssertNotNil(blocker)
+        XCTAssertTrue(blocker?.contains("exclusive") == true,
+                      "the two presets' branches are exclusive — got \(blocker ?? "nil")")
+
+        app.loras[1].on = false
+        XCTAssertNotEqual(app.maskBlocker?.contains("exclusive"), true,
+                          "a card switched off is not stacked, so no conflict")
+    }
+
+    /// **A preset card switched off does not pick the branch** (`patchMode` reads `activeLoRAs`): redraw
+    /// off is remove, on is redraw; the remove card beside it keeps remove.
+    func testATurnedOffPresetDoesNotPickTheBranch() {
+        let app = form()
+        let remove = loraCard(.remove), redraw = loraCard(.redraw)
+        app.compatibleLoras = [remove, redraw]
+        var slot = LoRASlot(path: redraw.path, strength: PatchLoRA.redraw.strength)
+        slot.on = false
+        app.loras = [slot]
+        XCTAssertEqual(app.patchMode, .remove, "switched off: not in the stack")
+        app.loras[0].on = true
+        XCTAssertEqual(app.patchMode, .redraw)
+        app.loras[0].on = false
+        app.loras.append(LoRASlot(path: remove.path, strength: PatchLoRA.remove.strength))
+        XCTAssertEqual(app.patchMode, .remove, "the remove card alone")
+    }
+
+    /// **A painted mask with the redraw preset leaves the crop untinted**: the brush's bitmap goes
+    /// through the same attachment as a PNG, and the click's branch is the rack's — `.redraw`, where
+    /// `execute` builds `Patch(tint: settings.patch?.mode != .redraw)`, hence tint false.
+    func testAPaintedMaskWithTheRedrawPresetIsNotTinted() async throws {
+        let app = form()
+        let redraw = loraCard(.redraw)
+        app.compatibleLoras = [redraw]
+        app.loras = [LoRASlot(path: redraw.path, strength: PatchLoRA.redraw.strength)]
+
+        let side = 256
+        let pixels = square(side)
+        let image = ReferenceImage(source: .image(pixels),
+                                   vignette: NSImage(cgImage: pixels, size: NSSize(width: side, height: side)),
+                                   name: "image.png", width: side, height: side)
+        var session = MaskSession(image: pixels, imageID: image.id)
+        session.strokes = [MaskSession.Stroke(tool: .brush, radius: 20,
+                                              points: [CGPoint(x: 100, y: 100), CGPoint(x: 140, y: 100)])]
+        let painted = try XCTUnwrap(session.maskImage())
+        let mask = ReferenceImage(source: .image(painted),
+                                  vignette: NSImage(cgImage: painted, size: NSSize(width: side, height: side)),
+                                  name: "Painted mask", width: side, height: side)
+        await app.attachMask(mask, to: image)
+        XCTAssertNotNil(app.attachedMask, "the painted mask is attached")
+
+        guard let plan = app.attachedMaskPlan, let input = app.attachedMaskInput(for: image) else {
+            return XCTFail("no attachment")
+        }
+        XCTAssertEqual(input.settings.mode, .redraw, "the painted entry takes the rack's branch")
+        let jobs = app.renderJobs(seed: 9, format: plan, patch: input, prompts: ["a red jacket"], edit: [])
+        XCTAssertEqual(jobs[0].settings.patch?.mode, .redraw,
+                       "redraw: the engine leaves the painted crop as it is (no green)")
+    }
 }

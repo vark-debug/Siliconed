@@ -63,6 +63,14 @@ enum PatchLoRA: String, CaseIterable, Identifiable {
         PatchLoRA(rawValue: name.lowercased())
     }
 
+    /// **The preset a LoRA's own installed name stands for**: its file name (`nom` + `.lora.silicon`)
+    /// or a path to that file — `nil` for any other LoRA. Under `--mask` such a name is the preset,
+    /// never a bare LoRA stacked beside the default branch's one.
+    static func preset(fileNamed name: String) -> PatchLoRA? {
+        let wanted = key((name as NSString).lastPathComponent)
+        return allCases.first { key($0.fileName) == wanted }
+    }
+
     /// The third GH LoRA's preset names: not part of this workflow, so `--lora` refuses them rather
     /// than ignoring them.
     static func isUnwired(named name: String) -> Bool {

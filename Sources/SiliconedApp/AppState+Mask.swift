@@ -67,17 +67,20 @@ extension AppState {
             return String(localized: "A mask stays on this Mac: stop following another Mac first.",
                            comment: "A patch cannot cross a mirror: its crop and mask are this Mac's")
         }
+        // **The two presets are two branches of one workflow**: switched on together, neither is the
+        // mask's — refused before the click. A card switched off is not in the stack (`patchMode`
+        // reads the same `activeLoRAs`). The stack is read before the model's own refusal: it is the
+        // rack's, whatever shape the mask workflow has here.
+        if let remove = PatchLoRA.card(for: .remove, in: compatibleLoras)?.path,
+           let redraw = PatchLoRA.card(for: .redraw, in: compatibleLoras)?.path,
+           activeLoRAs.contains(where: { $0.path == remove }),
+           activeLoRAs.contains(where: { $0.path == redraw }) {
+            return String(localized: "The remove and redraw presets are exclusive: keep one in the rack.",
+                           comment: "A patch takes one branch of the workflow, not both")
+        }
         guard canPatchMask else {
             return String(localized: "\(modelName(identifier)) has no mask workflow: a mask needs a model that edits by reference (Qwen-Image-2.1).",
                            comment: "The model refuses a patch: no additive start, or no image encoder")
-        }
-        // The two presets are two branches of one workflow: stacked together, neither is the mask's.
-        let presetCards = compatibleLoras
-        if let remove = PatchLoRA.card(for: .remove, in: presetCards)?.path,
-           let redraw = PatchLoRA.card(for: .redraw, in: presetCards)?.path,
-           loras.contains(where: { $0.path == remove }), loras.contains(where: { $0.path == redraw }) {
-            return String(localized: "The remove and redraw presets are exclusive: keep one in the rack.",
-                           comment: "A patch takes one branch of the workflow, not both")
         }
         guard let image = editInputs.first?.shown else {
             return String(localized: "Attach an image first: the mask must have the image’s size.",
@@ -254,10 +257,12 @@ extension AppState {
     }
 
     /// **The branch the rack's LoRA stack picks** (`Patch.Settings.mode`): the redraw preset's card
-    /// → redraw; anything else — the remove card included — remove, the default. The Add menu's two
-    /// presets and the command line's `--mode` / `--lora` write this one notion, never two paths.
+    /// switched **on** → redraw; anything else — the remove card included, and a card switched off —
+    /// remove, the default. The Add menu's two presets and the command line's `--mode` / `--lora`
+    /// write this one notion, never two paths.
     var patchMode: Patch.Mode {
-        guard let redraw = PatchLoRA.card(for: .redraw, in: compatibleLoras)?.path, loras.contains(where: { $0.path == redraw }) else {
+        guard let redraw = PatchLoRA.card(for: .redraw, in: compatibleLoras)?.path,
+              activeLoRAs.contains(where: { $0.path == redraw }) else {
             return .remove
         }
         return .redraw

@@ -120,6 +120,10 @@ silicontrol add --model qwen-image-2.1 --image photo.jpg --mask photo-mask.png \
 
 - **Presets imply the mode**: `--lora redraw` alone is `--mode redraw`; `--lora remove` alone is
   the default. With `--mask` the preset is wired once, even when `--mode` is also given.
+- **A preset's own installed file name is the preset under `--mask`**: `--lora
+  "Qwen2.1 一致性无偏移_GH_V1.0"` (or a path to that file) is `--lora redraw` — one branch, its
+  pinned strength. A `:strength` typed beside it is refused (`error: "lora"`); without `--mask`
+  the name stays the bare LoRA the user named.
 - **Conflicts are refused, never silently overridden** (`error: "mode"`): `--mode redraw
   --lora remove`, or both presets. The branch's preset is wired even when `--lora` names none;
   naming the same LoRA twice (a preset and a manual name that resolve to one file) is refused

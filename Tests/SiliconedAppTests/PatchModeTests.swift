@@ -64,6 +64,45 @@ final class PatchModeTests: XCTestCase {
         XCTAssertEqual(d.loras.map(\.name), [PatchLoRA.redraw.fileName])
     }
 
+    /// **A preset's own installed file name is the preset under `--mask`**: `--lora
+    /// "Qwen2.1 一致性无偏移_GH_V1.0"` selects the redraw branch at 0.48 — never the default remove
+    /// branch with the redraw LoRA stacked beside its remove preset. A path to the file reads the same.
+    func testAPresetsFileNameIsThePresetUnderAMask() throws {
+        let redraw = try parse(["--image", "photo.png", "--mask", "mask.png",
+                                "--lora", PatchLoRA.redraw.fileName, "make it a jacket"])
+        XCTAssertEqual(redraw.mode, .redraw)
+        XCTAssertEqual(redraw.loras.map(\.name), [PatchLoRA.redraw.fileName], "one LoRA, the preset's")
+        XCTAssertEqual(redraw.loras.first?.strength, PatchLoRA.redraw.strength, "the workflow's 0.48")
+
+        let remove = try parse(["--image", "photo.png", "--mask", "mask.png",
+                                "--lora", PatchLoRA.remove.fileName])
+        XCTAssertEqual(remove.mode, .remove)
+        XCTAssertEqual(remove.loras.map(\.name), [PatchLoRA.remove.fileName])
+        XCTAssertEqual(remove.loras.first?.strength, PatchLoRA.remove.strength)
+
+        let byPath = try parse(["--image", "photo.png", "--mask", "mask.png",
+                                "--lora", "/tmp/\(PatchLoRA.redraw.fileName).lora.silicon", "x"])
+        XCTAssertEqual(byPath.mode, .redraw)
+        XCTAssertEqual(byPath.loras.first?.strength, PatchLoRA.redraw.strength)
+
+        // The two files are the two branches: refused, as `--lora remove --lora redraw` is.
+        refusal(["--image", "photo.png", "--mask", "mask.png",
+                 "--lora", PatchLoRA.remove.fileName, "--lora", PatchLoRA.redraw.fileName, "x"], "mode")
+        // A strength typed beside a preset's file would be dropped by the preset: refused, like
+        // `--lora redraw:0.3`.
+        refusal(["--image", "photo.png", "--mask", "mask.png",
+                 "--lora", "\(PatchLoRA.redraw.fileName):0.3", "x"], "lora")
+    }
+
+    /// Without a mask the same name stays the LoRA the user named, strength and all — the CLI's
+    /// behaviour is unchanged there (`--mask` alone reads it as the preset).
+    func testAPresetsFileNameStaysABareLoRAWithoutAMask() throws {
+        let d = try parse(["--lora", PatchLoRA.redraw.fileName, "cat"])
+        XCTAssertEqual(d.loras.map(\.name), [PatchLoRA.redraw.fileName])
+        XCTAssertEqual(d.loras.first?.strength, 1, "the typed default, not the preset's 0.48")
+        XCTAssertNil(d.mode, "no branch without a mask")
+    }
+
     /// **No silent override**: the branch named by `--mode` and the preset named by `--lora` must
     /// agree; two presets exclude each other.
     func testContradictoryBranchesAreRefused() {

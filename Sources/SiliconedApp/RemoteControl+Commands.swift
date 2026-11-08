@@ -132,6 +132,10 @@ extension RemoteControl {
         /// `nil`, the model's choice.
         var accelerators: Bool?
         var loras: [(name: String, strength: Double)] = []
+        /// The `--lora` entries that named a preset's own installed LoRA (its file name, or a path to
+        /// it) rather than `remove` / `redraw`, with the strength typed beside it if any: with `--mask`
+        /// these are the preset — its branch and the workflow's pinned strength.
+        var presetFiles: [(preset: PatchLoRA, strength: Double?)] = []
         /// The `--ref`, in their order: the first is image 1, the one edited.
         var references: [String] = []
         /// `--image IMAGE|i7`: the starting image of an img2img (a model with "start_image": true); `--strength`: its strength,
