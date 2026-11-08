@@ -155,11 +155,19 @@ extension AppState {
             return
         }
         attachedMask = AttachedMask(mask: mask, plan: plan)
+        // **The patch's own default steps, 9** (`Patch.defaultSteps`): the form says so, and the job's
+        // settings, its plan and every label read the same number — no second arithmetic.
+        steps = Patch.defaultSteps
         problem = nil
     }
 
     /// **« Remove Mask »**: the next click is an ordinary render again, at the form's format.
-    func removeMask() { attachedMask = nil }
+    func removeMask() {
+        attachedMask = nil
+        // Nine was the mask's: back to the model's default when the form still holds it — a count the
+        // user chose while attached stays theirs.
+        if steps == Patch.defaultSteps { steps = card?.defaultSteps ?? 8 }
+    }
 
     // MARK: One render's
 

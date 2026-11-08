@@ -230,6 +230,15 @@ final class AdmissionTests: XCTestCase {
         let admitted = try Admission.judge(request, chain: qwen, usesANE: false)
         XCTAssertEqual([admitted.width, admitted.height], [48, 48], "768² from the plan, not the request's 512²")
         XCTAssertEqual([admitted.patch?.width, admitted.patch?.height], [768, 768])
+        XCTAssertEqual(admitted.steps, 9, "the patch's default: the workflow's ManualSigmas")
+        XCTAssertEqual(qwen.denoising.sigmas(steps: admitted.steps), QwenImage21Pipeline.manualSigmas,
+                       "the schedule the workflow stores, not the Turbo's published eight")
+        // An explicit count is the user's — 8 is a schedule the model has, and it is left alone.
+        var eight = request; eight.steps = 8
+        let published = try Admission.judge(eight, chain: qwen, usesANE: false)
+        XCTAssertEqual(published.steps, 8)
+        XCTAssertNotEqual(qwen.denoising.sigmas(steps: 8), QwenImage21Pipeline.manualSigmas,
+                          "the Turbo's published eight, not the workflow's nine")
         XCTAssertNil(admitted.seededSigma, "the default patch starts from noise: the crop is image 1 alone")
         XCTAssertEqual(admitted.start, 0)
         XCTAssertEqual(admitted.plan.reduced, 0, "the crop is never projected onto a half-size grid")

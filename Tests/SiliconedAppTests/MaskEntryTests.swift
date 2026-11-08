@@ -63,6 +63,7 @@ final class MaskEntryTests: XCTestCase {
         await app.attachMask(mask, to: image)
         XCTAssertNotNil(app.attachedMask)
         XCTAssertNil(app.problem, "a mask of image 1's size, with pixels to replace, is accepted")
+        XCTAssertEqual(app.steps, Patch.defaultSteps, "the patch's own default: the workflow's 9")
         guard let plan = app.attachedMask?.plan else { return XCTFail("no plan") }
         XCTAssertEqual(app.attachedMaskPlan, RecommendedFormat(plan.width, plan.height),
                        "the render's size is the crop's plan")
@@ -74,6 +75,8 @@ final class MaskEntryTests: XCTestCase {
                                   prompts: ["a cat"], edit: [])
         XCTAssertEqual(jobs.count, 1)
         XCTAssertNotNil(jobs[0].patch, "with a mask the job is the 「移除」 path")
+        XCTAssertEqual(jobs[0].settings.steps, Patch.defaultSteps,
+                       "the job walks the nine the form shows — display and plan, one number")
         XCTAssertEqual(jobs[0].settings.patch, Patch.Settings(),
                        "expand 1.3/1.4/1.4/1.4, max side 2560, noise_mask on: the command line's defaults")
         XCTAssertEqual(jobs[0].settings.format, RecommendedFormat(plan.width, plan.height),
@@ -93,6 +96,29 @@ final class MaskEntryTests: XCTestCase {
         XCTAssertNil(plain[0].patch, "the next click carries no mask, hence no green tint")
         XCTAssertNil(plain[0].settings.patch)
         XCTAssertEqual(plain[0].settings.format, chosen, "and it is the form's format")
+    }
+
+    /// **The mask's nine are the mask's**: attaching defaults the form to the workflow's 9
+    /// (`Patch.defaultSteps`), removing it returns the model's 8, a count chosen while attached
+    /// stays the user's, and an ordinary render always keeps the form's count — the job's settings
+    /// are the form's, so the displayed steps and the planned evaluations cannot diverge.
+    func testTheMaskStepsBelongToTheMask() async {
+        let app = form()
+        let image = picture(256, white: nil, name: "image.png")
+        let mask = picture(256, white: CGRect(x: 100, y: 100, width: 50, height: 50), name: "mask.png")
+        app.steps = 7
+        await app.attachMask(mask, to: image)
+        XCTAssertEqual(app.steps, 9, "attaching shows the patch's 9, whatever the form held")
+        app.removeMask()
+        XCTAssertEqual(app.steps, 8, "removing returns the model's default")
+        await app.attachMask(mask, to: image)
+        app.steps = 8
+        app.removeMask()
+        XCTAssertEqual(app.steps, 8, "a count chosen while attached is the user's, kept")
+        app.steps = 12
+        let plain = app.renderJobs(seed: 3, format: RecommendedFormat(512, 512), patch: nil,
+                                   prompts: ["x"], edit: [])
+        XCTAssertEqual(plain[0].settings.steps, 12, "no mask: the form's own count, unchanged")
     }
 
     /// **A mask of another size is refused, both sizes said** — never scaled.

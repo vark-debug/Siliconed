@@ -50,6 +50,9 @@ extension AppState {
         // as its crop, so no reference travels with it (`Request.references` empty).
         enqueue(renderJobs(seed: firstNumber, format: format, patch: patch,
                            prompts: prompts, edit: patch == nil ? renderReferences : []))
+        // The mask's nine belong to the job just queued (`Patch.defaultSteps`): the form goes back to
+        // the model's default for the next ordinary render — a count the user chose stays theirs.
+        if attached != nil, steps == Patch.defaultSteps { steps = card?.defaultSteps ?? 8 }
     }
 
     /// **The jobs a click makes**: one per prompt alternative, from the form as it reads now. `patch`: the

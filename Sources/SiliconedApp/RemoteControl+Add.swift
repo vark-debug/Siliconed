@@ -453,14 +453,19 @@ extension RemoteControl {
         }
 
         let defaultSteps = card?.defaultSteps ?? model.chain.denoising.defaultSteps
-        let steps = d.steps ?? defaultSteps
+        // **A mask walks the workflow's `ManualSigmas`**: 9 by default, not the Turbo's published 8.
+        // An explicit `--steps` is the user's, and the check below still refuses a count without a
+        // schedule — never mapped onto another table.
+        let requestDefault = d.mask == nil ? defaultSteps : Patch.defaultSteps
+        let steps = d.steps ?? requestDefault
         // A step count the denoiser has no schedule for (Qwen-Image-2.1-Turbo: 8 alone) would
         // fail in the queue: refused here, like everything else an accepted request cannot fail on.
         if (try? model.chain.denoising.check(steps: steps, startImage: false)) == nil {
             let accepted = (1...50).filter { (try? model.chain.denoising.check(steps: $0, startImage: false)) != nil }
                 .map(String.init).formatted(.list(type: .or))
             throw Refusal("steps", String(localized: "This model has no schedule for \(String(steps)) steps: \(accepted)."),
-                        help: "--steps \(defaultSteps) (the model's \"default_steps\")")
+                        help: d.mask == nil ? "--steps \(defaultSteps) (the model's \"default_steps\")"
+                                            : "--steps \(Patch.defaultSteps) (the mask workflow's ManualSigmas)")
         }
         let f = model.chain.denoising.space.factor
         let strength = start == nil ? nil : StartImage.snapped(d.strength ?? StartImage.defaultStrength(for: card?.family))

@@ -41,7 +41,9 @@ package struct Admission: Sendable {
         }
         let denoising = chain.denoising, space = denoising.space
         var height = request.height / space.factor, width = request.width / space.factor
-        var steps = request.steps ?? denoising.defaultSteps
+        // **A patch walks the workflow's `ManualSigmas`** (`Patch.defaultSteps`, 9) unless the
+        // request names a count — the graph's own table, not the Turbo's published eight.
+        var steps = request.steps ?? (request.patch != nil ? Patch.defaultSteps : denoising.defaultSteps)
         // **A σ table the request supplies** (`Request.sigmas`): the steps follow it (`steps + 1`
         // values, the shape checked — strictly decreasing, the last 0), and the denoiser's own
         // `check(sigmas:)` judges it below: a count its published schedule does not have

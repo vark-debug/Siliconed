@@ -17,7 +17,9 @@ silicontrol add --model qwen-image-2.1 \
 
 遮罩与 `--image` 同尺寸（白区域/alpha 为要处理的部分）；默认 `--mode remove`（涂绿 + 移除 LoRA
 1.0），`--mode redraw`（不涂绿 + 重绘 LoRA 0.48）；默认回贴，产物与原图同尺寸；`--no-paste`
-（= `--crop-only`）只留裁剪图。下面各节是同一条命令的逐项说明。
+（= `--crop-only`）只留裁剪图。**步数默认是 9**（工作流的 `ManualSigmas`，GUI 附遮罩后表单同样显示
+9）；显式 `--steps 8` 才走 Turbo 发布的 8 步表，模型没有的表在解析时就拒绝。下面各节是同一条命令的
+逐项说明。
 
 ## 1. Environment and launch
 

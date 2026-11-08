@@ -108,6 +108,11 @@ package struct Patch: Sendable, Equatable {
     /// smallest long side (768) at 12:7; a crop under it keeps too little of the region and is
     /// refused, said.
     package static let minimumRenderSide = 448
+    /// **The patch path's default step count, 9** — the « 移除、局部重绘 » graph's `ManualSigmas`
+    /// (`QwenImage21Pipeline.manualSteps`), the workflow's own table, one node past the Turbo's
+    /// published 8. A mask's job walks it unless the request names a count (`--steps`, the form's);
+    /// a count with no schedule is refused by `check(steps:)`, never mapped onto another table.
+    package static let defaultSteps = QwenImage21Pipeline.manualSteps
     /// `整除数`: both sides of the crop are multiples of 32.
     package static let multiple = 32
     /// The workflow tints the crop with `#00FF00` at 0.4, over the mask only. In the model's
