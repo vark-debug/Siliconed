@@ -138,10 +138,15 @@ extension RemoteControl {
             }
             i += 1
         }
-        guard let prompt = positional.first else {
+        // **The prompt may be left out with a mask**: `add` fills in the remove sentence the form uses
+        // (`MaskPrompt.standard`). Without a mask the prompt is the render.
+        if let first = positional.first {
+            d.prompt = first
+        } else if d.mask != nil {
+            d.prompt = ""
+        } else {
             throw Refusal("usage", String(localized: "the prompt is missing"), help: "silicontrol add [--model id] \"<prompt>\" [512|1024|WxH|P:Q@1K|2K] [seed] — silicontrol help add")
         }
-        d.prompt = prompt
         for p in positional.dropFirst() {
             if d.format == nil, SizeScales.looksLikeScale(p) {
                 // `3:4@2K`: the pixels of the rack's two-scale Size (`SizeScales`), whether or not that Beta option is on.
@@ -209,6 +214,19 @@ extension RemoteControl {
                 d.loras.append((preset.fileName, preset.strength))
             }
         }
+        // **The prompt, once the branch is known**: with a mask, remove may leave it out (the `add`
+        // below fills `MaskPrompt.standard`); redraw may not — an empty one there would be a sentence
+        // about what the marked area becomes, which the program cannot invent. Without a mask the
+        // prompt is the render.
+        if d.prompt.map({ $0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }) == true {
+            guard d.mask != nil else {
+                throw Refusal("usage", String(localized: "empty prompt"))
+            }
+            guard (d.mode ?? .remove) == .remove else {
+                throw Refusal("prompt", String(localized: "redraw needs a prompt: say what the marked area becomes"),
+                              help: String(localized: "write the sentence the area becomes — or --mode remove, whose prompt the mask fills"))
+            }
+        }
         return d
     }
 
@@ -267,8 +285,12 @@ extension RemoteControl {
             throw Refusal("accelerators", String(localized: "this Mac’s measure offers no accelerator"),
                           help: String(localized: "leave out --accelerators"))
         }
-        guard let prompt = d.prompt, !prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            throw Refusal("usage", String(localized: "empty prompt"))
+        // **A mask may leave the prompt out** (`MaskPrompt.standard`, « 移除图像中的绿色区域 »): the marked
+        // area is the sentence, and the form fills in the same string. `parse` has refused redraw's
+        // empty prompt already — here the remove branch's one is filled, never invented elsewhere.
+        var prompt = d.prompt ?? ""
+        if prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            prompt = MaskPrompt.standard
         }
         // `{a|b}`: one job per expanded prompt, parsed like the app's field — before anything else
         // is read, so that a typo costs nothing.

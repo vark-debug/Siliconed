@@ -364,6 +364,9 @@ package enum RemoteControlHelp {
         ARGUMENTS
           "<prompt>"          ONE argument: always in quotes. An extra word is refused.
                               {a|b|c} in it: one job per alternative (ALTERNATIVES below).
+                              With --mask it may be left out (or ""): --mode remove fills in the
+                              workflow's «Remove the green area from the image.» — --mode redraw
+                              needs one, said.
           512 | 1024 | WxH    format. 512 = 512x512, 1024 = 1024x1024; WxH = width x height
                               (832x1216 = portrait, the "formats" of « models »). Each side
                               ≥ 512 and a multiple of 16 (32 for qwen-image-2.1), ≤ 8192
@@ -454,6 +457,10 @@ package enum RemoteControlHelp {
                               crop is the text encoder's image 1: the prompt says what replaces
                               the region. --mode remove (the default) tints the crop green; --mode
                               redraw hands it over untouched, and the prompt says what it becomes.
+                              With --mode remove the prompt may be left out: it then says
+                              «Remove the green area from the image.» (移除图像中的绿色区域).
+                              --mode redraw refuses an empty one — it cannot invent what the
+                              area becomes.
                               THE RENDER STARTS FROM NOISE, the crop being a reference alone;
                               --seeded-start also makes it the start.
                               BY DEFAULT THE CROP IS PASTED BACK, as the workflow's GH_CropRestore
@@ -1755,6 +1762,9 @@ package enum RemoteControlHelp {
         ARGUMENTS
           "<prompt>"          UN argument : toujours entre guillemets. Un mot en trop est refusé.
                               {a|b|c} dedans : un travail par alternative (ALTERNATIVES plus bas).
+                              Avec --mask il peut être omis (ou "") : --mode remove le remplit avec
+                              «Remove the green area from the image.» du workflow ; --mode redraw
+                              en exige un, dit.
           512 | 1024 | WxH    format. 512 = 512x512, 1024 = 1024x1024 ; WxH = largeur x hauteur
                               (832x1216 = portrait, les "formats" de « models »). Chaque côté
                               ≥ 512 et multiple de 16 (32 pour qwen-image-2.1), ≤ 8192
@@ -1847,7 +1857,11 @@ package enum RemoteControlHelp {
                               cette découpe est l'image 1 de l'encodeur de texte : le prompt dit ce
                               qui remplace la région. --mode remove (par défaut) teint la découpe
                               en vert ; --mode redraw la donne telle quelle, et le prompt dit ce
-                              qu'elle devient. LE RENDU PART DU BRUIT, la découpe n'étant qu'une
+                              qu'elle devient. Avec --mode remove le prompt peut être omis : il dit
+                              alors «Remove the green area from the image.» (移除图像中的绿色区域).
+                              --mode redraw refuse un prompt vide — il ne peut pas inventer ce
+                              que la zone devient.
+                              LE RENDU PART DU BRUIT, la découpe n'étant qu'une
                               référence ; --seeded-start en fait aussi le départ.
                               PAR DÉFAUT LA DÉCOUPE EST REPOSÉE, comme le GH_CropRestore du
                               workflow : ramenée à sa place au Lanczos, fondue (4 % et 5 % de la

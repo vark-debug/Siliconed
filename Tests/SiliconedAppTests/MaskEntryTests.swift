@@ -148,6 +148,61 @@ final class MaskEntryTests: XCTestCase {
         XCTAssertFalse(problem.title.contains("invalid_patch"), "a sentence, not the code, reaches the interface")
     }
 
+    /// **An empty prompt with a mask is the remove sentence** (`MaskPrompt.standard`): painted or imported,
+    /// the marked area says what changes — the workflow's own « 移除图像中的绿色区域 ». A prompt the user
+    /// did write stays theirs, and without a mask the field is still required.
+    func testAnEmptyPromptWithAMaskIsTheRemoveSentence() async {
+        let app = form()
+        let image = picture(256, white: nil, name: "image.png")
+        await app.attachMask(picture(256, white: CGRect(x: 100, y: 100, width: 40, height: 40), name: "mask.png"),
+                             to: image)
+        app.prompt = ""
+        XCTAssertNil(MaskPrompt.blocker(prompt: "", masked: true, mode: .remove),
+                     "with a mask the prompt may be left empty")
+
+        guard let plan = app.attachedMaskPlan, let input = app.attachedMaskInput(for: image) else {
+            return XCTFail("no attachment")
+        }
+        let jobs = app.renderJobs(seed: 1, format: plan, patch: input, prompts: [""], edit: [])
+        XCTAssertEqual(jobs[0].settings.prompt, MaskPrompt.standard,
+                       "the remove branch fills in the workflow's sentence")
+        XCTAssertEqual(jobs[0].settings.patch?.mode, .remove)
+
+        let typed = app.renderJobs(seed: 2, format: plan, patch: input, prompts: ["a cat"], edit: [])
+        XCTAssertEqual(typed[0].settings.prompt, "a cat", "a prompt the user wrote is not replaced")
+
+        app.removeMask()
+        app.prompt = ""
+        XCTAssertEqual(MaskPrompt.blocker(prompt: "", masked: false, mode: .remove), "Write a prompt.",
+                       "without a mask an empty prompt still has nothing to render")
+    }
+
+    /// **The redraw branch never takes the remove sentence**: it would be inventing what the marked area
+    /// becomes, so an empty prompt is refused with a sentence — and the job's prompt stays empty, never
+    /// silently filled. (The form's branch is the LoRA stack's, so the message is tested where it lives,
+    /// `MaskPrompt.blocker`; the job's prompt below carries the redraw settings directly.)
+    func testARedrawAsksForItsOwnPrompt() async {
+        let app = form()
+        let image = picture(256, white: nil, name: "image.png")
+        await app.attachMask(picture(256, white: CGRect(x: 100, y: 100, width: 40, height: 40), name: "mask.png"),
+                             to: image)
+        XCTAssertNil(MaskPrompt.blocker(prompt: "", masked: true, mode: .remove),
+                     "remove fills the sentence in")
+        XCTAssertEqual(MaskPrompt.blocker(prompt: "", masked: true, mode: .redraw),
+                       "Redraw needs a prompt: say what the marked area becomes.")
+        XCTAssertEqual(MaskPrompt.blocker(prompt: "", masked: false, mode: .remove), "Write a prompt.")
+        XCTAssertNil(MaskPrompt.blocker(prompt: "a cat", masked: false, mode: .remove),
+                     "a prompt the user wrote needs no sentence")
+
+        guard let plan = app.attachedMaskPlan, let mask = app.attachedMask?.mask else {
+            return XCTFail("no attachment")
+        }
+        let redraw: PatchInput = (image, mask, Patch.Settings(mode: .redraw))
+        let jobs = app.renderJobs(seed: 1, format: plan, patch: redraw, prompts: [""], edit: [])
+        XCTAssertEqual(jobs[0].settings.prompt, "", "the redraw branch never fills one in")
+        XCTAssertEqual(jobs[0].settings.patch?.mode, .redraw)
+    }
+
     /// **A redo keeps its entry's own mask, and an ordinary redo never takes the lab's.**
     func testARedoKeepsItsOwnMaskAndIgnoresTheLabs() async {
         let app = form()

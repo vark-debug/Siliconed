@@ -100,4 +100,24 @@ final class PatchModeTests: XCTestCase {
     func testAnUnknownModeIsRefused() {
         refusal(["--image", "photo.png", "--mask", "mask.png", "--mode", "inpaint", "x"], "usage")
     }
+
+    /// **A mask may leave the prompt out; the branch decides.** `remove` keeps it empty here and
+    /// `add` fills the workflow's sentence (`MaskPrompt.standard`); `redraw` refuses an empty one,
+    /// a sentence the program cannot write; without a mask the prompt is still the render.
+    func testAMaskMayLeaveThePromptOutButRedrawMayNot() throws {
+        let remove = try parse(["--image", "photo.png", "--mask", "mask.png"])
+        XCTAssertEqual(remove.prompt, "", "the remove branch fills it in, not the parser")
+        XCTAssertEqual(remove.mode, .remove)
+
+        let said = try parse(["--image", "photo.png", "--mask", "mask.png", ""])
+        XCTAssertEqual(said.prompt, "", "an explicit empty positional reads the same")
+
+        refusal(["--image", "photo.png", "--mask", "mask.png", "--mode", "redraw"], "prompt")
+        refusal(["--image", "photo.png", "--mask", "mask.png", "--lora", "redraw"], "prompt")
+
+        XCTAssertThrowsError(try parse(["--image", "photo.png"])) { error in
+            guard let refusal = error as? RemoteControl.Refusal else { return XCTFail("\(error)") }
+            XCTAssertEqual(refusal.code, "usage", "without a mask an empty prompt is still refused")
+        }
+    }
 }

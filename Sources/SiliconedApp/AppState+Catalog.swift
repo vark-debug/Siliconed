@@ -78,7 +78,11 @@ extension AppState {
         if let reason = libraryBlocker { return reason }
         if let reason = installBlocker { return reason }
         if missing != nil { return String(localized: "This model isn’t installed.") }
-        if prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return String(localized: "Write a prompt.") }
+        // **An empty prompt with a mask is the remove sentence** (`MaskPrompt.blocker`): the marked area
+        // says what changes. A redraw cannot invent what the area becomes, so it asks for a sentence.
+        if let blocker = MaskPrompt.blocker(prompt: prompt, masked: attachedMask != nil, mode: patchMode) {
+            return blocker
+        }
         if case .failure(let e) = alternatives { return Problem(e).text }
         // An unknown `@name`, too many images, a mention inside a group: said before the click (`LabInputs.carry`).
         if case .failure(let refusal) = carried { return refusal.sentence }

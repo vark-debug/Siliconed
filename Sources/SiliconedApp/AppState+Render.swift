@@ -59,7 +59,13 @@ extension AppState {
     /// 「移除」 path's sources, passed by the caller — never read from a place shared between jobs (`render`).
     func renderJobs(seed: UInt64, format: RecommendedFormat, patch: PatchInput?,
                     prompts: [String], edit: [ReferenceImage]) -> [Job] {
-        prompts.map { expanded in
+        // **An empty prompt with a mask is the remove sentence** (`MaskPrompt.standard`, `AppState+Mask.swift`):
+        // the marked area says what changes — painted or imported alike. The redraw branch never reaches
+        // here blank (`formBlocker` asks for a sentence: it cannot invent what the area becomes).
+        let prompts = patch?.settings.mode == .remove
+            && prompts.allSatisfy { $0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+            ? [MaskPrompt.standard] : prompts
+        return prompts.map { expanded in
             var settings = RenderSettings(identifier: identifier, modelName: card?.name ?? identifier, prompt: expanded,
                                           format: format, steps: steps, loras: activeLoRAs,
                                           references: edit.count, variations: variations, detail: effectiveDetail,
