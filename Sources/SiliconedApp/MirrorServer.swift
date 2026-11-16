@@ -188,6 +188,15 @@ final class MirrorServer {
                 catch EnlargeFailure.download { host.send(.refused(.app(.enlargeModelDownload)), to: identity) }
                 catch { host.send(.refused(.app(.enlargeFailed)), to: identity) }
             }
+        case .upscale(let o, let scale):
+            guard let e = own(o, identity) else { return }
+            Task {
+                do { _ = try await app.upscaled(e, scale: scale) }
+                catch UpscaleFailure.refused(let sentence) { host.send(.refused(.text(sentence)), to: identity) }
+                catch UpscaleFailure.weightsMissing { host.send(.refused(.app(.upscaleWeightsMissing)), to: identity) }
+                catch is CancellationError { }
+                catch { host.send(.refused(.app(.upscaleFailed)), to: identity) }
+            }
         case .crop(let o, let box):
             guard let e = own(o, identity) else { return }
             if let refusal = app.cropRefusalCode(e) { host.send(.refused(.app(refusal)), to: identity); return }
@@ -555,7 +564,7 @@ final class MirrorServer {
                             width: e.width, height: e.height, seed: e.seed, timings: e.timings, footprints: e.footprints,
                             evaluations: e.evaluations, metadata: e.metadata, neuralEngine: e.settings.offer.neuralEngine, png: id,
                             offer: e.settings.offer,
-                            enlarged: e.enlarged, cropped: e.cropped,
+                            enlarged: e.enlarged, upscaled: e.metadata["upscaled"] != nil, cropped: e.cropped,
                             sheet: e.grid.map { RemoteSheet(ordinal: $0.ordinal, spec: RemoteGridSpec($0.grid), empty: $0.empty) },
                             enlargedFrom: e.enlargedFrom.flatMap { from in app.history.first { $0.owner == e.owner && $0.png == from }?.ordinal })
         return r

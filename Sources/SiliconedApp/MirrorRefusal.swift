@@ -24,6 +24,10 @@ extension AppRefusal {
             String(localized: "The enlargement model could not be downloaded")
         case .enlargeFailed:
             String(localized: "This image could not be enlarged")
+        case .upscaleWeightsMissing:
+            String(localized: "SeedVR2 is not installed on that Mac")
+        case .upscaleFailed:
+            String(localized: "This image could not be upscaled on that Mac")
         case .gridNotCropped:
             String(localized: "A grid is not cropped")
         case .cropNeeds(let side):

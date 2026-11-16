@@ -27,7 +27,7 @@ package enum RemoteControlHelp {
 
     /// The topics in reading order (`help all` follows it).
     static let order = ["contract", "open", "models", "install", "add", "grid", "edit", "wait", "status", "follow",
-                        "cancel", "clear", "set", "history", "save", "vary", "enlarge", "crop", "again", "remove", "undo", "sheet", "rewrite", "describe",
+                        "cancel", "clear", "set", "history", "save", "vary", "enlarge", "upscale", "crop", "again", "remove", "undo", "sheet", "rewrite", "describe",
                         "instructions", "settings", "start-image", "lab", "bracket", "rack", "subjects", "import", "uninstall", "macs", "library", "diagnose", "measure", "errors", "recipes"]
     static let aliases = ["examples": "recipes", "reuse": "again", "compute": "macs"]
 
@@ -102,6 +102,7 @@ package enum RemoteControlHelp {
       models                                   installed models, formats, LoRAs, default steps
       install ID [--standard|--compact|--light] shows a model's license and size in the app, to accept there
       install writer                           the Prompt Lab's writer (1.25 GB), no license of its own
+      install seedvr2                          the upscaler's weights (4.4 GB), downloaded at once
       diagnose [--issue|--stop]                measures this Mac (≈ 1 min, no model) → the report's JSON; --stop: the sheet's Stop
       measure [options] [-- add options]       times and peak memory of a series of renders → a TSV and its summary
       add [options] "<prompt>" [format] [seed] puts a request in the queue → its job (t3)
@@ -121,6 +122,8 @@ package enum RemoteControlHelp {
       save i7 [i8 …] DEST [--format F]         writes images (.png/.jpg/.heic file, or folder in png|jpeg|heic)
       vary i7 subtle|strong [--batch N]        variations of an image (same settings, same seed)
       enlarge i7 [--download]                  the image ×4, by macOS's super-resolution → its image (i8)
+      upscale i7 [--scale N|--long-side N]     the image ×N, refined 1:1 by SeedVR2 (MLX) → its image (i8)
+      upscale FILE [DEST] [--scale N]          a file of any size, without the app (the client runs it)
       rewrite "<text>" [--for ID]              the Prompt Lab's Rewrite: a prompt rewritten for a model → its text
       describe <image|i7> [--for ID]           the Prompt Lab's Describe: an image told as a prompt → its text
       instructions [rewrite|describe] [--for ID] [--set "<text>" | --file PATH | --restore]
@@ -264,6 +267,7 @@ package enum RemoteControlHelp {
         "install": """
         silicontrol install ID [--standard|--compact|--light]
         silicontrol install writer
+        silicontrol install seedvr2
         silicontrol install stop
 
         Opens the app's Models sheet on the model ID (an "id" of « models »), with its license and
@@ -303,6 +307,15 @@ package enum RemoteControlHelp {
         FAILURES (install writer): writer_absent (Qwen-Image-2.1 is not installed: no encoder to give a head to),
         writer_memory (this Mac is too small for the writer), writer_preparing, license_not_accepted, busy (a render,
         an installation or the diagnostic is running), remote.
+
+        install seedvr2 is the quality upscaler's weights (SeedVR2 3B, int8, about 4.4 GB from Hugging Face, Apache-2.0 —
+        no sheet: nothing to accept). The download starts at once, and the answer comes when the last byte lands —
+        minutes, the way « upscale »'s comes when the image is done. While it runs, the Upscale window (⌘⇧U) shows the
+        progress; closing it stops the download, and a half-downloaded file never takes its final name:
+          {"ok": true, "model": "seedvr2", "installed": true, "seconds": 214.5, "message": "…"}
+          {"ok": false, "error": "download_failed", "message": "…"}
+        FAILURES: busy (a render, an installation or the diagnostic is running, or a download already runs),
+        helper_missing (the app ships without the SeedVR2 helper), download_failed (the network failed).
 
         FAILURES: usage (also: --compact or --light for a model that has neither, two version flags
         together, a flag that contradicts the version an imported model's family has), model
@@ -837,6 +850,40 @@ package enum RemoteControlHelp {
         Then: silicontrol save i8 big.png
         FAILURES: usage, unknown_image, refused (macOS before 26, a grid, already enlarged, a render
           running), download_required, download_failed, internal.
+        """,
+
+        "upscale": """
+        silicontrol upscale i7 [--scale N | --long-side N] [--seed N]
+        silicontrol upscale FILE [DEST] [--scale N | --long-side N] [--seed N]
+
+        « Upscale » with SeedVR2, the quality path beside « Enlarge »: a diffusion model (SeedVR2-3B,
+        MLX) that refines the image 1:1 at any scale — macOS's super-resolution is faster and sees
+        no more than the image, SeedVR2 is slower by orders of magnitude and bound by nothing it is
+        bound by: not ×4 only, not the 1920 side. 1920×1080 becomes 3840×2160 (×4 by default); the
+        image joins the history beside its original, which stays. Its PNG keeps the original's
+        metadata, plus "upscaled" and the tiling. It does not go through the queue: refused while a
+        render runs or another upscaling does, and answered once done (no wait).
+        The weights (about 4.7 GB) live in the library (models/seedvr2-3b-int8) — « install seedvr2 »
+        puts them there. Missing, the command refuses (weights_missing).
+        In a mirror session the refinement runs on the other Mac — its weights, its canvas, its
+        answer: the image comes back with "computing_on" naming it, as an enlargement's does.
+
+        With the FILE form the app is not launched: this silicontrol runs the helper itself, prints
+        its plan and its tiles as they go, and its exit code is the answer. The destination is DEST,
+        or the source's name with ".upscaled.png"; an existing file is never overwritten. This Mac's
+        RAM decides the tiling: the plan names the tiles and the estimate, and a machine that starts
+        to swap stops itself (the retry with smaller tiles is automatic, twice at most).
+
+          silicontrol upscale ~/picture.png ~/picture-4k.png --scale 2
+          silicontrol upscale ~/picture.png --long-side 7680
+          silicontrol upscale i7 --scale 2          (the app's own image, answered on the socket)
+
+        Answer: {"ok": true, "image": {"image": "i8", "width": 3840, "height": 2160, "enlarged": 4, …}}
+        Then: silicontrol save i8 big.png
+        FAILURES: usage, unknown_image, no_file, exists, refused (a grid, already enlarged, a render
+          running, the target beyond this Mac's canvas), weights_missing, helper_missing, internal.
+        With the FILE form: the helper's own exit codes (0 ok · 1 failed · 3 weights or memory ·
+          4 the target is beyond this Mac · 5 the estimate passed 10 min without --yes).
         """,
 
         "rewrite": """
@@ -1498,6 +1545,7 @@ package enum RemoteControlHelp {
       models                                   modèles installés, formats, LoRA, pas par défaut
       install ID [--standard|--compact|--light] montre dans l'app la licence et la place d'un modèle, à accepter là
       install writer                           le rédacteur de l'Atelier de prompts (1,25 Go), sans licence propre
+      install seedvr2                          les poids du généralisateur (4,4 Go), téléchargés aussitôt
       diagnose [--issue|--stop]                mesure ce Mac (≈ 1 min, sans modèle) → le JSON du rapport ; --stop : l'Arrêter de la feuille
       measure [options] [-- options de add]    temps et pic mémoire d'une série de rendus → un TSV et son résumé
       add [options] "<prompt>" [format] [seed] met une demande en file → son travail (t3)
@@ -1517,6 +1565,8 @@ package enum RemoteControlHelp {
       save i7 [i8 …] DEST [--format F]         écrit des images (fichier .png/.jpg/.heic, ou dossier en png|jpeg|heic)
       vary i7 subtle|strong [--batch N]        variations d'une image (mêmes réglages, même graine)
       enlarge i7 [--download]                  l'image ×4, par la super-résolution de macOS → son image (i8)
+      upscale i7 [--scale N|--long-side N]     l'image ×N, affinée 1:1 par SeedVR2 (MLX) → son image (i8)
+      upscale FICHIER [DEST] [--scale N]       un fichier de toute taille, sans l'app (le client l'exécute)
       rewrite "<texte>" [--for ID]             « Réécrire » de l'Atelier : un prompt réécrit pour un modèle → son texte
       describe <image|i7> [--for ID]           « Décrire » de l'Atelier : une image racontée en prompt → son texte
       instructions [rewrite|describe] [--for ID] [--set "<texte>" | --file CHEMIN | --restore]
@@ -1661,6 +1711,7 @@ package enum RemoteControlHelp {
         "install": """
         silicontrol install ID [--standard|--compact|--light]
         silicontrol install writer
+        silicontrol install seedvr2
         silicontrol install stop
 
         Ouvre la feuille Modèles de l'app sur le modèle ID (un "id" de « models »), avec sa licence
@@ -1701,6 +1752,16 @@ package enum RemoteControlHelp {
         ÉCHECS (install writer) : writer_absent (Qwen-Image-2.1 n'est pas installé : pas d'encodeur à qui donner une tête),
         writer_memory (ce Mac est trop petit pour le rédacteur), writer_preparing, license_not_accepted, busy (un rendu,
         une installation ou le diagnostic tourne), remote.
+
+        install seedvr2 est les poids du généralisateur de qualité (SeedVR2 3B, int8, environ 4,4 Go chez Hugging Face,
+        Apache-2.0 — pas de feuille : rien à accepter). Le téléchargement part aussitôt, et la réponse vient quand le
+        dernier octet arrive — des minutes, comme celle d'« upscale » vient quand l'image est faite. Pendant ce temps,
+        la fenêtre Upscale (⌘⇧U) montre l'avancement ; la fermer arrête le téléchargement, et un fichier à moitié
+        téléchargé ne prend jamais son nom définitif :
+          {"ok": true, "model": "seedvr2", "installed": true, "seconds": 214.5, "message": "…"}
+          {"ok": false, "error": "download_failed", "message": "…"}
+        ÉCHECS : busy (un rendu, une installation ou le diagnostic tourne, ou un téléchargement court déjà),
+        helper_missing (l'app est livrée sans l'aide SeedVR2), download_failed (le réseau a échoué).
 
         ÉCHECS : usage (aussi : --compact ou --light pour un modèle qui n'en a pas, deux drapeaux de
         version ensemble, un drapeau qui contredit la version de la famille d'un modèle importé), model
@@ -2253,6 +2314,42 @@ package enum RemoteControlHelp {
         Puis : silicontrol save i8 grande.png
         ÉCHECS : usage, unknown_image, refused (macOS avant 26, une grille, déjà agrandie, un rendu en
           cours), download_required, download_failed, internal.
+        """,
+
+        "upscale": """
+        silicontrol upscale i7 [--scale N | --long-side N] [--seed N]
+        silicontrol upscale FICHIER [DEST] [--scale N | --long-side N] [--seed N]
+
+        « Agrandir » avec SeedVR2, la voie qualité à côté de « Agrandir » : un modèle de diffusion
+        (SeedVR2-3B, MLX) qui affine l'image 1:1 à l'échelle voulue — la super-résolution de macOS est
+        plus rapide et ne voit que l'image ; SeedVR2 est plus lent de plusieurs ordres de grandeur et
+        n'est lié par rien de ce qui la lie : pas ×4 seulement, pas le côté 1920. 1920×1080 devient
+        3840×2160 (×4 par défaut) ; l'image rejoint l'historique à côté de son original, qui reste.
+        Son PNG garde les métadonnées de l'original, plus "upscaled" et le carrelage. Elle ne passe
+        pas par la file : refusée pendant un rendu ou un autre agrandissement, elle répond une fois
+        faite (pas de wait).
+        Les poids (environ 4,7 Go) vivent dans la bibliothèque (models/seedvr2-3b-int8) — « install
+        seedvr2 » les y met. Absents, la commande refuse (weights_missing).
+        Dans une session miroir, l'affinage tourne sur l'autre Mac — ses poids, sa toile, sa réponse :
+        l'image revient avec « computing_on » qui la nomme, comme celui d'un agrandissement.
+
+        Avec la forme FICHIER, l'app n'est pas lancée : ce silicontrol exécute lui-même l'helper, en
+        affiche le plan et les tuiles au fil de l'eau, et son code de sortie est la réponse. La
+        destination est DEST, ou le nom de la source avec « .upscaled.png » ; un fichier existant
+        n'est jamais écrasé. La RAM de ce Mac décide du carrelage : le plan nomme les tuiles et
+        l'estimation, et une machine qui commence à swapper s'arrête seule (la reprise en tuiles plus
+        petites est automatique, deux fois au plus).
+
+          silicontrol upscale ~/image.png ~/image-4k.png --scale 2
+          silicontrol upscale ~/image.png --long-side 7680
+          silicontrol upscale i7 --scale 2          (l'image de l'app, répondue sur la socket)
+
+        Réponse : {"ok": true, "image": {"image": "i8", "width": 3840, "height": 2160, "enlarged": 4, …}}
+        Puis : silicontrol save i8 grande.png
+        ÉCHECS : usage, unknown_image, no_file, exists, refused (une grille, déjà agrandie, un rendu
+          en cours, la cible au-delà de la toile de ce Mac), weights_missing, helper_missing, internal.
+        Avec la forme FICHIER : les codes de sortie de l'helper (0 ok · 1 échec · 3 poids ou mémoire ·
+          4 la cible dépasse ce Mac · 5 l'estimation a passé 10 min sans --yes).
         """,
 
         "rewrite": """

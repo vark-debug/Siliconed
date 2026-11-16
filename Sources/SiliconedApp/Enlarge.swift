@@ -161,6 +161,7 @@ extension AppState {
             return String(localized: "This image is larger than macOS enlarges: \(String(SuperResolution.maximumSide)) px a side at most")
         }
         if enlarging != nil { return String(localized: "An image is being enlarged") }
+        if upscaling != nil { return String(localized: "An image is being upscaled") }
         if busy { return String(localized: "Enlarging waits for the queue to finish") }
         return nil
     }

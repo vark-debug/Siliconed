@@ -65,6 +65,36 @@ extension RemoteControl {
                 "message": String(localized: "the app shows the license and the space on disk: the user accepts there")]
     }
 
+    /// `install seedvr2`: the quality upscaler's weights — Apache-2.0, so no sheet to accept: the
+    /// helper downloads them (about 4.4 GB from Hugging Face) and the answer comes when the last
+    /// byte lands, the way « upscale »'s does. The window (⌘⇧U) shows the progress while it runs;
+    /// closing it stops the download. A half-downloaded file never takes its final name.
+    func installSeedVR2(_ c: Connection) throws {
+        if SeedVR2Upscale.weightsDirectory(app.library) != nil {
+            finish(c, ["ok": true, "model": "seedvr2", "installed": true,
+                       "message": String(localized: "already installed")])
+            return
+        }
+        guard app.managementPossible, !app.seedvr2Downloading else {
+            throw Refusal("busy", String(localized: "a render, an installation or the diagnostic is running"),
+                        help: "silicontrol wait, then retry")
+        }
+        app.seedvr2Downloading = true
+        let library = app.library
+        Task {
+            defer { app.seedvr2Downloading = false }
+            do {
+                let start = Date()
+                try await SeedVR2Upscale.download(to: SeedVR2Upscale.installDirectory(library))
+                finish(c, ["ok": true, "model": "seedvr2", "installed": true,
+                           "seconds": (Date().timeIntervalSince(start) * 100).rounded() / 100,
+                           "message": String(localized: "The SeedVR2 weights are installed")])
+            } catch {
+                finish(c, Response.failure("download_failed", UpscaleModel.sentence(for: error)))
+            }
+        }
+    }
+
     // ── diagnose ──
 
     /// `diagnose [--issue|--stop]`: **« Measure This Mac », from the terminal** — the sheet opens in the
@@ -503,6 +533,52 @@ extension RemoteControl {
                 finish(c, Response.failure("download_failed", String(localized: "The enlargement model could not be downloaded")))
             } catch {
                 finish(c, Response.failure("internal", String(localized: "This image could not be enlarged")))
+            }
+        }
+    }
+
+    /// `upscale i7 [--scale N | --long-side N]`: SeedVR2's refinement — the quality path « Enlarge »
+    /// is not bound by. Answered once the upscaled image is in the history.
+    func upscale(_ arguments: [String], _ c: Connection) throws {
+        guard let image = arguments.first else {
+            throw Refusal("usage", "upscale <i7> [--scale N | --long-side N]")
+        }
+        var scale = 4, longSide = 0
+        var rest = Array(arguments.dropFirst())
+        while let flag = rest.first {
+            rest.removeFirst()
+            switch flag {
+            case "--scale", "--long-side":
+                guard let value = rest.first, let n = Int(value), n > 0 else {
+                    throw Refusal("usage", String(localized: "\"\(flag)\" expects a positive integer, not \"\(rest.first ?? "")\""))
+                }
+                rest.removeFirst()
+                if flag == "--scale" { scale = n } else { longSide = n }
+            default:
+                throw Refusal("usage", String(localized: "unknown option \"\(flag)\""), help: "silicontrol help upscale")
+            }
+        }
+        guard let e = self.image(image) else {
+            throw Refusal("unknown_image", String(localized: "no image \"\(image)\" in the history"), help: "silicontrol history")
+        }
+        // The refusal the flags make: a long side is the scale it lands on, for the canvas's check.
+        let reported = longSide > 0 ? max(1, longSide / max(e.width, e.height, 1)) : scale
+        if let refusal = app.upscaleRefusal(e, scale: reported) {
+            throw Refusal("refused", refusal, help: "silicontrol help upscale")
+        }
+        Task {
+            do {
+                let result = try await app.upscaled(e, scale: scale, longSide: longSide)
+                finish(c, ["ok": true, "image": json(result)])
+            } catch UpscaleFailure.refused(let sentence) {
+                finish(c, Response.failure("refused", sentence))
+            } catch UpscaleFailure.weightsMissing {
+                finish(c, Response.failure("weights_missing", String(localized: "The SeedVR2 weights are not installed"),
+                                           help: "silicontrol install seedvr2"))
+            } catch is CancellationError {
+                finish(c, Response.failure("cancelled", String(localized: "The upscaling was cancelled")))
+            } catch {
+                finish(c, Response.failure("internal", String(localized: "This image could not be upscaled")))
             }
         }
     }

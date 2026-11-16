@@ -9,6 +9,8 @@
 #     Contents/Helpers/siliconed        `siliconed check`: the engine checked against the reference's goldens
 #                                       (docs/VERIFY.md) — the very binary the app renders with, no Xcode needed
 #     Contents/Helpers/siliconed-dev    the maintainer's command line, when its sources are present
+#     Contents/Helpers/seedvr2-upscale  the SeedVR2 quality upscale, with its Metal bundle
+#                                       (mlx-swift_Cmlx.bundle) — only when its sources are present
 #     Contents/Resources/               the phrases (en, fr, de, es, it) and the icon
 #
 # The models live in the app's space (`~/Library/Application Support/Siliconed/`), which it fills
@@ -64,8 +66,23 @@ cp .build/release/silicontrol "$app/Contents/Helpers/silicontrol"
 cp .build/release/siliconed "$app/Contents/Helpers/siliconed"
 (( dev )) && cp .build/release/siliconed-dev "$app/Contents/Helpers/siliconed-dev"
 # Local symbols serve only a debugger: without them each binary is about half its size (the app 20.9 → 10.3 MB),
-# the same code. Before the signature, which covers the stripped bytes.
+# the same code. Before the signature, which covers the stripped bytes. `strip` refuses a directory,
+# which is why the SeedVR2 step below stays after it — its Metal bundle ships unstripped, the shape
+# its package builds and the only one verified.
 strip -x "$app/Contents/MacOS/Siliconed" "$app"/Contents/Helpers/*
+# **The SeedVR2 helper** — the quality upscale, its own package (`mlx-swift`, its own Metal bundle).
+# Built separately, when its sources are around (`SEEDVR2_DIR` names the directory, default a
+# `seedvr2-mlx-swift` beside this repository): the app and every other helper are complete without
+# it, « Upscale » is simply not offered.
+seedvr2=${SEEDVR2_DIR:-$root/../seedvr2-mlx-swift}
+if [[ -d $seedvr2 ]]; then
+  (cd $seedvr2 && swift build -c release --product seedvr2-upscale)
+  bin=$(cd $seedvr2 && swift build -c release --product seedvr2-upscale --show-bin-path)
+  cp "$bin/seedvr2-upscale" "$app/Contents/Helpers/seedvr2-upscale"
+  cp -R "$bin/mlx-swift_Cmlx.bundle" "$app/Contents/Helpers/mlx-swift_Cmlx.bundle"
+else
+  echo "app: no SeedVR2 sources at $seedvr2 — « Upscale » will not be in this app (SEEDVR2_DIR to say where they are)." >&2
+fi
 xcrun xcstringstool compile Sources/SiliconedApp/Localizable.xcstrings --output-directory "$app/Contents/Resources" >/dev/null
 xcrun xcstringstool compile Sources/SiliconedApp/InfoPlist.xcstrings --output-directory "$app/Contents/Resources" >/dev/null
 # English is the language of the keys: the compiler emits only what differs (the translations, and
@@ -136,7 +153,15 @@ PLIST
 
 if [[ $identity == - ]]; then
   codesign --force --deep --sign - "$app"
-  echo "→ $app (signed ad hoc: on another Mac, System Settings → Privacy & Security → Open Anyway)"
+  # **The pairings item and an ad hoc signature.** The pairings live in one keychain item whose
+  # access list binds the signature that created it — and an ad hoc signature is new every build:
+  # without this, the app is asked at every launch to read what its predecessor wrote, and a
+  # « always allow » cannot stick to a signature that changes. Deleted here, the new build writes
+  # its own at first launch (creating an item asks nothing) and is not asked again — until the
+  # next build, and the pairings are forgotten: the Macs pair anew. With a real identity this
+  # branch is not reached, the signature — and the item — stay.
+  security delete-generic-password -s "dev.gwenn-ha.siliconed.pairings" >/dev/null 2>&1 || true
+  echo "→ $app (signed ad hoc: on another Mac, System Settings → Privacy & Security → Open Anyway; pairings reset, the Macs pair anew)"
 else
   # Inside out: the helpers first, then the bundle — `--deep` is not used for a real identity.
   for binary in "$app"/Contents/Helpers/*(N) "$app"; do

@@ -219,7 +219,7 @@ struct SceneView: View {
                         .help("Variations: cousins of this image, same scene, slightly different — as many as the rack’s Batch")
                         .accessibilityLabel(Text("Variations"))
                 }
-                EnlargeButton(app: app, entry: e)
+                UpscaleButton(app: app, entry: e)
                 Button { app.beginCrop(e) } label: { Image(systemName: "crop") }
                     .disabled(app.cropRefusal(e) != nil)
                     .help(app.cropRefusal(e) ?? String(localized: "Crop: a new image, the original stays (C)"))

@@ -1,6 +1,52 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "\"%@\" expects a positive integer, not \"%@\"" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ erwartet eine positive Ganzzahl, nicht %2$@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "\"%1$@\" expects a positive integer, not \"%2$@\""
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ espera un entero positivo, no %2$@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ attend un entier positif, pas %2$@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ si attende un intero positivo, non %2$@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@には正の整数が必要です（%2$@は無効）"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@需要正整数，而非%2$@"
+          }
+        }
+      }
+    },
     "\"expand\" is not a preset: the workflow wires remove and redraw" : {
       "localizations" : {
         "de" : {
@@ -3194,6 +3240,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@：接受其许可证后才能生成"
+          }
+        }
+      }
+    },
+    "%@×%@, %@ tiles of %@×%@, about %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@×%2$@, %3$@ Kacheln zu %4$@×%5$@, etwa %6$@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@×%2$@, %3$@ tiles of %4$@×%5$@, about %6$@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@×%2$@, %3$@ teselas de %4$@×%5$@, unos %6$@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@×%2$@, %3$@ tuiles de %4$@×%5$@, environ %6$@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@×%2$@, %3$@ riquadri di %4$@×%5$@, circa %6$@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@×%2$@、%3$@タイル（%4$@×%5$@）、約%6$@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@×%2$@，%3$@块，每块%4$@×%5$@，约%6$@"
           }
         }
       }
@@ -6507,6 +6599,46 @@
         }
       }
     },
+    "A grid is not upscaled" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Raster wird nicht hochskaliert"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una cuadrícula no se reescala"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une grille n’est pas upscalée"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una griglia non è in upscale"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "グリッドはアップスケールできません"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "网格不会精修"
+          }
+        }
+      }
+    },
     "A grid that varies the model can’t take a LoRA: each LoRA is made for one model." : {
       "localizations" : {
         "de" : {
@@ -8636,6 +8768,46 @@
         }
       }
     },
+    "An image is being upscaled" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Bild wird gerade hochskaliert"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se está reescalando una imagen"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une image est en cours d’upscaling"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un’immagine è in fase di upscale"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "画像をアップスケール中です"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在精修图像"
+          }
+        }
+      }
+    },
     "An image of the lab" : {
       "localizations" : {
         "de" : {
@@ -10197,6 +10369,52 @@
         }
       }
     },
+    "Budget %@ GB · peak about %@ GB of %@ GB of RAM" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Budget %1$@ GB · Spitze etwa %2$@ GB von %3$@ GB RAM"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Budget %1$@ GB · peak about %2$@ GB of %3$@ GB of RAM"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Presupuesto %1$@ GB · pico de unos %2$@ GB de %3$@ GB de RAM"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Budget %1$@ Go · crête d’environ %2$@ Go sur %3$@ Go de RAM"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Budget %1$@ GB · picco di circa %2$@ GB su %3$@ GB di RAM"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "予算%1$@ GB · ピーク約%2$@ GB（RAM %3$@ GB）"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "预算 %1$@ GB · 峰值约 %2$@ GB（内存共 %3$@ GB）"
+          }
+        }
+      }
+    },
     "Build the app with tools/app.sh." : {
       "localizations" : {
         "de" : {
@@ -11113,6 +11331,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "请选择 Euler。"
+          }
+        }
+      }
+    },
+    "Choose Image…" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bild wählen…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elegir imagen…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisir une image…"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scegli immagine…"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "画像を選択…"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择图像…"
           }
         }
       }
@@ -13277,6 +13535,46 @@
         }
       }
     },
+    "Continue, about %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fortsetzen, etwa %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuar, unos %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuer, environ %@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continua, circa %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "続行（約%@）"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "继续，约 %@"
+          }
+        }
+      }
+    },
     "Converting: %@" : {
       "localizations" : {
         "de" : {
@@ -14677,6 +14975,46 @@
         }
       }
     },
+    "Deriving the tiling plan…" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kachelplan wird berechnet…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calculando el plan de teselas…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calcul du découpage en tuiles…"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calcolo del piano dei riquadri…"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タイル配置を計算中…"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在计算分块计划…"
+          }
+        }
+      }
+    },
     "Describe" : {
       "localizations" : {
         "de" : {
@@ -15375,6 +15713,46 @@
         }
       }
     },
+    "Downloading SeedVR2 (about 4.4 GB)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2 wird heruntergeladen (rund 4,4 GB)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descargando SeedVR2 (unos 4,4 GB)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Téléchargement de SeedVR2 (environ 4,4 Go)"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Download di SeedVR2 (circa 4,4 GB)"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2 をダウンロード中（約 4.4 GB）"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在下载 SeedVR2（约 4.4 GB）"
+          }
+        }
+      }
+    },
     "Drag the line, or press ← →, to reveal one image or the other" : {
       "localizations" : {
         "de" : {
@@ -15531,6 +15909,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "抽取种子"
+          }
+        }
+      }
+    },
+    "Drop a picture here, or choose one" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bild hierher ziehen oder auswählen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arrastra una imagen aquí, o elige una"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Déposez une image ici, ou choisissez-en une"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trascina qui un’immagine, oppure scegline una"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "画像をここにドラッグするか、選択してください"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "把图片拖到这里，或点“选择图像”"
           }
         }
       }
@@ -20362,6 +20780,46 @@
         }
       }
     },
+    "Install SeedVR2 (about 4.4 GB)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2 installieren (rund 4,4 GB)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Instalar SeedVR2 (unos 4,4 GB)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installer SeedVR2 (environ 4,4 Go)"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installa SeedVR2 (circa 4,4 GB)"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2 をインストール（約 4.4 GB）"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "安装 SeedVR2（约 4.4 GB）"
+          }
+        }
+      }
+    },
     "Install it from the Models sheet (⇧⌘M), then import the file again: an import downloads nothing." : {
       "localizations" : {
         "de" : {
@@ -22278,6 +22736,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "比较的 LoRA"
+          }
+        }
+      }
+    },
+    "Long side" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lange Seite"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lado largo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grand côté"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lato lungo"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "長辺"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "长边"
           }
         }
       }
@@ -27295,6 +27793,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "打开页面"
+          }
+        }
+      }
+    },
+    "Open the Upscale Window…" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscaling-Fenster öffnen…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir la ventana de reescalado…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvrir la fenêtre d’upscaling…"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apri la finestra di upscale…"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アップスケールウィンドウを開く…"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "打开精修窗口…"
           }
         }
       }
@@ -32336,6 +32874,46 @@
         }
       }
     },
+    "Scale" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skalierung"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escala"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Échelle"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scala"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "倍率"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "倍率"
+          }
+        }
+      }
+    },
     "Seed" : {
       "localizations" : {
         "de" : {
@@ -32412,6 +32990,206 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "种子 %@"
+          }
+        }
+      }
+    },
+    "SeedVR2 is not installed" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2 ist nicht installiert"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2 no está instalado"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2 n’est pas installé"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2 non è installato"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2がインストールされていません"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2 未安装"
+          }
+        }
+      }
+    },
+    "SeedVR2 is not installed on that Mac" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2 ist auf diesem Mac nicht installiert"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2 no está instalado en ese Mac"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2 n’est pas installé sur ce Mac"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2 non è installato su quel Mac"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2がそのMacにインストールされていません"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "那台 Mac 未安装 SeedVR2"
+          }
+        }
+      }
+    },
+    "SeedVR2 will refine every tile of this image — close the window to stop it." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2 verfeinert jede Kachel dieses Bildes — schließen Sie das Fenster, um es zu stoppen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2 refinará cada tesela de esta imagen — cierra la ventana para detenerlo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2 affinera chaque tuile de cette image — fermez la fenêtre pour l’arrêter."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2 affinerà ogni riquadro di questa immagine — chiudi la finestra per fermarlo."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2はこの画像のすべてのタイルを精緻化します。中止するにはウィンドウを閉じてください。"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2 将逐块精修这张图像——关闭窗口即可停止。"
+          }
+        }
+      }
+    },
+    "SeedVR2 ×2" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2 ×2"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2 ×2"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2 ×2"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2 ×2"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2 ×2"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2 ×2"
+          }
+        }
+      }
+    },
+    "SeedVR2 ×4" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2 ×4"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2 ×4"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2 ×4"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2 ×4"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2 ×4"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2 ×4"
           }
         }
       }
@@ -36719,6 +37497,46 @@
         }
       }
     },
+    "The Mac began to swap — the run was stopped" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Mac begann zu swappen — der Lauf wurde gestoppt"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El Mac empezó a paginar — la ejecución se detuvo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le Mac a commencé à swapper — l’upscaling a été stoppé"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il Mac ha iniziato a swappare — l’operazione è stata interrotta"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "メモリスワップが始まったため、実行を停止しました"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "内存开始交换，运行已停止"
+          }
+        }
+      }
+    },
     "The Mac swapped during the measure: other apps held its memory." : {
       "localizations" : {
         "de" : {
@@ -36875,6 +37693,166 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "提示词实验室的文本为空：没有可改写的内容。"
+          }
+        }
+      }
+    },
+    "The SeedVR2 helper is missing from the app" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der SeedVR2-Helper fehlt in der App"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Falta el helper de SeedVR2 en la app"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’helper SeedVR2 manque dans l’app"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nell’app manca l’helper di SeedVR2"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリにSeedVR2ヘルパーがありません"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "应用缺少 SeedVR2 helper"
+          }
+        }
+      }
+    },
+    "The SeedVR2 weights are installed" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die SeedVR2-Gewichte sind installiert"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los pesos de SeedVR2 están instalados"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les poids de SeedVR2 sont installés"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I pesi di SeedVR2 sono installati"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2 の重みがインストールされました"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2 权重已安装"
+          }
+        }
+      }
+    },
+    "The SeedVR2 weights are missing" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die SeedVR2-Gewichte fehlen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faltan los pesos de SeedVR2"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les poids SeedVR2 manquent"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mancano i pesi di SeedVR2"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2の重みがありません"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2 权重缺失"
+          }
+        }
+      }
+    },
+    "The SeedVR2 weights are not installed" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die SeedVR2-Gewichte sind nicht installiert"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los pesos de SeedVR2 no están instalados"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les poids SeedVR2 ne sont pas installés"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I pesi di SeedVR2 non sono installati"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2の重みがインストールされていません"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2 权重未安装"
           }
         }
       }
@@ -37841,6 +38819,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "网格的两个轴改变的是同一项设置。"
+          }
+        }
+      }
+    },
+    "The helper exited %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Helper wurde mit %@ beendet"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El helper terminó con %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’helper a quitté avec le code %@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’helper è terminato con %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ヘルパーが終了しました（コード%@）"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "helper 已退出（%@）"
           }
         }
       }
@@ -39619,6 +40637,46 @@
         }
       }
     },
+    "The plan never arrived" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Plan ist nie angekommen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El plan nunca llegó"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le plan n’est jamais arrivé"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il piano non è mai arrivato"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プランが届きませんでした"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "计划从未送达"
+          }
+        }
+      }
+    },
     "The process that loaded this route died: it is left out of the plan, and no render loads it." : {
       "localizations" : {
         "de" : {
@@ -41060,6 +42118,46 @@
         }
       }
     },
+    "The target size is beyond what this Mac can hold — try a smaller scale" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Zielgröße übersteigt, was dieser Mac fassen kann — versuchen Sie eine kleinere Skalierung"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El tamaño objetivo supera lo que este Mac puede sostener — prueba con una escala menor"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La taille visée dépasse ce que ce Mac peut tenir — essayez une échelle plus petite"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La dimensione desiderata supera ciò che questo Mac può contenere — prova una scala minore"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "目標サイズがこのMacの容量を超えています。より小さい倍率をお試しください"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "目标尺寸超出这台 Mac 的承载能力——请尝试更小的倍率"
+          }
+        }
+      }
+    },
     "The text encoder reads %@ image(s), the denoiser %@ reference block(s): a sequence needs one block per image it read." : {
       "localizations" : {
         "de" : {
@@ -41142,6 +42240,326 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "两张图像尺寸不同：只能并排显示"
+          }
+        }
+      }
+    },
+    "The upscaled image could not be encoded" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das hochskalierte Bild konnte nicht kodiert werden"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo codificar la imagen reescalada"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’image upscale n’a pas pu être encodée"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non è stato possibile codificare l’immagine in upscale"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アップスケールした画像をエンコードできませんでした"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "精修后的图像无法编码"
+          }
+        }
+      }
+    },
+    "The upscaled image could not be read" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das hochskalierte Bild konnte nicht gelesen werden"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo leer la imagen reescalada"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’image upscale n’a pas pu être lue"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non è stato possibile leggere l’immagine in upscale"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アップスケールした画像を読み込めませんでした"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "精修后的图像无法读取"
+          }
+        }
+      }
+    },
+    "The upscaled image could not be saved" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das hochskalierte Bild konnte nicht gesichert werden"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo guardar la imagen reescalada"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’image upscale n’a pas pu être enregistrée"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non è stato possibile salvare l’immagine in upscale"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アップスケールした画像を保存できませんでした"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "精修后的图像无法存储"
+          }
+        }
+      }
+    },
+    "The upscaled image is at the head of the history" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das hochskalierte Bild steht am Anfang des Verlaufs"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La imagen reescalada está a la cabeza del historial"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’image upscale est en tête de l’historique"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’immagine in upscale è in testa alla cronologia"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アップスケールした画像が履歴の先頭にあります"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "精修后的图像已置于历史顶部"
+          }
+        }
+      }
+    },
+    "The upscaled image never arrived" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das hochskalierte Bild ist nie angekommen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La imagen reescalada nunca llegó"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’image upscale n’est jamais arrivée"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’immagine in upscale non è mai arrivata"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アップスケールした画像が届きませんでした"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "精修后的图像从未送达"
+          }
+        }
+      }
+    },
+    "The upscaler ran out of memory — the tiles were made smaller, twice, and it still failed" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dem Upscaler ging der Speicher aus — die Kacheln wurden zweimal verkleinert, und es schlug dennoch fehl"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El upscaler se quedó sin memoria — las teselas se redujeron dos veces y aun así falló"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’upscaler a manqué de mémoire — les tuiles ont été réduites, deux fois, et l’échec persiste"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’upscaler ha esaurito la memoria — i riquadri sono stati ridotti, due volte, e ha comunque fallito"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アップスケーラーがメモリ不足になりました。タイルを二度縮小しましたが、それでも失敗しました"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "放大器内存不足——已两次缩小分块，仍然失败"
+          }
+        }
+      }
+    },
+    "The upscaling kept failing with smaller tiles" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Hochskalieren schlug auch mit kleineren Kacheln weiter fehl"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El reescalado siguió fallando incluso con teselas menores"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’upscaling a continué d’échouer, même avec des tuiles plus petites"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’upscale ha continuato a fallire, anche con riquadri più piccoli"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タイルを縮小してもアップスケールは失敗し続けました"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "缩小分块后仍然持续失败"
+          }
+        }
+      }
+    },
+    "The upscaling was cancelled" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Hochskalieren wurde abgebrochen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El reescalado se canceló"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’upscaling a été annulé"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’upscale è stato annullato"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アップスケールはキャンセルされました"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "精修已取消"
           }
         }
       }
@@ -43004,6 +44422,86 @@
         }
       }
     },
+    "This image could not be upscaled" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieses Bild konnte nicht hochskaliert werden"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo reescalar esta imagen"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette image n’a pas pu être upscalée"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non è stato possibile effettuare l’upscale di questa immagine"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この画像はアップスケールできませんでした"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这张图像无法精修"
+          }
+        }
+      }
+    },
+    "This image could not be upscaled on that Mac" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieses Bild konnte auf diesem Mac nicht hochskaliert werden"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo reescalar esta imagen en ese Mac"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette image n’a pas pu être upscalée sur ce Mac"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non è stato possibile effettuare l’upscale di questa immagine su quel Mac"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この画像はそのMacでアップスケールできませんでした"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这张图像无法在那台 Mac 上精修"
+          }
+        }
+      }
+    },
     "This image could not be varied" : {
       "localizations" : {
         "de" : {
@@ -43166,6 +44664,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "此图像超出 macOS 可放大的范围：每边最多 %@ 像素"
+          }
+        }
+      }
+    },
+    "This image is too large for this Mac's memory" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieses Bild ist zu groß für den Speicher dieses Macs"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta imagen es demasiado grande para la memoria de este Mac"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette image est trop grande pour la mémoire de ce Mac"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Questa immagine è troppo grande per la memoria di questo Mac"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この画像はこのMacのメモリには大きすぎます"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这张图像超出这台 Mac 的内存"
           }
         }
       }
@@ -43822,6 +45360,86 @@
         }
       }
     },
+    "This run will take a while" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieser Lauf wird eine Weile dauern"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta ejecución tardará un rato"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette exécution prendra du temps"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Questa operazione richiederà tempo"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この実行には時間がかかります"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这次运行需要一些时间"
+          }
+        }
+      }
+    },
+    "This run would take too long" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieser Lauf würde zu lange dauern"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta ejecución tardaría demasiado"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette exécution prendrait trop de temps"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Questa operazione richiederebbe troppo tempo"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この実行は時間がかかりすぎます"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这次运行耗时过长"
+          }
+        }
+      }
+    },
     "This seeded start is refused: %@." : {
       "localizations" : {
         "de" : {
@@ -44150,6 +45768,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "缩览图大小"
+          }
+        }
+      }
+    },
+    "Tile %@ of %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kachel %1$@ von %2$@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Tile %1$@ of %2$@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tesela %1$@ de %2$@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tuile %1$@ sur %2$@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riquadro %1$@ di %2$@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タイル %1$@/%2$@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "第 %1$@ 块，共 %2$@ 块"
           }
         }
       }
@@ -45242,6 +46906,338 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "文件中无法读取：%@。"
+          }
+        }
+      }
+    },
+    "Upscale" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hochskalieren"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reescalar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscaler"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscale"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アップスケール"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "精修放大"
+          }
+        }
+      }
+    },
+    "Upscale with SeedVR2…" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mit SeedVR2 hochskalieren…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reescalar con SeedVR2…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscaler avec SeedVR2…"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscale con SeedVR2…"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2でアップスケール…"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "用 SeedVR2 精修…"
+          }
+        }
+      }
+    },
+    "Upscale ×4 with SeedVR2: %@, about %@. The original stays." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscale ×4 mit SeedVR2: %1$@, etwa %2$@. Das Original bleibt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Upscale ×4 with SeedVR2: %1$@, about %2$@. The original stays."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscale ×4 con SeedVR2: %1$@, unos %2$@. El original se queda."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscale ×4 avec SeedVR2 : %1$@, environ %2$@. L’original reste."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscale ×4 con SeedVR2: %1$@, circa %2$@. L’originale resta."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2で×4アップスケール：%1$@、約%2$@。元の画像は残ります"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "用 SeedVR2 精修 ×4：%1$@，约 %2$@。原图保留。"
+          }
+        }
+      }
+    },
+    "Upscale ×4 with SeedVR2: %@. The original stays." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscale ×4 mit SeedVR2: %@. Das Original bleibt."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscale ×4 con SeedVR2: %@. El original se queda."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscale ×4 avec SeedVR2 : %@. L’original reste."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscale ×4 con SeedVR2: %@. L’originale resta."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2で×4アップスケール：%1$@。元の画像は残ります"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "用 SeedVR2 精修 ×4：%1$@。原图保留。"
+          }
+        }
+      }
+    },
+    "Upscaling runs on this Mac alone — not in a mirror session" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hochskalieren läuft nur auf diesem Mac — nicht in einer Spiegelsitzung"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El reescalado corre solo en este Mac — no en una sesión espejo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’upscaling ne tourne que sur ce Mac — pas dans une session miroir"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’upscale gira solo su questo Mac — non in una sessione specchio"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アップスケールはこのMacでのみ実行されます。ミラーセッションでは実行できません"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "精修只在本机运行——镜像会话中不可用"
+          }
+        }
+      }
+    },
+    "Upscaling waits for the queue to finish" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Hochskalieren wartet, bis die Warteschlange fertig ist"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El reescalado espera a que la cola termine"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’upscaling attend la fin de la file"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’upscale attende che la coda finisca"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アップスケールはキューの終了を待ちます"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "精修会等待队列完成"
+          }
+        }
+      }
+    },
+    "Upscaling with SeedVR2…" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hochskalieren mit SeedVR2…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reescalando con SeedVR2…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscaling avec SeedVR2…"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscale con SeedVR2…"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SeedVR2でアップスケール中…"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在用 SeedVR2 精修…"
+          }
+        }
+      }
+    },
+    "Upscaling ×%@ makes %@ MP, beyond this Mac’s %@ MP — try a smaller scale" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hochskalieren ×%1$@ ergibt %2$@ MP, jenseits der %3$@ MP dieses Macs — versuchen Sie eine kleinere Skalierung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Upscaling ×%1$@ makes %2$@ MP, beyond this Mac’s %3$@ MP — try a smaller scale"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reescalar ×%1$@ produce %2$@ MP, más allá de los %3$@ MP de este Mac — prueba una escala menor"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscaling ×%1$@ fait %2$@ MP, au-delà des %3$@ MP de ce Mac — essayez une échelle plus petite"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upscale ×%1$@ fa %2$@ MP, oltre i %3$@ MP di questo Mac — prova una scala minore"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "×%1$@のアップスケールは%2$@ MPになり、このMacの上限%3$@ MPを超えます。より小さい倍率をお試しください"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "精修 ×%1$@ 得到 %2$@ MP，超出这台 Mac 的 %3$@ MP——请尝试更小的倍率"
           }
         }
       }
@@ -49908,6 +51904,46 @@
         }
       }
     },
+    "image i%@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bild i%@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "imagen i%@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "image i%@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "immagine i%@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "画像 i%@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "图像 i%@"
+          }
+        }
+      }
+    },
     "image to edit" : {
       "localizations" : {
         "de" : {
@@ -50544,6 +52580,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已丢失，正在重试…"
+          }
+        }
+      }
+    },
+    "macOS Super-Resolution ×4" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "macOS-Superauflösung ×4"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Superresolución de macOS ×4"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Super-résolution de macOS ×4"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Super-risoluzione di macOS ×4"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "macOSのスーパー解像度 ×4"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "macOS 超分 ×4"
           }
         }
       }
@@ -51285,7 +53361,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "no hay ninguna imagen «%@» en el historial"
+            "value" : "no hay ninguna imagen \"%@\" en el historial"
           }
         },
         "fr" : {
@@ -51297,19 +53373,19 @@
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "nessuna immagine «%@» nella cronologia"
+            "value" : "nessuna immagine \"%@\" nella cronologia"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "履歴に画像「%@」はありません"
+            "value" : "履歴に「%@」という画像はありません"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "历史记录中没有图像“%@”"
+            "value" : "历史中没有图像“%@”"
           }
         }
       }
@@ -51710,6 +53786,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "非商用"
+          }
+        }
+      }
+    },
+    "none" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "keine"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ninguno"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "aucun"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "nessuno"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "なし"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无"
           }
         }
       }
@@ -52670,6 +54786,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "比例：%@——silicontrol help add"
+          }
+        }
+      }
+    },
+    "px" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "px"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "px"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "px"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "px"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "px"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "px"
           }
         }
       }
@@ -55528,6 +57684,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "未知模型：“%@”"
+          }
+        }
+      }
+    },
+    "unknown option \"%@\"" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "unbekannte Option „%@“"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "opción desconocida \"%@\""
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "option inconnue « %@ »"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "opzione sconosciuta \"%@\""
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不明なオプション「%@」"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未知选项“%@”"
           }
         }
       }

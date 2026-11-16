@@ -86,7 +86,9 @@ final class RemoteControl {
             case "status": finish(c, state())
             case "models": finish(c, app.mirror == nil ? models() : mirroredModels())
             case "install":
-                if arguments == ["stop"] { finish(c, stopInstallation()) } else {
+                if arguments == ["stop"] { finish(c, stopInstallation()) }
+                else if arguments == ["seedvr2"] { try installSeedVR2(c) }
+                else {
                     finish(c, try arguments.contains("writer") ? installWriter(arguments.filter { $0 != "writer" }) : install(arguments))
                 }
             case "rewrite": try writing(.rewrite, arguments, cwd: cwd, c)
@@ -109,6 +111,9 @@ final class RemoteControl {
                 if let mirror = app.mirror { try varyOnMirror(mirror, arguments, c) } else { finish(c, try vary(arguments)) }
             case "enlarge":
                 if let mirror = app.mirror { try enlargeOnMirror(mirror, arguments, c) } else { try enlarge(arguments, c) }
+            case "upscale":
+                // The other Mac has the SeedVR2 weights: the refinement runs there, the result comes back.
+                if let mirror = app.mirror { try upscaleOnMirror(mirror, arguments, c) } else { try upscale(arguments, c) }
             case "subjects": finish(c, try subjects(arguments, cwd: cwd))
             case let verb where GestureOrder.verbs.contains(verb):
                 try gesture(try order(verb, arguments), cwd: cwd, c)

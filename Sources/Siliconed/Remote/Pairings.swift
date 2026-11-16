@@ -7,10 +7,12 @@ import Security
 /// name becomes). A pairing outlives the session, as an accepted license does — incognito is about the
 /// images, not about which Macs may talk.
 ///
-/// **One Keychain item for all**, a generic password holding this JSON: a build signed ad hoc gets a
-/// new code signature each time, and the Keychain asks the user once per item before letting it read —
-/// once per build, not once per Mac. A Developer ID build keeps its signature across updates and is
-/// not asked again.
+/// **One Keychain item for all**, a generic password holding this JSON. The item's access list binds
+/// the code signature that created it, and a build signed ad hoc gets a new signature every time:
+/// at load, the item of a foreign signature is deleted (`forgetUnreadable`) and the first save
+/// writes a fresh one — a build reads without a prompt for its whole life, at the price of the
+/// pairings, which a new build forgets. A Developer ID build keeps its signature across updates
+/// and is never asked, never forgotten.
 ///
 /// Two instances with different `SILICONED_ROOT` are two Macs (the test of two apps on one machine):
 /// the item's account carries the root then.
@@ -79,6 +81,7 @@ extension Pairings {
     /// What the Keychain holds, or a new identity if nothing; `nil` if it could not be read (the user
     /// denied access): then nothing is written over it.
     package static func load(account: String = account()) -> Pairings? {
+        forgetUnreadable(account: account)
         var q = query(account)
         q[kSecReturnData as String] = true
         q[kSecMatchLimit as String] = kSecMatchLimitOne
@@ -92,6 +95,41 @@ extension Pairings {
         default:
             return nil
         }
+    }
+
+    /// **A build cannot quietly read what its predecessor wrote.** The item's access list binds the
+    /// code signature that created it — and an ad hoc build signs anew every time, so a new build
+    /// would be asked at every launch (« always allow » cannot stick to a signature that changes).
+    /// Before reading, the item of a foreign signature goes: matching by attribute alone, the
+    /// keychain asks nothing to delete — the first save writes a fresh one this build owns, and it
+    /// reads without a prompt until the next build. The mark of the last signature lives beside, in
+    /// Application Support. Only the app does this (the tests run unsigned); a Developer ID build
+    /// keeps its signature, its mark matches, and nothing is ever deleted.
+    private static func forgetUnreadable(account: String) {
+        guard Bundle.main.bundleURL.pathExtension == "app", let now = ownSignature else { return }
+        guard (try? String(contentsOf: markURL, encoding: .utf8)) != now else { return }
+        SecItemDelete(query(account) as CFDictionary)
+        try? now.write(to: markURL, atomically: true, encoding: .utf8)
+    }
+
+    /// Where the last signature is remembered.
+    private static var markURL: URL {
+        let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("Siliconed", isDirectory: true)
+        try? FileManager.default.createDirectory(at: support, withIntermediateDirectories: true)
+        return support.appendingPathComponent("pairings-signature")
+    }
+
+    /// This build's cdhash — what the item's access list binds to.
+    private static var ownSignature: String? {
+        var code: SecCode?
+        guard SecCodeCopySelf([], &code) == errSecSuccess, let code else { return nil }
+        var static_: SecStaticCode?
+        guard SecCodeCopyStaticCode(code, [], &static_) == errSecSuccess, let staticCode = static_ else { return nil }
+        var info: CFDictionary?
+        guard SecCodeCopySigningInformation(staticCode, SecCSFlags(rawValue: kSecCSSigningInformation), &info) == errSecSuccess,
+              let d = info as? [String: Any], let u = d[kSecCodeInfoUnique as String] as? Data else { return nil }
+        return u.map { String(format: "%02x", $0) }.joined()
     }
 
     @discardableResult

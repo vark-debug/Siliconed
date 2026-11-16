@@ -108,6 +108,9 @@ package enum SessionMessage: Codable, Equatable, Sendable {
     case render(RemoteJob)
     case quote(RemoteQuote)
     case enlarge(Int, download: Bool)
+    /// SeedVR2's refinement of this image, at the scale asked (`MirrorServer` runs it on the mini;
+    /// the weights are the mini's business — nothing is downloaded, a missing install is a refusal).
+    case upscale(Int, scale: Int)
     case crop(Int, Crop.Box)
     case grid(RemoteGridRequest)
     case addSheet(Int)

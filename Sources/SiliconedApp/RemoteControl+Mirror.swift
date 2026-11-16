@@ -457,4 +457,28 @@ extension RemoteControl {
         }
         mirror.send(.enlarge(e.ordinal, download: arguments.count == 2))
     }
+
+    /// **`upscale` on a mirror**: the other Mac refines its own pixels with SeedVR2, at the scale asked.
+    /// Its answer is the new image, or a refusal — the weights are the other Mac's business, nothing is
+    /// downloaded, nothing is asked here. A long side is not offered across: the refinement runs at a
+    /// scale, and the other Mac's canvas is the one that judges.
+    func upscaleOnMirror(_ mirror: MirrorLink, _ arguments: [String], _ c: Connection) throws {
+        guard arguments.count == 3, arguments[1] == "--scale", let scale = Int(arguments[2]), scale >= 2 else {
+            throw Refusal("usage", "upscale <i7> --scale N  (N ≥ 2)")
+        }
+        guard let e = image(arguments[0]) else {
+            throw Refusal("unknown_image", String(localized: "no image \"\(arguments[0])\" in the history"), help: "silicontrol history")
+        }
+        mirror.upscaleWaiters.append { [self] outcome in
+            switch outcome {
+            case .done(let result):
+                var o = json(result)
+                o["computing_on"] = mirror.macName
+                finish(c, ["ok": true, "image": o, "computing_on": mirror.macName])
+            case .refused(let sentence):
+                finish(c, Response.failure("refused", sentence))
+            }
+        }
+        mirror.send(.upscale(e.ordinal, scale: scale))
+    }
 }

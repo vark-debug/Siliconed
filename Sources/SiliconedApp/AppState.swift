@@ -508,6 +508,13 @@ final class AppState {
     var enlarging: Entry.ID?
     var enlargeDownload: Double?
     var enlargeSpeed: Double?
+    /// **« Upscale »** (`SeedVR2.swift`): the image being upscaled by the helper, and the seconds
+    /// per output megapixel learned this session.
+    var upscaling: Entry.ID?
+    var upscaleSpeed: Double?
+    /// The SeedVR2 weights coming from Hugging Face: one download at a time, the window's and the
+    /// `install seedvr2` command's alike — two helpers writing the same files would fight.
+    var seedvr2Downloading = false
     /// **The crop being made** (`CropEditor.swift`): the frame over an image of the history or an edit's reference.
     var cropping: CropSession?
     /// **The mask being painted** (`MaskPainter.swift`): image 1 under the brush, in the canvas's place.

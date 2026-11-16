@@ -92,6 +92,10 @@ private struct AppCommands: Commands {
             }
             .keyboardShortcut("e", modifiers: [.command, .shift])
             .disabled(app.history.isEmpty)
+            Divider()
+            // SeedVR2's window: the quality upscale, its own room — loaded with the selected image.
+            Button("Upscale with SeedVR2…") { UpscaleWindow.shared.show(app, entry: app.selectedEntry) }
+                .keyboardShortcut("u", modifiers: [.command, .shift])
         }
         CommandGroup(after: .pasteboard) {
             Divider()

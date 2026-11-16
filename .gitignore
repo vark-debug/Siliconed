@@ -8,6 +8,9 @@
 /Tests/SiliconedTests/Fixtures/quant/*/*.safetensors
 /Tests/SiliconedTests/Fixtures/quant/comfy/*/
 
+# Local test images (mask and group screenshots).
+/测试使用/
+
 # What docs/VERIFY.md has a reader create: the oracle environment, the goldens, Python caches.
 /oracle-env/
 /goldens/

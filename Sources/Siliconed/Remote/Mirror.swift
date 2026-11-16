@@ -198,6 +198,9 @@ package struct RemoteEntry: Codable, Equatable, Sendable {
     package var png: UInt32
     /// An enlargement's factor; a crop's box in the image it was cut from.
     package var enlarged: Int?
+    /// SeedVR2's refinement made it (`metadata["upscaled"]` says the same, in words). Separate from
+    /// `enlarged` so that a waiter of each engine knows which answer is its own.
+    package var upscaled: Bool
     package var cropped: Crop.Box?
     package var sheet: RemoteSheet?
     /// An enlargement's source, by its history ordinal (`nil`: it left the history): the borrowing Mac lays
@@ -206,8 +209,9 @@ package struct RemoteEntry: Codable, Equatable, Sendable {
 
     package init(ordinal: Int, job: RemoteJob, width: Int, height: Int, seed: UInt64, timings: Engine.Timings,
                  footprints: Engine.Footprints, evaluations: Int, metadata: [String: String], neuralEngine: Bool, png: UInt32,
-                 offer: AcceleratorOffer? = nil, enlarged: Int? = nil, cropped: Crop.Box? = nil, sheet: RemoteSheet? = nil, enlargedFrom: Int? = nil) {
-        self.enlarged = enlarged; self.cropped = cropped; self.sheet = sheet; self.enlargedFrom = enlargedFrom
+                 offer: AcceleratorOffer? = nil, enlarged: Int? = nil, upscaled: Bool = false, cropped: Crop.Box? = nil,
+                 sheet: RemoteSheet? = nil, enlargedFrom: Int? = nil) {
+        self.enlarged = enlarged; self.upscaled = upscaled; self.cropped = cropped; self.sheet = sheet; self.enlargedFrom = enlargedFrom
         self.ordinal = ordinal; self.job = job; self.width = width; self.height = height; self.seed = seed
         self.timings = timings; self.footprints = footprints; self.evaluations = evaluations
         self.metadata = metadata; self.neuralEngine = neuralEngine; self.png = png; self.offer = offer

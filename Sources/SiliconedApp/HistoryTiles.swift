@@ -191,24 +191,39 @@ struct VariationButtons: View {
     }
 }
 
-/// **« Enlarge ×4 »** in the bar under the image: greyed with its reason when it cannot; while it
-/// works, a spinner — or the model's download, in percent.
-struct EnlargeButton: View {
+/// **« Upscale », one button for both engines**: the menu picks the mode and the scale — SeedVR2's
+/// refinement (×2, ×4) or macOS Super-Resolution (×4); the window (⌘⇧U) takes any size by its long
+/// side. While either works, the spinner stands in. The right-click menu on an image offers the same.
+struct UpscaleButton: View {
     let app: AppState
     let entry: Entry
 
     var body: some View {
-        if app.enlarging == entry.id {
+        if app.upscaling == entry.id {
+            ProgressView().controlSize(.small).help("Upscaling with SeedVR2…")
+        } else if app.enlarging == entry.id {
             HStack(spacing: 5) {
                 ProgressView().controlSize(.small)
                 if let p = app.enlargeDownload { Text(Figures.percent(Int(p * 100))).font(.caption).monospacedDigit() }
             }
             .help(app.enlargeDownload == nil ? "Enlarging…" : "macOS is downloading the enlargement model")
         } else {
-            Button { app.enlarge(entry) } label: { Image(systemName: "arrow.up.left.and.down.right.magnifyingglass") }
-                .disabled(app.enlargeRefusal(entry) != nil)
-                .help(app.enlargeHelp(entry))
-                .accessibilityLabel(Text("Enlarge ×4"))
+            Menu {
+                Button("SeedVR2 ×2") { app.upscale(entry, scale: 2) }
+                    .disabled(app.upscaleRefusal(entry, scale: 2) != nil)
+                Button("SeedVR2 ×4") { app.upscale(entry, scale: 4) }
+                    .disabled(app.upscaleRefusal(entry, scale: 4) != nil)
+                Divider()
+                Button("macOS Super-Resolution ×4") { app.enlarge(entry) }
+                    .disabled(app.enlargeRefusal(entry) != nil)
+                Divider()
+                Button("Open the Upscale Window…") { UpscaleWindow.shared.show(app, entry: entry) }
+            } label: {
+                Image(systemName: "sparkles")
+            }
+            .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize()
+            .help(app.upscaleHelp(entry))
+            .accessibilityLabel(Text("Upscale"))
         }
     }
 }
@@ -261,8 +276,16 @@ struct MenuEntry: View {
                     .disabled(!app.canVary(entry))
             }
             if entry.grid == nil {
-                Button("Enlarge ×4") { app.enlarge(entry) }
-                    .disabled(app.enlargeRefusal(entry) != nil)
+                Menu("Upscale") {
+                    Button("SeedVR2 ×2") { app.upscale(entry, scale: 2) }
+                        .disabled(app.upscaleRefusal(entry, scale: 2) != nil)
+                    Button("SeedVR2 ×4") { app.upscale(entry, scale: 4) }
+                        .disabled(app.upscaleRefusal(entry) != nil)
+                    Button("macOS Super-Resolution ×4") { app.enlarge(entry) }
+                        .disabled(app.enlargeRefusal(entry) != nil)
+                    Divider()
+                    Button("Open the Upscale Window…") { UpscaleWindow.shared.show(app, entry: entry) }
+                }
             }
             if entry.grid == nil {
                 Button("Crop…") { app.beginCrop(entry) }

@@ -92,6 +92,10 @@ final class MirrorLink {
     /// consent alert, the flash).
     var enlargeWaiters: [(Enlarged) -> Void] = []
     enum Enlarged { case done(Entry), downloadRequired, refused(String) }
+    /// **Who waits for a SeedVR2 upscaling** (`silicontrol upscale`), as `enlargeWaiters` — the other
+    /// Mac upscales one image at a time, the queue finished first. Without one, its word flashes here.
+    var upscaleWaiters: [(Upscaled) -> Void] = []
+    enum Upscaled { case done(Entry), refused(String) }
     /// The grids the other Mac made for `silicontrol grid`: their cell jobs in order, and whether a sheet ends them.
     var grids: [Int: (jobs: [Int], sheet: Bool)] = [:]
     private var sheets: [Int: Bool] = [:]
@@ -390,7 +394,9 @@ extension AppState {
             measureRefused(r)
             let p = Problem(r)
             // An enlargement asked by `silicontrol` is answered there; its refusal is not the window's.
+            // The same for a SeedVR2 upscaling: its waiter, then the window.
             if !link.enlargeWaiters.isEmpty { link.enlargeWaiters.removeFirst()(.refused(p.text)); return }
+            if !link.upscaleWaiters.isEmpty { link.upscaleWaiters.removeFirst()(.refused(p.text)); return }
             problem = p
             flash(p.text)
         case .synced(let s):
@@ -449,6 +455,9 @@ extension AppState {
             link.cropsAsked -= 1
             registerRemoteUndo(of: e.ordinal, name: String(localized: "Crop"))
         }
+        // A refinement's answer is told to its waiter before the enlargement's check reads `enlarged` —
+        // an upscaled image carries both (`enlarged` is its factor), and each waiter takes its own.
+        if e.upscaled, !link.upscaleWaiters.isEmpty { link.upscaleWaiters.removeFirst()(.done(entry)) }
         if entry.enlarged != nil, !link.enlargeWaiters.isEmpty { link.enlargeWaiters.removeFirst()(.done(entry)) }
         if let job = link.jobs[e.job.ordinal] { signal(.image(job, entry)) }
         // The history is newest first; entries arrive in their order, the first connection's oldest first.

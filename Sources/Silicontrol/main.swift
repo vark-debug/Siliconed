@@ -154,6 +154,76 @@ if argv.first == "open" {
     printJSON(["ok": true, "message": already ? "Siliconed was already open" : "Siliconed open", "socket": socketPath])
     exit(0)
 }
+if argv.first == "upscale" {
+    // `upscale i7 …` goes to the app below; a file path does not need the app at all — the client
+    // execs the helper itself (`Contents/Helpers/seedvr2-upscale`), exactly as the window would,
+    // and the helper's exit code is the answer (0 ok · 1 failed · 3 weights · 4 too large · 5 refused).
+    let second = argv.dropFirst().first ?? ""
+    let isImage = second.first == "i" && Int(second.dropFirst()) != nil
+    if !isImage { upscaleFile(Array(argv.dropFirst())) }
+}
+
+/// `silicontrol upscale FILE [DEST] [--scale N | --long-side N] [--seed N]` — the client's own run,
+/// no app, no socket. The helper prints its plan and its tiles as they go; the exit code passes through.
+func upscaleFile(_ rest: [String]) -> Never {
+    guard let file = rest.first else {
+        fail("usage", "upscale <file> [DEST] [--scale N | --long-side N] [--seed N]", hint: "silicontrol help upscale", exit: 2)
+    }
+    var rest = Array(rest.dropFirst())
+    var dest: String?
+    if let first = rest.first, !first.hasPrefix("--") { dest = first; rest.removeFirst() }
+    var scale = 4, longSide = 0
+    var seed: UInt64 = 42
+    while let flag = rest.first {
+        rest.removeFirst()
+        switch flag {
+        case "--scale", "--long-side", "--seed":
+            guard let value = rest.first, let n = Int(value), n > 0 else {
+                fail("usage", "\"\(flag)\" expects a positive integer, not \"\(rest.first ?? "")\"", hint: "silicontrol help upscale", exit: 2)
+            }
+            rest.removeFirst()
+            switch flag {
+            case "--scale": scale = n
+            case "--long-side": longSide = n
+            default: seed = UInt64(n)
+            }
+        default:
+            fail("usage", "unknown option \"\(flag)\"", hint: "silicontrol help upscale", exit: 2)
+        }
+    }
+    guard FileManager.default.fileExists(atPath: file) else {
+        fail("no_file", "no file at \(file)", exit: 2)
+    }
+    // The helper next to this command (possibly through a symlink), or the development override.
+    // An environment variable set to the empty string counts as unset.
+    let helper = environment["SILICONED_SEEDVR2_HELPER"].flatMap { $0.isEmpty ? nil : $0 }
+        ?? ownBundle().map { $0 + "/Contents/Helpers/seedvr2-upscale" }
+    guard let helper, FileManager.default.isExecutableFile(atPath: helper) else {
+        fail("helper_missing", "the SeedVR2 helper is not in the app bundle", hint: "reinstall Siliconed.app", exit: 3)
+    }
+    let weights = environment["SILICONED_SEEDVR2_WEIGHTS"].flatMap { $0.isEmpty ? nil : $0 } ?? library + "/models/seedvr2-3b-int8"
+    guard FileManager.default.fileExists(atPath: weights) else {
+        fail("weights_missing", "the SeedVR2 weights are not at \(weights)", hint: "silicontrol install seedvr2", exit: 3)
+    }
+    // Never over an existing file: the destination is said, or named after the source.
+    let sourceURL = URL(fileURLWithPath: file)
+    let output = dest ?? sourceURL.deletingPathExtension().path + ".upscaled.png"
+    guard !FileManager.default.fileExists(atPath: output) else {
+        fail("exists", "\(output) is already there", hint: "name another DEST", exit: 2)
+    }
+    let process = Process()
+    process.executableURL = URL(fileURLWithPath: helper)
+    var arguments = ["--weights", weights, "--image", sourceURL.path, "--output", output]
+    if longSide > 0 { arguments += ["--long-side", String(longSide)] } else { arguments += ["--scale", String(scale)] }
+    arguments += ["--seed", String(seed)]
+    process.arguments = arguments
+    process.standardOutput = FileHandle.standardOutput
+    process.standardError = FileHandle.standardError
+    do { try process.run() } catch { fail("helper", "cannot run the helper: \(error)", exit: 1) }
+    process.waitUntilExit()
+    exit(process.terminationStatus)
+}
+
 ensureRunning()
 if argv.first == "measure" {
     // Client-side, like `open`: the series needs this process's clock and the app's pid, which the app
