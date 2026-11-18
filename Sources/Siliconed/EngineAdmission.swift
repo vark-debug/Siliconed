@@ -27,6 +27,10 @@ package struct Admission: Sendable {
     /// **The 「移除」 patch's crop** (`Request.patch`): the box in the original's pixels and the size the render will have —
     /// the render draws the green crop from it, for both z₀ and the text encoder's first image.
     package let patch: Patch.Plan?
+    /// **The 「扩图」 expand's plan** (`Request.expand`): the canvas and the size the render will have —
+    /// the render draws the grey canvas from it, the text encoder's image 1 alone (no noise-mask, no
+    /// start from the image: pure noise).
+    package let expand: Expand.Plan?
     /// **What the denoiser may compute on beyond fp32**: the switch asked (`Request.accelerators`), the Neural Engine where the plan
     /// offers it (`usesANE`); off, fp32 throughout.
     package let accelerators: Accelerators
@@ -42,8 +46,10 @@ package struct Admission: Sendable {
         let denoising = chain.denoising, space = denoising.space
         var height = request.height / space.factor, width = request.width / space.factor
         // **A patch walks the workflow's `ManualSigmas`** (`Patch.defaultSteps`, 9) unless the
-        // request names a count — the graph's own table, not the Turbo's published eight.
-        var steps = request.steps ?? (request.patch != nil ? Patch.defaultSteps : denoising.defaultSteps)
+        // request names a count — the graph's own table, not the Turbo's published eight. An expand
+        // walks the same table: its graph's `ManualSigmas` is the mask path's own.
+        var steps = request.steps ?? (request.patch != nil || request.expand != nil
+            ? Patch.defaultSteps : denoising.defaultSteps)
         // **A σ table the request supplies** (`Request.sigmas`): the steps follow it (`steps + 1`
         // values, the shape checked — strictly decreasing, the last 0), and the denoiser's own
         // `check(sigmas:)` judges it below: a count its published schedule does not have
@@ -116,6 +122,51 @@ package struct Admission: Sendable {
                 seededSigma = (request.sigmas ?? denoising.sigmas(steps: steps)).first
             }
         }
+        // **The 「扩图」 expand** (`Request.expand`): the canvas decides the render's format, as the
+        // patch's crop does, and it is the text encoder's image 1 alone — no noise-mask, no start from
+        // the image, pure noise. Judged here, before img2img, references and an additive start, which
+        // it cannot share the request with; `expand.plan()` throws `EngineError.invalidPatch` for pads
+        // out of range, all four 0, a ceiling under 1024, or a size under the patch path's floor.
+        var expandPlan: Expand.Plan?
+        if let expand = request.expand {
+            guard request.patch == nil else {
+                throw EngineError.invalidPatch(reason:
+                    "a patch (its mask) and an expand (its pads) edit two ways: the mask replaces a region, "
+                    + "the expand keeps the whole image — choose one")
+            }
+            guard request.image == nil else {
+                throw EngineError.invalidPatch(reason:
+                    "an img2img image (its strength) and an expand start two ways: choose one")
+            }
+            guard request.seededStart == nil else {
+                throw EngineError.invalidPatch(reason:
+                    "a seeded start and an expand, not both: the expand starts from pure noise, the canvas "
+                    + "being the text encoder's image 1 alone")
+            }
+            guard request.references.isEmpty else {
+                throw EngineError.invalidPatch(reason:
+                    "an expand is the edit's only image: its canvas is the text encoder's image 1")
+            }
+            guard chain.encoding != nil else {
+                throw EngineError.invalidPatch(reason:
+                    "this chain has no image encoder to hand the expand's canvas to the text encoder")
+            }
+            guard denoising.acceptsSeededStart else {
+                throw EngineError.invalidPatch(reason:
+                    "\(denoising.model) takes no reference block of the kind the expand's canvas needs "
+                    + "(Qwen-Image-2.1's workflows are the ones)")
+            }
+            let planned = try expand.plan()
+            // The canvas is prepared at the plan's size, to the pixel (the workflow's `拉伸`): `--ref-res`
+            // has no image to prepare — refused, not ignored, as a patch's crop that is the target's own is.
+            if request.referenceResolution != nil {
+                throw EngineError.invalidReferenceResolution(reason:
+                    "an expand's canvas is prepared at the render's own size: --ref-res does not apply — leave it out")
+            }
+            expandPlan = planned
+            width = planned.width / space.factor
+            height = planned.height / space.factor
+        }
         // **img2img is judged before any computation, too**: an out-of-range strength, a chain
         // without an encoder, a strength that leaves no evaluation all throw here.
         var start = 0
@@ -168,7 +219,9 @@ package struct Admission: Sendable {
         let faster = request.fasterRendering
         var plan = denoising.plan(height: height, width: width, steps: steps, start: start,
                                   withLoRA: !request.loras.isEmpty || request.detail != .normal, faster: faster)
-        if !request.references.isEmpty || request.seededStart != nil || patchPlan != nil { plan = plan.unreduced }
+        if !request.references.isEmpty || request.seededStart != nil || patchPlan != nil || expandPlan != nil {
+            plan = plan.unreduced
+        }
         guard plan.evaluations > 0 else {
             // The floor: the last start that keeps an evaluation, `d`, is reached as soon as
             // `N − N·s < d + 1`, i.e. `s > (N − d − 1)/N`.
@@ -181,20 +234,21 @@ package struct Admission: Sendable {
         }
         // **The images the text encoder reads and the reference blocks the denoiser receives are one
         // list** (`QwenImage21Sequence`: each block fills the rows its image made, 4 × slots == h·w).
-        // A patch's crop is image 1 and the denoiser's block; an edit's references are both; img2img's
-        // image is neither. Judged here, before the encoder's minutes: the wiring C4 dropped in the
-        // render threw at the end of the text stage (`2373 slots for 5376 image tokens`) — a chain that
-        // cannot keep the two together is refused at the door instead.
+        // A patch's crop is image 1 and the denoiser's block; an expand's canvas too; an edit's
+        // references are both; img2img's image is neither. Judged here, before the encoder's minutes:
+        // the wiring C4 dropped in the render threw at the end of the text stage (`2373 slots for 5376
+        // image tokens`) — a chain that cannot keep the two together is refused at the door instead.
+        let planImage = patchPlan != nil || expandPlan != nil
         let textImages = chain.text is any ImageTextModule
-            ? (patchPlan == nil ? request.references.count : 1) : 0
-        let referenceBlocks = patchPlan == nil
-            ? min(request.references.count, denoising.maxReferences)
-            : min(1, denoising.maxReferences)
+            ? (planImage ? 1 : request.references.count) : 0
+        let referenceBlocks = planImage
+            ? min(1, denoising.maxReferences)
+            : min(request.references.count, denoising.maxReferences)
         guard textImages == referenceBlocks else {
             throw EngineError.referenceSequence(text: textImages, blocks: referenceBlocks)
         }
         return Admission(space: space, height: height, width: width, steps: steps, start: start, plan: plan,
-                         seededSigma: seededSigma, patch: patchPlan,
+                         seededSigma: seededSigma, patch: patchPlan, expand: expandPlan,
                          accelerators: Accelerators(requested: request.accelerators, usesANE: usesANE), fasterRendering: faster)
     }
 }

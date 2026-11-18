@@ -135,6 +135,10 @@ struct CurtainView: View {
     let b: CGImage
     let width: Int, height: Int
     let tags: (String, String)
+    /// **Where `a` sits in the frame's image**, in its pixels — an expand's original: the canvas is
+    /// bigger, often another shape, and the original keeps its own shape at its own place
+    /// (`AppState.loadOriginal`). `nil` (and every other path): `a` fills the frame.
+    var aPlacement: (x: Int, y: Int, width: Int, height: Int)? = nil
 
     private var curtain: Curtain { .shared }
     /// The two images' common offset when zoomed in, in the frame's points.
@@ -160,7 +164,7 @@ struct CurtainView: View {
         let (tagA, tagB) = tags
         ZStack {
             layer(b, liveOffset)
-            layer(a, liveOffset)
+            layer(a, liveOffset, placed: true)
                 .mask(alignment: .leading) {
                     Rectangle().frame(width: frame.width * curtain.position)
                 }
@@ -207,13 +211,52 @@ struct CurtainView: View {
         }
     }
 
-    /// One image, under the common zoom and offset.
-    private func layer(_ image: CGImage, _ o: CGSize) -> some View {
-        Image(decorative: image, scale: 1)
-            .resizable()
-            .interpolation(.high)
-            .scaleEffect(zoom)
-            .offset(o)
+    /// One image, under the common zoom and offset. A placed image (`placed`, an expand's original)
+    /// keeps its own shape at its own place in the frame's image — the canvas is bigger, often
+    /// another shape, and stretching it would draw it in the canvas's. The empty container carries
+    /// it so the zoom anchors the frame's centre, the other layer's own.
+    @ViewBuilder
+    private func layer(_ image: CGImage, _ o: CGSize, placed: Bool = false) -> some View {
+        if placed, let rect = aPlacement, rect.width != width || rect.height != height, frame != .zero {
+            let sx = frame.width / CGFloat(width), sy = frame.height / CGFloat(height)
+            let w = CGFloat(rect.width) * sx, h = CGFloat(rect.height) * sy
+            Color.clear.frame(width: frame.width, height: frame.height)
+                .background {
+                    // **The grey border is not the original's**: outside the original's rectangle the
+                    // canvas carries pixels the original never had, and a transparency checkerboard —
+                    // the editor's own sign for「no content here」— fills them instead of a colour that
+                    // would read as part of the picture.
+                    Canvas { context, size in
+                        let s: CGFloat = 14
+                        context.fill(Path(CGRect(origin: .zero, size: size)),
+                                     with: .color(Color(white: 0.72)))
+                        let columns = Int((size.width / s).rounded(.up))
+                        let rows = Int((size.height / s).rounded(.up))
+                        for row in 0..<rows {
+                            for column in 0..<columns where (row + column).isMultiple(of: 2) {
+                                context.fill(Path(CGRect(x: CGFloat(column) * s, y: CGFloat(row) * s,
+                                                         width: s, height: s)),
+                                             with: .color(Color(white: 0.92)))
+                            }
+                        }
+                    }
+                }
+                .overlay(alignment: .topLeading) {
+                    Image(decorative: image, scale: 1)
+                        .resizable()
+                        .interpolation(.high)
+                        .frame(width: w, height: h)
+                        .offset(x: CGFloat(rect.x) * sx, y: CGFloat(rect.y) * sy)
+                }
+                .scaleEffect(zoom)
+                .offset(o)
+        } else {
+            Image(decorative: image, scale: 1)
+                .resizable()
+                .interpolation(.high)
+                .scaleEffect(zoom)
+                .offset(o)
+        }
     }
 
     /// The offset as drawn: during a drag, where the hand has carried the images; during a pinch, moved so that the

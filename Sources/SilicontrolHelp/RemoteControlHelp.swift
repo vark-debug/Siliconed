@@ -379,7 +379,8 @@ package enum RemoteControlHelp {
                               {a|b|c} in it: one job per alternative (ALTERNATIVES below).
                               With --mask it may be left out (or ""): --mode remove fills in the
                               workflow's «Remove the green area from the image.» — --mode redraw
-                              needs one, said.
+                              needs one, said. With --mode expand too: the workflow's fixed
+                              sentence leads, and this is the supplement after it.
           512 | 1024 | WxH    format. 512 = 512x512, 1024 = 1024x1024; WxH = width x height
                               (832x1216 = portrait, the "formats" of « models »). Each side
                               ≥ 512 and a multiple of 16 (32 for qwen-image-2.1), ≤ 8192
@@ -404,10 +405,11 @@ package enum RemoteControlHelp {
                               displayed name, or a path). STRENGTH: 1 by default, 0.8 attenuates,
                               > 1 emphasizes; below 0 (a « slider » LoRA), with Experimental →
                               Negative LoRA Strengths on in the app's Settings.
-                              Qwen-Image-2.1 also takes two presets, at the workflow's own
-                              strength: remove (1) and redraw (0.48). A preset names no strength.
-                              With --mask a preset also picks the branch (--mode); without it,
-                              the preset is only that LoRA.
+                              Qwen-Image-2.1 also takes three presets, at the workflow's own
+                              strength: remove (1), redraw (0.48) and expand (0.7). A preset names
+                              no strength. With --mask a preset also picks the branch (--mode);
+                              without it, the preset is only that LoRA — except expand, which
+                              implies the expand branch (--mode expand), a mask beside it refused.
           --steps N           number of steps, 1 to 50. Default: the model's "default_steps" —
                               with --mask, the mask workflow's 9 (ManualSigmas). A model may have
                               a schedule for some counts only (Qwen-Image-2.1: 8, and 9 — a
@@ -489,7 +491,7 @@ package enum RemoteControlHelp {
                               may go to 448 px — the patch path's floor, under the regular 512 —
                               and under it the crop is refused, with its sizes, not silently
                               enlarged.
-          --mode remove|redraw
+          --mode remove|redraw|expand
                               with --mask: the workflow's branch. remove — the default — paints the
                               mask #00FF00 at 0.4 and wires --lora remove (1); redraw — no paint,
                               the crop as the model's image 1 — wires --lora redraw (0.48). The
@@ -499,6 +501,16 @@ package enum RemoteControlHelp {
                               and the two presets exclude each other. The branch's preset is wired
                               even when --lora names none; naming the same LoRA twice — a preset
                               and a manual name — is refused. Without --mask: refused.
+                              expand: no mask — the 「扩图」 path (--pad, below). The canvas grows
+                              outward in grey, the whole picture is rebuilt from noise, and the
+                              original is laid back inside the bigger one; --image is the image the
+                              canvas grows from, the prompt is the supplement of the workflow's
+                              fixed sentence (it may be left out), and the canvas decides the
+                              format. --mask beside it is refused (error "patch"); so are
+                              --expand, --max-side, --strength, --ref, --ref-res, a typed format
+                              and grid (errors "patch" and "usage"). --lora expand implies it, the
+                              expand preset (0.7) wired; remove or redraw beside it is refused
+                              ("mode").
           --seeded-start     with --mask: the crop is also the render's start — the additive latent
                               z₀ + √2·ε (ComfyUI's max_denoise noise), as the workflow's encoded
                               primary latent is. Default: off — noise only, the crop as image 1.
@@ -528,6 +540,13 @@ package enum RemoteControlHelp {
                               Default: 1.3,1.4,1.4,1.4 (the workflow's).
           --max-side N        with --mask: the crop's longest side after scaling, 768 to 2560, a
                               multiple of 32. Default: 2560 (the workflow's slider).
+          --pad L,R,T,B       with --mode expand: the percents of the image's own sides the canvas
+                              grows by — left,right,top,bottom, 0 to 200 each, floats allowed.
+                              Default: 30,30,0,0 (the workflow's). All four 0 is refused
+                              (error "patch"): nothing to expand. Without the branch: refused.
+          --max-sample N      with --mode expand: the sampling long side's ceiling, 1024 to 3840 in
+                              steps of 128 (the workflow's slider). Default: 2048. Without the
+                              branch: refused, as --pad is.
           --preview, --no-preview
                               a preview at every step in the app (writes nothing). Default: the
                               app's « Preview at every step » switch.
@@ -1825,7 +1844,8 @@ package enum RemoteControlHelp {
                               {a|b|c} dedans : un travail par alternative (ALTERNATIVES plus bas).
                               Avec --mask il peut être omis (ou "") : --mode remove le remplit avec
                               «Remove the green area from the image.» du workflow ; --mode redraw
-                              en exige un, dit.
+                              en exige un, dit. Avec --mode expand aussi : la phrase fixe du
+                              workflow mène, celui-ci est le complément qui suit.
           512 | 1024 | WxH    format. 512 = 512x512, 1024 = 1024x1024 ; WxH = largeur x hauteur
                               (832x1216 = portrait, les "formats" de « models »). Chaque côté
                               ≥ 512 et multiple de 16 (32 pour qwen-image-2.1), ≤ 8192
@@ -1849,10 +1869,11 @@ package enum RemoteControlHelp {
           --lora NOM[:FORCE]  répétable, 3 au plus. NOM = un "loras.lora" de « models » (ou son
                               nom affiché, ou un chemin). FORCE : 1 par défaut, 0.8 atténue,
                               > 1 appuie.
-                              Qwen-Image-2.1 accepte aussi deux préréglages, à la force du
-                              workflow\u{00A0}: remove (1) et redraw (0.48). Un préréglage ne prend pas de force.
+                              Qwen-Image-2.1 accepte aussi trois préréglages, à la force du
+                              workflow\u{00A0}: remove (1), redraw (0.48) et expand (0.7). Un préréglage ne prend pas de force.
                               Avec --mask, un préréglage choisit aussi la branche (--mode) ; sans,
-                              ce n'est que ce LoRA.
+                              ce n'est que ce LoRA — sauf expand, qui implique la branche d'agrandissement
+                              (--mode expand), un --mask à côté étant refusé.
           --steps N           nombre de pas, de 1 à 50. Défaut : "default_steps" du modèle — avec
                               --mask, les 9 du workflow du masque (ManualSigmas). Un modèle peut
                               n'avoir de calendrier que pour certains (Qwen-Image-2.1 : 8, et 9 —
@@ -1937,7 +1958,7 @@ package enum RemoteControlHelp {
                               de 32 ; son côté court peut descendre à 448 px — le plancher de la
                               voie patch, sous les 512 px ordinaires — et en dessous la découpe est
                               refusée, avec ses tailles, pas agrandie en silence.
-          --mode remove|redraw
+          --mode remove|redraw|expand
                               avec --mask : la branche du workflow. remove — par défaut — peint le
                               masque #00FF00 à 0.4 et câble --lora remove (1) ; redraw — aucune
                               peinture, la découpe en image 1 telle quelle — câble --lora redraw
@@ -1948,6 +1969,16 @@ package enum RemoteControlHelp {
                               préréglages s'excluent. Le préréglage de la branche est câblé même
                               si --lora n'en nomme aucun ; nommer deux fois le même LoRA — un
                               préréglage et un nom manuel — est refusé. Sans --mask : refusé.
+                              expand : sans masque — la voie 「扩图」 (--pad, plus bas). Le canevas
+                              grandit en gris, l'image entière est reconstruite à partir du bruit,
+                              et l'originale est reposée dedans, dans l'image plus grande ; --image
+                              est l'image dont le canevas part, le prompt est le complément de la
+                              phrase fixe du workflow (il peut être omis), et le canevas décide du
+                              format. --mask à côté est refusé (erreur "patch") ; --expand,
+                              --max-side, --strength, --ref, --ref-res, un format tapé et grid
+                              aussi (erreurs "patch" et "usage"). --lora expand l'implique, le
+                              préréglage expand (0.7) câblé ; remove ou redraw à côté est refusé
+                              ("mode").
           --seeded-start     avec --mask : la découpe est aussi le départ du rendu — le latent
                               additif z₀ + √2·ε (le bruit « max_denoise » de ComfyUI), comme le
                               latent primaire encodé du workflow. Défaut : désactivé — bruit seul,
@@ -1981,6 +2012,13 @@ package enum RemoteControlHelp {
                               workflow).
           --max-side N        avec --mask : le plus long côté de la découpe après mise à l'échelle,
                               768 à 2560, multiple de 32. Défaut : 2560 (le curseur du workflow).
+          --pad L,R,T,B       avec --mode expand : les pourcents des côtés propres de l'image dont le
+                              canevas grandit — gauche,droite,haut,bas, de 0 à 200 chacun, flottants
+                              admis. Défaut : 30,30,0,0 (celui du workflow). Les quatre à 0 sont
+                              refusés (erreur "patch") : rien à agrandir. Sans la branche : refusé.
+          --max-sample N      avec --mode expand : le plafond du plus long côté d'échantillonnage,
+                              1024 à 3840 par pas de 128 (le curseur du workflow). Défaut : 2048.
+                              Sans la branche : refusé, comme --pad.
           --preview, --no-preview
                               un aperçu à chaque pas dans l'app (n'écrit rien). Défaut : l'interrupteur
                               « Aperçu à chaque pas » de l'app.

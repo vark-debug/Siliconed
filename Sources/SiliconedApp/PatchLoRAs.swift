@@ -1,9 +1,12 @@
-// **The Qwen-Image-2.1 workflow's two GH LoRAs**, as presets: the removal at 1.0, the redraw at 0.48.
-// The names below are the `nom` their installed `.lora.silicon` headers carry, checked against
-// `~/Library/Application Support/Siliconed/store`.
+// **The Qwen-Image-2.1 workflow's three GH LoRAs**, as presets: the removal at 1.0, the redraw at
+// 0.48, the expand at 0.7. The names below are the `nom` their installed `.lora.silicon` headers
+// carry, checked against `~/Library/Application Support/Siliconed/store`.
 //
-// The workflow's third GH LoRA (`Qwen2.1_扩图_GH_3750`, an outpainting branch) is not wired: its
-// preset name is refused, never silently dropped, and « Add » does not list it.
+// The expand preset (`Qwen2.1_扩图_GH_3750`) belongs to the 「扩图」 workflow (`Expand`), not to the
+// mask's branches: it carries no `Patch.Mode`, and a `--mask` render that names it is refused rather
+// than silently stacked beside remove or redraw. The names outside the preset list (`outpaint`,
+// `扩图`) stand for no preset: `--lora` reads them as a LoRA's own name and refuses them as unfound,
+// never silently dropped.
 
 import Foundation
 import Siliconed
@@ -11,6 +14,7 @@ import Siliconed
 enum PatchLoRA: String, CaseIterable, Identifiable {
     case remove
     case redraw
+    case expand
 
     /// The model whose workflow these presets come from.
     static let workflow = "qwen-image-2.1"
@@ -22,6 +26,7 @@ enum PatchLoRA: String, CaseIterable, Identifiable {
         switch self {
         case .remove: return "Qwen2.1_万物移除Remove_GH"
         case .redraw: return "Qwen2.1 一致性无偏移_GH_V1.0"
+        case .expand: return "Qwen2.1_扩图_GH_3750"
         }
     }
 
@@ -30,19 +35,22 @@ enum PatchLoRA: String, CaseIterable, Identifiable {
         switch self {
         case .remove: return 1
         case .redraw: return 0.48
+        case .expand: return 0.7
         }
     }
 
-    /// **The branch this preset carries** (`Patch.Mode`): the remove LoRA goes with the tinted crop,
-    /// the redraw LoRA with the untouched one.
-    var mode: Patch.Mode {
+    /// **The mask branch this preset carries** (`Patch.Mode`): the remove LoRA goes with the tinted
+    /// crop, the redraw LoRA with the untouched one. The expand LoRA is **no mask branch** — the
+    /// 「扩图」 workflow has no mask, and its canvas is the model's image 1 whole (`Request.expand`).
+    var mode: Patch.Mode? {
         switch self {
         case .remove: return .remove
         case .redraw: return .redraw
+        case .expand: return nil
         }
     }
 
-    /// The preset a branch carries.
+    /// The preset a mask branch carries.
     static func preset(for mode: Patch.Mode) -> PatchLoRA {
         switch mode {
         case .remove: return .remove
@@ -55,6 +63,7 @@ enum PatchLoRA: String, CaseIterable, Identifiable {
         switch self {
         case .remove: return String(localized: "Remove preset (1.0)")
         case .redraw: return String(localized: "Redraw preset (0.48)")
+        case .expand: return String(localized: "Expand preset (0.7)")
         }
     }
 
@@ -69,12 +78,6 @@ enum PatchLoRA: String, CaseIterable, Identifiable {
     static func preset(fileNamed name: String) -> PatchLoRA? {
         let wanted = key((name as NSString).lastPathComponent)
         return allCases.first { key($0.fileName) == wanted }
-    }
-
-    /// The third GH LoRA's preset names: not part of this workflow, so `--lora` refuses them rather
-    /// than ignoring them.
-    static func isUnwired(named name: String) -> Bool {
-        ["expand", "outpaint", "扩图"].contains(name.lowercased())
     }
 
     /// The presets this model's LoRAs offer, in order — only the workflow's model has them.

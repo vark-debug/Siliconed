@@ -46,6 +46,7 @@ struct LabImages: View {
                         PictureTile(model: model, picture: picture, number: numbers.plain[picture.id])
                     }
                     if model.showsMaskTile { MaskTile(model: model) }
+                    if model.showsExpandTile { ExpandTile(model: model) }
                     ForEach(model.subjects.all) { subject in
                         SubjectTile(model: model, subject: subject, numbers: numbers.subjects[subject.id] ?? [])
                     }
@@ -183,6 +184,174 @@ private struct MaskTile: View {
     }
 }
 
+/// **The expand attached to image 1** — the entry to the 「扩图」 path (`AppState+Expand.swift`), a tile
+/// beside the mask's: « Expand… » opens the pads form (`ExpandPadsSheet`), four percents and no brush;
+/// once attached it shows the pads, the canvas's plan size, and « Remove Expand ». With the pads
+/// attached, « Generate » grows image 1's canvas through the workflow; they go with that one click
+/// and the next is an ordinary render.
+private struct ExpandTile: View {
+    let model: LabModel
+    private var rack: AppState { model.rack }
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 8) {
+            RoundedRectangle(cornerRadius: 6, style: .continuous)
+                .fill(Color.secondary.opacity(0.12))
+                .overlay(Image(systemName: "plus.forwardslash.minus")
+                    .foregroundStyle(rack.attachedExpand == nil ? Color.secondary : WireKind.image.color))
+                .frame(width: LabTile.picture.width, height: LabTile.picture.height)
+                .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                .overlay { LabTile.edge(goes: rack.attachedExpand != nil, main: false) }
+            VStack(alignment: .leading, spacing: 3) {
+                Text("Expand").font(.caption.weight(.semibold))
+                    .foregroundStyle(rack.attachedExpand == nil ? Color.secondary : WireKind.image.color)
+                if let attached = rack.attachedExpand {
+                    Text(verbatim: Self.pads(attached.pads)).font(.caption2).lineLimit(1)
+                        .help("The percents each side grows by: of the image's own sides, 0–200")
+                    Text(verbatim: "→ \(attached.plan.crop.width) × \(attached.plan.crop.height) → \(attached.plan.width) × \(attached.plan.height)")
+                        .font(.caption2).foregroundStyle(.secondary).lineLimit(1)
+                        .help("The canvas, then the size the render will have")
+                    Button("Pads…") { rack.beginExpand() }
+                        .controlSize(.small)
+                        .help("Open the pads again: what you commit replaces them")
+                    Button("Remove Expand") { rack.removeExpand() }
+                        .controlSize(.small)
+                        .help("The next render is an ordinary one again, at the format the form shows")
+                } else {
+                    Button("Expand…") { rack.beginExpand() }
+                        .controlSize(.small)
+                        .disabled(!rack.canAttachExpand)
+                        .help("Grow the canvas outward: four percents, no mask")
+                    Text("No mask: four percents — the canvas grows outward, the original laid back inside.")
+                        .font(.caption2).foregroundStyle(.secondary).lineLimit(3)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .help(rack.canExpand
+                              ? Text("The canvas grows by percents of the image's own sides; the model draws the new border")
+                              : Text("An expand needs a model that edits by reference (Qwen-Image-2.1), image 1 alone"))
+                }
+            }
+            .frame(width: LabTile.meta, alignment: .leading)
+        }
+        .contextMenu {
+            Button("Expand…") { rack.beginExpand() }.disabled(!rack.canAttachExpand)
+            if rack.attachedExpand != nil {
+                Button("Remove Expand", role: .destructive) { rack.removeExpand() }
+            }
+        }
+    }
+
+    /// `L 30 · R 30 · T 0 · B 0` — the four pads, in the canvas node's own order.
+    static func pads(_ pads: Expand.Pads) -> String {
+        "L \(Int(pads.left)) · R \(Int(pads.right)) · T \(Int(pads.top)) · B \(Int(pads.bottom))"
+    }
+}
+
+/// **The expand's pads form** (« Expand… »): four percents of the image's own sides, the workflow's own
+/// 30/30/0/0 in the fields — no brush, no mask. The plan is computed live (`Expand.plan`): the canvas
+/// and the size the render will have, said before the click; a size the engine refuses (all four pads
+/// 0, the patch path's short-side floor) says why and keeps the sheet open.
+struct ExpandPadsSheet: View {
+    let app: AppState
+    @Environment(\.dismiss) private var dismiss
+    @State private var pads = Expand.Pads()
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("Expand").font(.headline)
+            Text("Grow the canvas outward: the model draws the new border, and the original is laid back inside.")
+                .font(.callout).fixedSize(horizontal: false, vertical: true)
+            HStack(spacing: 12) {
+                field("Left", left)
+                field("Right", right)
+            }
+            HStack(spacing: 12) {
+                field("Top", top)
+                field("Bottom", bottom)
+            }
+            preview
+            HStack {
+                Spacer(minLength: 8)
+                Button("Cancel") { dismiss() }
+                    .keyboardShortcut(.cancelAction)
+                Button("Use Expand") { commit() }
+                    .keyboardShortcut(.defaultAction)
+                    .disabled(blocker != nil)
+            }
+        }
+        .padding(20)
+        .frame(width: 400)
+        .onAppear { if let attached = app.attachedExpand { pads = attached.pads } }
+    }
+
+    // MARK: The fields
+
+    private var left: Binding<Double> { pad(\.left) }
+    private var right: Binding<Double> { pad(\.right) }
+    private var top: Binding<Double> { pad(\.top) }
+    private var bottom: Binding<Double> { pad(\.bottom) }
+
+    /// A pad typed in, kept inside the workflow's 0–200 (`Expand.Pads.range`).
+    private func pad(_ side: WritableKeyPath<Expand.Pads, Double>) -> Binding<Double> {
+        Binding(get: { pads[keyPath: side] },
+                set: { pads[keyPath: side] = $0.isFinite ? min(max($0, Expand.Pads.range.lowerBound), Expand.Pads.range.upperBound) : 0 })
+    }
+
+    private func field(_ title: LocalizedStringKey, _ value: Binding<Double>) -> some View {
+        HStack(spacing: 6) {
+            Text(title).foregroundStyle(.secondary)
+            TextField(value: value, format: .number.precision(.fractionLength(0))) { Text(title) }
+                .labelsHidden().textFieldStyle(.roundedBorder).controlSize(.small)
+                .multilineTextAlignment(.trailing).frame(width: 52).monospacedDigit()
+            Text(verbatim: "%").foregroundStyle(.secondary)
+        }
+    }
+
+    // MARK: The plan, before the click
+
+    /// Why « Use Expand » stays out: a mask beside the pads, no image 1, or the pads the engine
+    /// refuses — said here, as the footer says it at « Generate ».
+    private var blocker: String? {
+        if app.attachedMask != nil {
+            return String(localized: "A mask replaces a region and an expand grows the canvas: remove one of them.",
+                          comment: "A mask and an expand cannot edit one image two ways")
+        }
+        guard let image = app.editInputs.first?.shown else {
+            return String(localized: "Attach an image first: the canvas grows around it.",
+                          comment: "An expand without image 1: there is nothing to grow")
+        }
+        if pads.left == 0, pads.right == 0, pads.top == 0, pads.bottom == 0 {
+            return String(localized: "All four pads are 0: give at least one side a percent to grow by.",
+                          comment: "An expand with nothing to grow: the render would redraw the image and change nothing")
+        }
+        do { _ = try Expand.plan(pads: pads, width: image.width, height: image.height) }
+        catch { return Problem(EngineError(error)).text }
+        return nil
+    }
+
+    @ViewBuilder private var preview: some View {
+        if let image = app.editInputs.first?.shown, blocker == nil,
+           let plan = try? Expand.plan(pads: pads, width: image.width, height: image.height) {
+            Text(verbatim: "\(image.width) × \(image.height) → \(plan.crop.width) × \(plan.crop.height) → \(plan.width) × \(plan.height)")
+                .font(.caption).foregroundStyle(.secondary).monospacedDigit()
+                .help("The image, the canvas it sits in, then the size the render will have")
+        }
+        if let blocker {
+            Text(blocker).font(.caption).foregroundStyle(Color(nsColor: .systemOrange))
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    /// **« Use Expand »**: the pads go through the same attachment every expand takes — the plan
+    /// computed, the form's steps set to the workflow's nine — and the sheet closes. A refusal leaves
+    /// it open, its sentence shown.
+    private func commit() {
+        Task {
+            await app.attachExpand(pads: pads)
+            if app.attachedExpand != nil { dismiss() }
+        }
+    }
+}
+
 private extension LabModel {
     /// **When the mask's tile is drawn**: where the model edits by reference and an image is there to edit — or
     /// while a mask is still attached and must be removable (the model changed under it, an image was removed).
@@ -190,6 +359,14 @@ private extension LabModel {
         // A mask still attached must stay removable, even when the image it was sized to is gone.
         if rack.attachedMask != nil { return true }
         return !pictures.isEmpty && rack.canPatchMask
+    }
+
+    /// **When the expand's tile is drawn**: where the 「扩图」 workflow is and an image is there to grow —
+    /// or while the pads are still attached and must be removable.
+    var showsExpandTile: Bool {
+        // The pads still attached must stay removable, whatever the images do meanwhile.
+        if rack.attachedExpand != nil { return true }
+        return !pictures.isEmpty && rack.canExpand
     }
 }
 
@@ -300,13 +477,23 @@ private struct PictureTile: View {
         if let bytes = picture.bytes, AppState.isRecipe(bytes) {
             Button("Reuse These Settings") { _ = rack.restoreSettings(fromPNG: bytes, file: picture.shown.name) }
         }
-        // Image 1's mask, beside the image it edits (`AppState+Mask.swift`).
+        // Image 1's mask, beside the image it edits (`AppState+Mask.swift`), and its expand beside both:
+        // two entries of one image, never together (`AppState+Expand.swift`).
         if rack.canPatchMask, rack.editInputs.first?.id == picture.id {
             Button("Paint Mask…") { rack.beginMaskPainting() }.disabled(!rack.canAttachMask)
             if rack.attachedMask == nil {
                 Button("Attach Mask…") { rack.chooseMask() }.disabled(!rack.canAttachMask)
             } else {
                 Button("Remove Mask") { rack.removeMask() }
+            }
+            Divider()
+            Button("Expand…") { rack.beginExpand() }
+                .disabled(!rack.canAttachExpand)
+                .help(rack.attachedMask == nil
+                      ? "Grow the canvas outward: four percents, no mask"
+                      : "A mask and an expand edit two ways: remove the mask first")
+            if rack.attachedExpand != nil {
+                Button("Remove Expand", role: .destructive) { rack.removeExpand() }
             }
         }
         Divider()

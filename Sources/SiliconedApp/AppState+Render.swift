@@ -12,54 +12,70 @@ import UniformTypeIdentifiers
 /// with, and the next click is an ordinary render.
 typealias PatchInput = (image: ReferenceImage, mask: ReferenceImage, settings: Patch.Settings)
 
+/// **The 「扩图」 path's sources for one render**: the image whose canvas grows, and the pads and
+/// ceiling it grows by (`Request.expand`). A value handed to `render` like a patch's, one job's own.
+typealias ExpandInput = (image: ReferenceImage, settings: ExpandSettings)
+
 extension AppState {
     // MARK: Render
 
     /// **Puts a render in the queue**, and launches it if nothing is running. `imposedSeed`: "Redo" (the seed of a history
     /// image). `imposedFormat`: "Redo" (its size) — with edit images, `outputFormat` would derive another one from image 1.
-    /// `patch`: the 「移除」 path's sources **of this render alone** (a redo of a mask image). `ignoresAttachedMask`: a redo —
-    /// its entry decides what it renders, the lab's attachment never enters it.
+    /// `patch`: the 「移除」 path's sources **of this render alone** (a redo of a mask image). `expand`: the 「扩图」 path's
+    /// the same way (a redo of an expand image). `ignoresAttachedMask`: a redo — its entry decides what it renders, the lab's
+    /// attachment never enters it.
     /// **Something varies** (`Series.swift`): the series' grid, one finished image per cell.
     ///
     /// **A mask in the lab is this click's**: taken (`takeAttachedMask`), given image 1 and the branch
     /// the prompt (or the rack's one preset card, or neither) reads as (`patchDecision` — a redraw
     /// branch leaves the crop untinted), and the render's format becomes the crop's plan. The next
-    /// click is ordinary again.
+    /// click is ordinary again. **The pads are the same one click's** (`takeAttachedExpand`): the
+    /// render's format becomes the canvas's plan, the original laid back inside by the engine.
     func render(imposedSeed: UInt64? = nil, imposedFormat: RecommendedFormat? = nil, patch: PatchInput? = nil,
-                ignoresAttachedMask: Bool = false) {
+                expand: ExpandInput? = nil, ignoresAttachedMask: Bool = false) {
         guard canRender else { return }
         guard let prompts = try? alternatives.get().prompts, (try? carried.get()) != nil else { return }
         // **The attached mask, for one render**: cleared here, before the jobs are made — it belongs to them, never to
         // the form (the leak `a08e33f` closed). A redo passes `ignoresAttachedMask`.
         let attached = ignoresAttachedMask ? nil : takeAttachedMask()
+        let expandAttachment = ignoresAttachedMask ? nil : takeAttachedExpand()
         var patch = patch
         if patch == nil, let attached, let image = editInputs.first?.shown {
             patch = (image, attached.mask, Patch.Settings(mode: patchDecision(prompt: prompts.first ?? "").mode))
         }
+        // **The pads, the same one click's**: the canvas grows around image 1 — never beside a mask,
+        // whose crop is the other way of editing the same image (`expandBlocker` says so first).
+        var expand = expand
+        if patch == nil, expand == nil, let expandAttachment, let image = editInputs.first?.shown {
+            expand = (image, ExpandSettings(pads: expandAttachment.pads, maximumSample: Expand.defaultMaximumSample))
+        }
         // Everything that reads the state is taken here: the job no longer depends on the form.
         let firstNumber = imposedSeed ?? (fixedSeed ? seed : UInt64.random(in: 0...UInt64(UInt32.max)))
-        // A mask's render is its crop's plan (the format `outputFormat` would give while it is attached).
-        let format = imposedFormat ?? (patch == nil ? outputFormat
-                                       : attached.map { RecommendedFormat($0.plan.width, $0.plan.height) } ?? outputFormat)
-        // **The 「移除」 path**: one image, not a series; the format comes with the settings (the plan's
-        // size), as a redo gives it (`Admission` takes the plan's anyway).
-        if patch == nil, case .success(let g?) = seriesGrid(seed: firstNumber) {
+        // A mask's render is its crop's plan, an expand's its canvas's (the format `outputFormat` gives while one is attached).
+        let format = imposedFormat ?? (patch == nil && expand == nil ? outputFormat
+                                       : attached.map { RecommendedFormat($0.plan.width, $0.plan.height) }
+                                         ?? expandAttachment.map { RecommendedFormat($0.plan.width, $0.plan.height) }
+                                         ?? outputFormat)
+        // **The 「移除」 and 「扩图」 paths**: one image each, not a series; the format comes with the
+        // settings (the plan's size), as a redo gives it (`Admission` takes the plan's anyway).
+        if patch == nil, expand == nil, case .success(let g?) = seriesGrid(seed: firstNumber) {
             renderSeries(g, format: format)
             return
         }
         followsRender = true
-        // The edit's images as the render reads them, decoded once for the whole series; a mask reads image 1 alone,
-        // as its crop, so no reference travels with it (`Request.references` empty).
-        enqueue(renderJobs(seed: firstNumber, format: format, patch: patch,
-                           prompts: prompts, edit: patch == nil ? renderReferences : []))
-        // The mask's nine belong to the job just queued (`Patch.defaultSteps`): the form goes back to
-        // the model's default for the next ordinary render — a count the user chose stays theirs.
-        if attached != nil, steps == Patch.defaultSteps { steps = card?.defaultSteps ?? 8 }
+        // The edit's images as the render reads them, decoded once for the whole series; a mask or an expand reads
+        // image 1 alone, as its crop or canvas, so no reference travels with it (`Request.references` empty).
+        enqueue(renderJobs(seed: firstNumber, format: format, patch: patch, expand: expand,
+                           prompts: prompts, edit: patch == nil && expand == nil ? renderReferences : []))
+        // The nine of a mask or an expand belong to the job just queued (`Patch.defaultSteps`): the form goes back
+        // to the model's default for the next ordinary render — a count the user chose stays theirs.
+        if attached != nil || expandAttachment != nil, steps == Patch.defaultSteps { steps = card?.defaultSteps ?? 8 }
     }
 
     /// **The jobs a click makes**: one per prompt alternative, from the form as it reads now. `patch`: the
-    /// 「移除」 path's sources, passed by the caller — never read from a place shared between jobs (`render`).
-    func renderJobs(seed: UInt64, format: RecommendedFormat, patch: PatchInput?,
+    /// 「移除」 path's sources, `expand`: the 「扩图」 path's — passed by the caller, never read from a
+    /// place shared between jobs (`render`).
+    func renderJobs(seed: UInt64, format: RecommendedFormat, patch: PatchInput?, expand: ExpandInput? = nil,
                     prompts: [String], edit: [ReferenceImage]) -> [Job] {
         // **An empty prompt with a mask is the remove sentence** (`MaskPrompt.standard`, `AppState+Mask.swift`):
         // the marked area says what changes — painted or imported alike. The redraw branch never reaches
@@ -70,7 +86,8 @@ extension AppState {
         return prompts.map { expanded in
             // **The patch's stack is the branch's** (`patchLoras`): the rack's slots plus the preset
             // the same `mode` decided — a redraw job never carries the remove LoRA, or the reverse.
-            let loras = patch.map { patchLoras(for: $0.settings.mode) } ?? activeLoRAs
+            // **The expand's stack carries the expand preset** (`expandLoras`), the workflow's 0.7.
+            let loras = patch.map { patchLoras(for: $0.settings.mode) } ?? (expand != nil ? expandLoras() : activeLoRAs)
             var settings = RenderSettings(identifier: identifier, modelName: card?.name ?? identifier, prompt: expanded,
                                           format: format, steps: steps, loras: loras,
                                           references: edit.count, variations: variations, detail: effectiveDetail,
@@ -79,17 +96,21 @@ extension AppState {
             // reading the rewrite, the text kept as typed.
             let used = namedJob(expanded, settings: &settings, references: edit, model: model(identifier),
                                 capacity: mirror != nil ? imageCapacity : nil)
-            let start = patch == nil ? usedStart : nil
+            // A mask's crop and an expand's canvas are the text encoder's image 1: neither starts from
+            // an image (`Request.image` is refused beside both), and neither carries the strength.
+            let start = patch == nil && expand == nil ? usedStart : nil
             if start != nil { settings.strength = startStrength }
             if let patch { settings.patch = patch.settings }
+            if let expand { settings.expand = expand.settings }
             let plan = expectedPlan(steps: steps, format: format, withLoRA: !settings.loras.isEmpty || !plainSampling,
-                                    references: used.count + (patch == nil ? 0 : 1), strength: settings.strength)
+                                    references: used.count + (patch == nil && expand == nil ? 0 : 1), strength: settings.strength)
             var job = Job(ordinal: nextJobNumber(), settings: settings,
                           seeds: (0..<max(1, batch)).map { seed &+ UInt64($0) },
                           references: used, previews: previews,
                           defaultSteps: card?.defaultSteps, plan: plan)
             job.start = start
             job.patch = patch.map { (image: $0.image, mask: $0.mask) }
+            job.expand = expand?.image
             return job
         }
     }
@@ -440,12 +461,23 @@ extension AppState {
                              maximumSide: settings.patch?.maximumSide ?? Patch.maximumSide,
                              tint: settings.patch?.mode != .redraw)
             }.value
+            // **The 「扩图」 path's source**, decoded the same way: the image whose canvas the engine
+            // pads in grey and hands the text encoder whole (`Request.expand` — no noise-mask, pure
+            // noise), then lays the original back inside the decoded canvas.
+            let expandSource = job.expand
+            let expand = try await Task.detached(priority: .userInitiated) { () -> Expand? in
+                guard let expandSource else { return nil }
+                return Expand(image: try expandSource.imageRGB(),
+                              pads: settings.expand?.pads ?? Expand.Pads(),
+                              maximumSample: settings.expand?.maximumSample ?? Expand.defaultMaximumSample)
+            }.value
             var request = Request(settings.modelPrompt ?? settings.prompt, width: settings.format.width,
                                   height: settings.format.height, seed: job.seeds[0],
                                   steps: settings.steps == job.defaultSteps ? nil : settings.steps,
                                   loras: loraEntries, image: start, strength: settings.strength ?? Strength.defaultValue,
                                   previews: job.previews)
             request.patch = patch
+            request.expand = expand
             // The crop as z₀ only when the entry asked for it (`--seeded-start`): the default render
             // starts from noise, the crop being image 1 alone (`Request.patchSeededStart`).
             request.patchSeededStart = settings.patch?.seededStart ?? false
@@ -499,7 +531,8 @@ extension AppState {
                 case .image(_, let renderResult):
                     stageStates[.decoding] = .done
                     // The render against the map's prediction (`RenderLoop`): kept for the report and the next launch.
-                    checkMap(renderResult, model: model, references: references.count + (start == nil ? 0 : 1) + (patch == nil ? 0 : 1))
+                    checkMap(renderResult, model: model, references: references.count + (start == nil ? 0 : 1)
+                             + (patch == nil ? 0 : 1) + (expand == nil ? 0 : 1))
                     // The PNG and the thumbnail are made off the main thread; the engine has already
                     // moved on to the next image of the batch.
                     // A job `silicontrol add "@name"` translated: the PNG keeps the prompt typed, the model's beside it.
@@ -517,7 +550,8 @@ extension AppState {
                                         evaluations: renderResult.evaluations,
                                         settings: { var s = settings; s.offer = renderResult.offer; s.fasterRendering = renderResult.fasterRendering; return s }(),
                                         metadata: named ?? renderResult.metadata, references: job.references,
-                                        start: start == nil ? job.patch?.image : job.start, mask: job.patch?.mask, owner: job.owner)
+                                        start: start == nil ? (job.patch?.image ?? job.expand) : job.start,
+                                        mask: job.patch?.mask, owner: job.owner)
                     history.insert(entry, at: 0)
                     saveIfAsked(entry)
                     if followsRender {
@@ -701,9 +735,10 @@ extension AppState {
         restoreSettings(entry)
         // **The 「移除」 path's sources travel with this image**, not through the form: a redo draws the
         // same crop from them, and the click after it is an ordinary render again. `ignoresAttachedMask`:
-        // the lab's attachment never turns an ordinary redo into a patch (`redoPatch`).
-        render(imposedSeed: entry.seed, imposedFormat: entry.settings.format, patch: redoPatch(entry),
-               ignoresAttachedMask: true)
+        // the lab's attachment never turns an ordinary redo into a patch (`redoPatch`). **The 「扩图」
+        // path's the same** (`redoExpand`): the pads, the ceiling, the canvas's size.
+        render(imposedSeed: entry.seed, imposedFormat: entry.settings.format,
+               patch: redoPatch(entry), expand: redoExpand(entry), ignoresAttachedMask: true)
     }
 
     /// **What « Redo » hands the render**: the entry's own crop — its image and mask, with the margins it
@@ -747,9 +782,10 @@ extension AppState {
         identifier = r.identifier
         // The job's prompt is an expanded one: its braces are characters, not a series.
         prompt = PromptAlternatives.escaping(r.prompt)
-        // **A mask's format is its crop's plan**, decided by the engine, not a size the user chose:
-        // writing it back would give the next ordinary render the crop's dimensions.
-        if r.patch == nil {
+        // **A mask's format is its crop's plan**, an expand's its canvas's: decided by the engine, not
+        // a size the user chose — writing either back would give the next ordinary render those
+        // dimensions.
+        if r.patch == nil, r.expand == nil {
             orientation = r.format.orientation
             format = r.format
         }

@@ -186,8 +186,12 @@ extension RemoteControl {
         /// **`--mode remove|redraw`**: the patch's branch (`Patch.Settings.mode`); presets imply it
         /// when left out, and `.remove` is the default. Refused without `--mask`.
         var mode: Patch.Mode?
-        /// The presets `--lora remove` / `--lora redraw` named, in order: they imply `mode`, and
-        /// with `--mask` they must agree with it.
+        /// **`--mode expand`**: the 「扩图」 branch (`Request.expand`) — the canvas grows, no mask.
+        /// `--lora expand` implies it (`expandBranch`); a `--mask` beside it is refused (`patch`),
+        /// and it is no `Patch.Mode`: the two mask branches' own value stays untouched.
+        var expandMode = false
+        /// The presets `--lora remove` / `--lora redraw` / `--lora expand` named, in order: they
+        /// imply their branch (`mode`, or the expand one), and with a mask they must agree with it.
         var presets: [PatchLoRA] = []
         /// **`--paste` / `--no-paste`** (`--crop-only`, its other spelling): false — the crop alone
         /// (`Request.patchCropOnly`), instead of the default where it is laid back over the original
@@ -200,6 +204,14 @@ extension RemoteControl {
         /// **on by default** — outside the mask every step keeps the crop's own latent. `nil`: the
         /// default; an explicit switch without `--mask` is refused.
         var noiseMask: Bool?
+        /// **`--pad L,R,T,B`**: the percents the expand's canvas grows by, left,right,top,bottom of
+        /// the image's own sides (`Expand.Pads`); `nil`, the workflow's 30/30/0/0. Goes with the
+        /// expand branch alone: beside a mask it is refused (`patch`), without a branch (`usage`).
+        var pads: Expand.Pads?
+        /// **`--max-sample N`**: the sampling long side's ceiling (`Expand.maximumSample`),
+        /// 1024–3840 in steps of 128 (the workflow's slider); `nil`, 2048. Goes with the expand
+        /// branch alone, as `--pad` does.
+        var maximumSample: Int?
         /// `nil`: like the app's « Preview at every step » switch.
         var previews: Bool?
         var wait = false
@@ -209,6 +221,12 @@ extension RemoteControl {
         /// `grid`: the axes as typed (`RenderGrid.axis`), and whether `--batch` was given (refused).
         var x: String?, y: String?
         var batchGiven = false
+
+        /// **The expand branch, once parsed**: `--mode expand`, or the preset `--lora expand` (or
+        /// its installed file name) implying it, as the mask presets imply their modes.
+        var expandBranch: Bool {
+            expandMode || presets.contains(.expand) || presetFiles.contains { $0.preset == .expand }
+        }
     }
 
     /// **`subjects`** (`Subjects.swift`): list, name, delete — the Prompt Lab's library, in the app's memory.

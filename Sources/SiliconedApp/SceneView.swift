@@ -41,7 +41,8 @@ struct SceneView: View {
                       let entry = app.selectedEntry {
                 VStack(spacing: 14) {
                     CurtainView(app: app, a: original.image, b: selected.image, width: entry.width, height: entry.height,
-                                tags: (String(localized: "Original"), String(localized: "Edited")))
+                                tags: (String(localized: "Original"), String(localized: "Edited")),
+                                aPlacement: original.rect)
                     bar(entry)
                 }
                 .padding(28)

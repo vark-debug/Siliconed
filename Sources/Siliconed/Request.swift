@@ -120,6 +120,16 @@ package struct Request: Sendable, Equatable {
     /// **With `patchSeededStart`** the start stays `z₀ + √2·ε`; the backfill is `z₀`, never the noise.
     /// False: the whole crop is rebuilt, and the mask only tints. Refused without `patch`.
     package var patchNoiseMask = false
+    /// **A 「扩图」 expand** (`Expand`): the image, the percents its canvas grows by, the sampling
+    /// ceiling. The engine builds the grey canvas, stretches it to the plan's size and hands it to the
+    /// text encoder as image 1 — the denoiser's reference block, **with no noise-mask** — starts from
+    /// pure noise at the plan's size, and lays the original back inside the decoded canvas
+    /// (`Expand.composited`): the image delivered is the **canvas's size**. The render's format is the
+    /// plan's size, whatever `width` and `height` say (`Admission` takes the plan's), and the prompt
+    /// the model reads is `Expand.prompt`'s — the workflow's fixed sentence leading, an empty
+    /// supplement allowed. Refused beside `patch`, `image`, `seededStart` or `references`. `nil`: the
+    /// path is not taken, and nothing else changes.
+    package var expand: Expand? = nil
     /// **The editing reference images** ("change her jacket to red"): the denoiser re-reads them
     /// at each layer, and the generated image starts from noise — nothing to do with `image`,
     /// which is its starting point. Each keeps **its own** aspect ratio, at the size the denoiser
