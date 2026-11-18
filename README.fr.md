@@ -1,4 +1,4 @@
-[English](README.md) · Français
+[English](README.md) · Français · [简体中文](README.zh.md)
 
 # Siliconed
 
