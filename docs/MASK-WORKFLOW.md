@@ -64,8 +64,9 @@ own strength — no `:strength` suffix:
 | `--lora remove` | `Qwen2.1_万物移除Remove_GH` | **1.0** |
 | `--lora redraw` | `Qwen2.1 一致性无偏移_GH_V1.0` | **0.48** |
 
-A third file (`Qwen2.1_扩图_GH_3750`) belongs to the workflow's outpaint node, which this
-workflow does not wire: `--lora expand` is refused (`error: "lora"`), not ignored.
+A third file (`Qwen2.1_扩图_GH_3750`) belongs to the 「扩图」 workflow's outpaint branch, which
+this mask workflow does not wire: beside `--mask` it is refused (`error: "lora"`) — on its own,
+`--lora expand` / `--mode expand` walks the expand path ([EXPAND](EXPAND-WORKFLOW.md)).
 
 ## 3. The mask: what it must be
 
@@ -251,7 +252,7 @@ The CLI refusals (`ok:false`, `error`) come before a job is queued:
 | `prompt` | `--mode redraw` with an empty prompt beside `--mask` | write the sentence the area becomes, or `--mode remove`, whose prompt the mask fills |
 | `patch` | mask of another size than image 1; an empty region; a crop that renders under 448 px on its short side; a model without the mask workflow; a mask with `--ref` on a non-Qwen model | fix the PNG, widen the mask or make the crop less elongated, or use Qwen-Image-2.1 |
 | `mode` | `--mode` against the other branch's preset; both presets | name one branch |
-| `lora` | a preset with `:strength`; `--lora expand`; the same LoRA twice; an uninstalled preset | `--lora remove` / `--lora redraw` bare; install it (`silicontrol models`) |
+| `lora` | a preset with `:strength`; `--lora expand` beside `--mask`; the same LoRA twice; an uninstalled preset | `--lora remove` / `--lora redraw` bare; install it (`silicontrol models`) |
 | `ref` | `--ref-res` without `--ref`, or a value out of 768–2560 / not ×32 | give a valid `--ref` and `N` |
 | `format` | a typed format with `--mask` | leave the format out |
 | `busy` | a model install or import in progress | `silicontrol install stop`, then retry |

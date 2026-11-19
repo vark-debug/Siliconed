@@ -148,6 +148,11 @@ final class RemoteControl {
             .merging(r.solver == .euler ? [:] : ["solver": r.solver.rawValue]) { a, _ in a }
             // An img2img: the image it starts from, and the strength.
             .merging(r.strength.map { ["strength": Response.number($0), "start_image": t.start?.name ?? ""] } ?? [:]) { a, _ in a }
+            // **The 「扩图」 canvas**: its pads (left,right,top,bottom, percents of the image's own
+            // sides) and its sampling ceiling, when the render grows one.
+            .merging(r.expand.map { ["expand": ["pads": [$0.pads.left, $0.pads.right, $0.pads.top, $0.pads.bottom]
+                                                                .map { Response.number($0, 1) },
+                                                "maximum_sample": $0.maximumSample]] } ?? [:]) { a, _ in a }
             // What the job will ask, on a Mac whose map offers an accelerator: elsewhere, the answer is unchanged.
             .merging(app.acceleratorsOffered ? ["accelerators": t.accelerators ?? app.accelerators(for: r.identifier)] : [:]) { a, _ in a }
     }
@@ -174,6 +179,12 @@ final class RemoteControl {
             "loras": r.loras.map { ["lora": Self.shortName($0.path), "strength": Response.number($0.strength)] }]
         if r.isVariation { o["variation"] = Self.json(r.variations) }
         if let s = r.strength { o["strength"] = Response.number(s); o["start_image"] = e.start?.name ?? "" }
+        // The 「扩图」 canvas the image was made in, as the job's answer said it.
+        if let expand = r.expand {
+            o["expand"] = ["pads": [expand.pads.left, expand.pads.right, expand.pads.top, expand.pads.bottom]
+                                       .map { Response.number($0, 1) },
+                           "maximum_sample": expand.maximumSample]
+        }
         if r.detail != .normal { o["detail"] = r.detail.rawValue }
         if r.solver != .euler { o["solver"] = r.solver.rawValue }
         // What the accelerators could do for it on the Mac that computed it: absent, fp32 throughout.

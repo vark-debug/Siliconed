@@ -80,9 +80,6 @@ extension RemoteControl {
                     }
                     d.loras.append((preset.fileName, preset.strength))
                     d.presets.append(preset)
-                } else if PatchLoRA.isUnwired(named: name) {
-                    throw Refusal("lora", String(localized: "\"expand\" is not a preset: the workflow wires remove and redraw"),
-                                  help: "silicontrol add --lora remove")
                 } else {
                     // A preset's own installed name: kept as the LoRA it is without a mask; `--mask`
                     // reads `presetFiles` and makes it the preset (its branch and pinned strength).
@@ -120,11 +117,40 @@ extension RemoteControl {
                 d.maximumSide = n
             case "--mode":
                 let v = try value(a)
-                guard let m = Patch.Mode(rawValue: v.lowercased()) else {
-                    throw Refusal("usage", String(localized: "--mode expects remove or redraw, not \"\(v)\""),
-                                  help: String(localized: "--mode remove (the default) or redraw — silicontrol help add"))
+                // **`expand` is the 「扩图」 branch**, no `Patch.Mode`: the canvas grows, no mask —
+                // refused beside one further down (`patch`), where the contradiction is said.
+                if v.lowercased() == PatchLoRA.expand.rawValue {
+                    d.expandMode = true
+                } else {
+                    guard let m = Patch.Mode(rawValue: v.lowercased()) else {
+                        throw Refusal("usage", String(localized: "--mode expects remove, redraw or expand, not \"\(v)\""),
+                                      help: String(localized: "--mode remove (the default), redraw — or expand, the canvas that grows — silicontrol help add"))
+                    }
+                    d.mode = m
                 }
-                d.mode = m
+            case "--pad":
+                let v = try value(a)
+                // `单位 百分比`: four percents of the image's own sides, left,right,top,bottom —
+                // floats included, 0–200 each (`Expand.Pads.range`). All four 0 is not refused here:
+                // the honest check is the canvas's plan, where the mask's own emptiness is judged.
+                let parts = v.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+                let percents = parts.compactMap { Double($0) }
+                guard parts.count == 4, percents.count == 4,
+                      percents.allSatisfy({ $0.isFinite && Expand.Pads.range.contains($0) }) else {
+                    throw Refusal("usage", String(localized: "--pad expects four percents from 0 to 200, left,right,top,bottom, not \"\(v)\""),
+                                  help: "--pad 30,30,0,0 (the workflow's) — silicontrol help add")
+                }
+                d.pads = Expand.Pads(left: percents[0], right: percents[1], top: percents[2], bottom: percents[3])
+            case "--max-sample":
+                let v = try value(a)
+                // `GoohaiUniversalSlider` #27: the sampling long side's ceiling, walked in the
+                // slider's steps of 128, from the graph's own floor to its slider's end.
+                let bounds = Expand.minimumSampleSide...3840
+                guard let n = Int(v), bounds ~= n, n % 128 == 0 else {
+                    throw Refusal("usage", String(localized: "\(a) expects \(bounds.lowerBound) to \(bounds.upperBound), a multiple of 128, not \"\(v)\""),
+                                  help: "--max-sample 2048 (the workflow's slider) — silicontrol help add")
+                }
+                d.maximumSample = n
             case "--seeded-start": d.seededStart = true
             case "--paste": try setPaste(true, "--paste")
             case "--no-paste": try setPaste(false, "--no-paste")
@@ -143,11 +169,13 @@ extension RemoteControl {
             }
             i += 1
         }
-        // **The prompt may be left out with a mask**: `add` fills in the remove sentence the form uses
-        // (`MaskPrompt.standard`). Without a mask the prompt is the render.
+        // **The prompt may be left out with a mask or the expand branch**: `add` fills in the remove
+        // sentence the form uses (`MaskPrompt.standard`) for a mask; the expand's fixed sentence
+        // (`Expand.prompt`) the engine prepends, so an empty supplement is the sentence alone.
+        // Without either the prompt is the render.
         if let first = positional.first {
             d.prompt = first
-        } else if d.mask != nil {
+        } else if d.mask != nil || d.expandBranch {
             d.prompt = ""
         } else {
             throw Refusal("usage", String(localized: "the prompt is missing"), help: "silicontrol add [--model id] \"<prompt>\" [512|1024|WxH|P:Q@1K|2K] [seed] — silicontrol help add")
@@ -200,10 +228,89 @@ extension RemoteControl {
         if d.mode != nil, d.mask == nil {
             throw Refusal("usage", String(localized: "--mode goes with --mask: the crop is the branch"))
         }
+        // **The 「扩图」 branch** (`--mode expand`, or `--lora expand` implying it, as presets imply
+        // modes): no mask — the image itself is the region kept, the pads the growth. Refused where
+        // the flags were typed, as the mask's own contradictions are.
+        if d.expandBranch {
+            // The masks of remove/redraw mean replace: the opposite of expand's keep-region —
+            // refused, never translated (`Request.expand` refuses a patch the same way).
+            if d.mask != nil {
+                throw Refusal("patch", String(localized: "--mode expand and --mask don’t go together: the mask’s region is replaced, the expand’s canvas keeps the image"),
+                              help: String(localized: "drop --mask: --image is the image the canvas grows from"))
+            }
+            // **A preset's own installed name is the preset here too**, as under a mask: the branch
+            // is the preset's, at the strength the workflow pinned — a strength typed beside it is
+            // refused, and left a bare LoRA it would stack twice.
+            for named in d.presetFiles {
+                guard named.strength == nil else {
+                    throw Refusal("lora", String(localized: "a preset's strength is fixed: name it without a strength"),
+                                  help: "silicontrol add --lora \(named.preset.rawValue)")
+                }
+                if !d.presets.contains(named.preset) { d.presets.append(named.preset) }
+            }
+            if !d.presetFiles.isEmpty {
+                d.loras = d.loras.map { entry in
+                    guard let preset = PatchLoRA.preset(fileNamed: entry.name) else { return entry }
+                    return (preset.fileName, preset.strength)
+                }
+            }
+            // **One branch, once**: the expand preset goes alone — remove and redraw are the mask's.
+            if let other = d.presets.first, other != .expand {
+                throw Refusal("mode", String(localized: "--mode expand contradicts --lora \(other.rawValue)"),
+                              help: String(localized: "leave --lora out: --mode expand wires its preset"))
+            }
+            guard d.presets.count <= 1 else {
+                throw Refusal("mode", String(localized: "--lora expand goes alone: remove and redraw are the mask’s branches"),
+                              help: String(localized: "leave --lora out: --mode expand wires its preset"))
+            }
+            // **One start, one geometry**: the crop's margins, the img2img's strength, the edit's
+            // references and a typed format say another path — the canvas decides the format
+            // (`Expand.plan`), the expand starts from noise, and its canvas is the edit's only image.
+            if d.expansion != nil || d.maximumSide != nil {
+                throw Refusal("usage", String(localized: "--expand and --max-side go with --mask: the expand’s pads are --pad"),
+                              help: "--pad 30,30,0,0 — silicontrol help add")
+            }
+            if d.strength != nil {
+                throw Refusal("usage", String(localized: "--strength and --mode expand don’t go together: the expand starts from noise"),
+                              help: String(localized: "leave out --strength"))
+            }
+            guard d.references.isEmpty else {
+                throw Refusal("usage", String(localized: "--ref and --mode expand don’t go together: the canvas is the edit’s only image"),
+                              help: String(localized: "leave out --ref"))
+            }
+            if d.format != nil {
+                throw Refusal("usage", String(localized: "the expand’s canvas decides the format: leave 1024 / WxH out"),
+                              help: "--pad 30,30,0,0 — silicontrol help add")
+            }
+            // The canvas grows from an image: without one there is nothing to expand.
+            guard d.image != nil else {
+                throw Refusal("usage", String(localized: "--mode expand goes with --image <the image the canvas grows from>"),
+                              help: "silicontrol add --image photo.jpg --mode expand — silicontrol help add")
+            }
+            // **The branch's preset, wired when `--lora` named none** — as `--mode` wires its preset
+            // under a mask.
+            if d.presets.isEmpty {
+                let preset = PatchLoRA.expand
+                d.presets.append(preset)
+                d.loras.append((preset.fileName, preset.strength))
+            }
+        }
+        // `--pad` and `--max-sample` are the expand's geometry: without the branch they would be
+        // no-ops — with a mask, the crop decides its own, said as the patch refusal it is.
+        if (d.pads != nil || d.maximumSample != nil), !d.expandBranch {
+            if d.mask != nil {
+                throw Refusal("patch", String(localized: "--pad and --max-sample go with --mode expand: the mask decides its own crop"),
+                              help: String(localized: "drop --mask, or leave --pad out"))
+            }
+            throw Refusal("usage", String(localized: "--pad and --max-sample go with --mode expand: the canvas’s pads and sampling ceiling"),
+                          help: "--pad 30,30,0,0 — silicontrol help add")
+        }
         // **The branch, once**: with a mask, `--mode` and the presets named must agree, the two
         // presets exclude each other, and the branch's preset is wired at the workflow's strength
         // when the user named none — no silent overwrite either way. With neither named, the prompt
-        // reads its own branch (`PatchBranch`, the GUI's rule); an empty prompt is remove's.
+        // reads its own branch (`PatchBranch`, the GUI's rule); an empty prompt is remove's. The
+        // expand preset never reaches here: the branch above refused it beside a mask either way
+        // (`patch`), the keep-region being the opposite of a mask's replace-region.
         if d.mask != nil {
             // **A `--lora` naming a preset's own installed LoRA is that preset** — its file name as
             // the header spells it, or a path to it. Left a bare LoRA it would keep the default
@@ -239,10 +346,11 @@ extension RemoteControl {
         }
         // **The prompt, once the branch is known**: with a mask, remove may leave it out (the `add`
         // below fills `MaskPrompt.standard`); redraw may not — an empty one there would be a sentence
-        // about what the marked area becomes, which the program cannot invent. Without a mask the
-        // prompt is the render.
+        // about what the marked area becomes, which the program cannot invent. With the expand
+        // branch it may too: the engine leads with its fixed sentence. Without either the prompt is
+        // the render.
         if d.prompt.map({ $0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }) == true {
-            guard d.mask != nil else {
+            guard d.mask != nil || d.expandBranch else {
                 throw Refusal("usage", String(localized: "empty prompt"))
             }
             guard (d.mode ?? .remove) == .remove else {
@@ -311,8 +419,10 @@ extension RemoteControl {
         // **A mask may leave the prompt out** (`MaskPrompt.standard`, « 移除图像中的绿色区域 »): the marked
         // area is the sentence, and the form fills in the same string. `parse` has refused redraw's
         // empty prompt already — here the remove branch's one is filled, never invented elsewhere.
+        // **The expand branch keeps its emptiness**: the engine leads with its own fixed sentence
+        // (`Expand.prompt`) and the user's words follow — a remove sentence would say nothing here.
         var prompt = d.prompt ?? ""
-        if prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+        if prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, d.expandBranch != true {
             prompt = MaskPrompt.standard
         }
         // `{a|b}`: one job per expanded prompt, parsed like the app's field — before anything else
@@ -373,12 +483,47 @@ extension RemoteControl {
                                            paste: d.paste, noiseMask: d.noiseMask ?? true)
         }
 
+        // **The 「扩图」 path** (`--mode expand`): `--image` is the image the canvas grows from. The
+        // canvas's plan decides the format, as a mask's crop does — and a canvas that cannot render
+        // is refused here, before a job is queued, as a mask too empty is: all four pads at 0
+        // (`invalid_patch`), a plan whose short side falls under the patch path's floor. The pads
+        // and the ceiling the job carries are the resolved ones, defaults applied.
+        var expandOrigins: ReferenceImage?
+        var expandSettings: ExpandSettings?
+        if d.expandBranch {
+            guard !grid else {
+                throw Refusal("usage", String(localized: "grid does not take --mode expand"),
+                              help: String(localized: "render one expand with add — silicontrol help add"))
+            }
+            guard model.chain.denoising.acceptsSeededStart, model.chain.encoding != nil else {
+                let name = card?.name ?? model.name
+                throw Refusal("patch", String(localized: "\(name) takes no reference block of the kind the expand’s canvas needs (--mode expand)"),
+                              help: String(localized: "models that do have \"seeded_start\": true in \"silicontrol models\""))
+            }
+            guard let imageWord = d.image else {
+                throw Refusal("usage", String(localized: "--mode expand goes with --image <the image the canvas grows from>"),
+                              help: "silicontrol add --image photo.jpg --mode expand — silicontrol help add")
+            }
+            let original = try startImage(imageWord, cwd: cwd)
+            let pads = d.pads ?? Expand.Pads()
+            let maximumSample = d.maximumSample ?? Expand.defaultMaximumSample
+            let expand = Expand(image: try original.imageRGB(), pads: pads, maximumSample: maximumSample)
+            let planned: Expand.Plan
+            do { planned = try expand.plan() } catch {
+                let p = Problem(error)
+                throw Refusal("patch", p.title, help: p.suggestion ?? "silicontrol help add")
+            }
+            d.format = (planned.width, planned.height)
+            expandOrigins = original
+            expandSettings = ExpandSettings(pads: pads, maximumSample: maximumSample)
+        }
+
         // The starting image (img2img): a model whose chain starts from one, never with references — one or the other.
         var start: ReferenceImage?
         if d.strength != nil, d.image == nil {
             throw Refusal("usage", String(localized: "--strength goes with --image"), help: "silicontrol help add")
         }
-        if let word = d.image, d.mask == nil {
+        if let word = d.image, d.mask == nil, expandOrigins == nil {
             guard model.chain.entries.contains(where: { $0.kind == .image }) else {
                 let name = card?.name ?? model.name
                 throw Refusal("img2img", String(localized: "\(name) doesn’t start from an image (--image)"),
@@ -445,9 +590,10 @@ extension RemoteControl {
         }
 
         let (width, height) = d.format ?? (1024, 1024)
-        // A mask's format is its crop's plan: that render alone clears 512 at `Patch.minimumRenderSide`.
+        // A mask's format is its crop's plan, an expand's its canvas's: those renders alone clear
+        // 512 at `Patch.minimumRenderSide`.
         do { try Format.check(width: width, height: height, family: model.card.family,
-                              minimumSide: d.mask == nil ? Format.minimumSide : Patch.minimumRenderSide) } catch {
+                              minimumSide: d.mask == nil && expandOrigins == nil ? Format.minimumSide : Patch.minimumRenderSide) } catch {
             let p = Problem(error)
             throw Refusal("format", p.title, help: p.suggestion)
         }
@@ -498,10 +644,10 @@ extension RemoteControl {
         }
 
         let defaultSteps = card?.defaultSteps ?? model.chain.denoising.defaultSteps
-        // **A mask walks the workflow's `ManualSigmas`**: 9 by default, not the Turbo's published 8.
-        // An explicit `--steps` is the user's, and the check below still refuses a count without a
-        // schedule — never mapped onto another table.
-        let requestDefault = d.mask == nil ? defaultSteps : Patch.defaultSteps
+        // **A mask or an expand walks the workflow's `ManualSigmas`**: 9 by default, not the Turbo's
+        // published 8. An explicit `--steps` is the user's, and the check below still refuses a
+        // count without a schedule — never mapped onto another table.
+        let requestDefault = d.mask == nil && expandOrigins == nil ? defaultSteps : Patch.defaultSteps
         let steps = d.steps ?? requestDefault
         // A step count the denoiser has no schedule for (Qwen-Image-2.1-Turbo: 8 alone) would
         // fail in the queue: refused here, like everything else an accepted request cannot fail on.
@@ -509,8 +655,8 @@ extension RemoteControl {
             let accepted = (1...50).filter { (try? model.chain.denoising.check(steps: $0, startImage: false)) != nil }
                 .map(String.init).formatted(.list(type: .or))
             throw Refusal("steps", String(localized: "This model has no schedule for \(String(steps)) steps: \(accepted)."),
-                        help: d.mask == nil ? "--steps \(defaultSteps) (the model's \"default_steps\")"
-                                            : "--steps \(Patch.defaultSteps) (the mask workflow's ManualSigmas)")
+                        help: d.mask == nil && expandOrigins == nil ? "--steps \(defaultSteps) (the model's \"default_steps\")"
+                                                                    : "--steps \(Patch.defaultSteps) (the workflow's ManualSigmas)")
         }
         let f = model.chain.denoising.space.factor
         let strength = start == nil ? nil : StartImage.snapped(d.strength ?? StartImage.defaultStrength(for: card?.family))
@@ -536,10 +682,17 @@ extension RemoteControl {
         }
         let variants = alternatives.variants
         // A patch reads one image — its crop — so a prompt that cites a subject (whose picture would
-        // become a reference) is refused, not silently thinned.
+        // become a reference) is refused, not silently thinned. The expand's canvas likewise: the
+        // edit's only image, so a subject's picture has nowhere to go.
         if patchOrigins != nil {
             for v in variants where app.rewrite(v.prompt, model: model, editImages: 0) != nil {
                 throw Refusal("subject", String(localized: "a mask’s prompt does not cite named subjects yet"),
+                              help: "silicontrol add")
+            }
+        }
+        if expandOrigins != nil {
+            for v in variants where app.rewrite(v.prompt, model: model, editImages: 0) != nil {
+                throw Refusal("subject", String(localized: "the expand’s prompt does not cite named subjects yet"),
                               help: "silicontrol add")
             }
         }
@@ -559,17 +712,20 @@ extension RemoteControl {
             settings.strength = strength
             settings.referenceResolution = d.referenceResolution
             settings.patch = patchSettings
+            settings.expand = expandSettings
             let used = app.namedJob(v.prompt, settings: &settings, references: references, model: model)
             var job = Job(ordinal: app.nextJobNumber(), settings: settings,
                           seeds: (0..<d.batch).map { firstNumber &+ UInt64($0) },
                           references: used, previews: d.previews ?? app.previews,
-                          // Subjects' pictures, or a mask's crop, make the plan unreduced (as `AppState.expectedPlan`);
-                          // without them, the plan as it was.
+                          // Subjects' pictures, a mask's crop or an expand's canvas make the plan
+                          // unreduced (as `AppState.expectedPlan`); without them, the plan as it was.
                           defaultSteps: defaultSteps,
-                          plan: used.count > references.count || patchOrigins != nil ? plan.unreduced : plan)
+                          plan: used.count > references.count || patchOrigins != nil || expandOrigins != nil
+                              ? plan.unreduced : plan)
             job.accelerators = d.accelerators
             job.start = start
             job.patch = patchOrigins
+            job.expand = expandOrigins
             return job
         }
         app.enqueue(jobs)

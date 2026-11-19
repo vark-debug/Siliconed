@@ -50,19 +50,36 @@ extension AppState {
         originalLoad?.cancel()
         guard comparesOriginal, let e = selectedEntry, canCompareOriginal(e) else { original = nil; return }
         guard original?.id != e.id else { return }
-        // Image 1 of an edit; for a pasted 「移除」 patch, the image it started from (`Entry.start`).
-        // A crop-only render keeps the crop alone: no like-for-like original.
+        // Image 1 of an edit; for a pasted 「移除」 patch or an expand, the image it was made from
+        // (`Entry.start`). A crop-only render keeps the crop alone: no like-for-like original.
         let local = e.references.first { if case .remote = $0.source { false } else { true } }
-        let start = e.settings.patch?.paste == true ? e.start : nil
+        let expand = e.settings.expand
+        let start = e.settings.patch?.paste == true || expand != nil ? e.start : nil
         let reference = local ?? start.flatMap { ref in if case .remote = ref.source { nil } else { ref } }
         let id = e.id, source = e.enlargedFrom, width = e.width, height = e.height
+        // **An expand's original keeps its own shape** (`CurtainView.aPlacement`): decoded at its own
+        // size and placed where it sits in the canvas (`Expand.plan`'s crop — the same pads the render
+        // took). The canvas is bigger and often another shape, and stretching the original to the
+        // output's size would draw it in the canvas's. Every other path fills the frame: an
+        // enlargement's original is stretched to it by design.
+        let expandRef = expand != nil ? reference : nil
+        let pads = expand?.pads, ceiling = expand?.maximumSample
+        let noRect: (x: Int, y: Int, width: Int, height: Int)? = nil
         originalLoad = Task { [weak self] in
-            let image = await Task.detached(priority: .userInitiated) {
-                Decoded(source.flatMap { SuperResolution.stretched($0, width: width, height: height) }
-                        ?? reference?.displayed(width: width, height: height))
-            }.value.image
+            let (image, rect) = await Task.detached(priority: .userInitiated) {
+                if let expandRef {
+                    let plan = try? Expand.plan(pads: pads ?? Expand.Pads(), width: expandRef.width,
+                                                height: expandRef.height,
+                                                maximumSample: ceiling ?? Expand.defaultMaximumSample)
+                    return (expandRef.displayed(width: expandRef.width, height: expandRef.height),
+                            plan.map { (x: $0.crop.x, y: $0.crop.y,
+                                        width: $0.imageWidth, height: $0.imageHeight) })
+                }
+                return (source.flatMap { SuperResolution.stretched($0, width: width, height: height) }
+                        ?? reference?.displayed(width: width, height: height), noRect)
+            }.value
             guard let self, !Task.isCancelled, self.selectedEntry?.id == id, self.comparesOriginal else { return }
-            self.original = image.map { (id, $0) }
+            self.original = image.map { (id, $0, rect) }
         }
     }
 

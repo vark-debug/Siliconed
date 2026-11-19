@@ -67,6 +67,13 @@ extension AppState {
             return String(localized: "A mask stays on this Mac: stop following another Mac first.",
                            comment: "A patch cannot cross a mirror: its crop and mask are this Mac's")
         }
+        // **The mask and the expand are two edits of one image**: the mask says which region changes,
+        // the expand keeps the whole image and grows the canvas — the engine refuses them together
+        // (`Request.expand`), said here before the click.
+        if attachedExpand != nil {
+            return String(localized: "A mask replaces a region and an expand grows the canvas: remove one of them.",
+                          comment: "A mask and an expand cannot edit one image two ways")
+        }
         // **The two presets are two branches of one workflow**: switched on together, neither is the
         // mask's — refused before the click. A card switched off is not in the stack
         // (`rackPresetMode` reads the same `activeLoRAs`). The stack is read before the model's own
@@ -77,6 +84,14 @@ extension AppState {
            activeLoRAs.contains(where: { $0.path == redraw }) {
             return String(localized: "The remove and redraw presets are exclusive: keep one in the rack.",
                            comment: "A patch takes one branch of the workflow, not both")
+        }
+        // **The expand preset is no mask branch**: it belongs to the 「扩图」 workflow, whose canvas
+        // keeps the whole image — the opposite of a mask's replace-region. Switched on beside a mask,
+        // it says two things of one render: the CLI's `lora` refusal, mirrored before the click.
+        if let expand = PatchLoRA.card(for: .expand, in: compatibleLoras)?.path,
+           activeLoRAs.contains(where: { $0.path == expand }) {
+            return String(localized: "The expand preset grows the canvas — it has no mask: turn the card off, or remove the mask.",
+                          comment: "The expand preset and a mask are two branches of one workflow")
         }
         // **The prompt and the rack's card are two statements of one branch**: the card is the user's
         // explicit choice, the prompt's reading a guess — when they disagree neither wins silently.
@@ -144,8 +159,14 @@ extension AppState {
     }
 
     /// **The mask is attached to `image`** — its size checked (never scaled), its pixels read off the
-    /// main thread, the crop's plan computed there and then.
+    /// main thread, the crop's plan computed there and then. An expand beside it is refused: the two
+    /// entries edit one image two ways (`AppState+Expand.swift`).
     func attachMask(_ mask: ReferenceImage, to image: ReferenceImage) async {
+        if attachedExpand != nil {
+            problem = Problem(String(localized: "A mask replaces a region and an expand grows the canvas: remove one of them.",
+                                     comment: "A mask and an expand cannot edit one image two ways"))
+            return
+        }
         guard mask.width == image.width, mask.height == image.height else {
             problem = Problem(String(localized: "The mask is \(String(mask.width)) × \(String(mask.height)), the image \(String(image.width)) × \(String(image.height)): a mask must be the image’s size — it is never scaled.",
                                        comment: "The mask and image 1 must have the same pixel size"),

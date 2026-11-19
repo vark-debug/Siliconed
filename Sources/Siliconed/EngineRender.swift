@@ -52,6 +52,11 @@ extension Engine {
     private func execute(_ request: Request, _ seeds: [UInt64], _ model: Model,
                           _ cancellation: Cancellation?,
                           _ onProgress: (@Sendable (Event) -> Void)?) throws -> [Render] {
+        // **The expand prompt**: the workflow's fixed sentence leads (`Expand.promptPrefix`, node 33)
+        // and the user's words are appended with an empty separator (node 32) — an empty supplement is
+        // the sentence alone, where every other path refuses an empty prompt.
+        var request = request
+        if request.expand != nil { request.prompt = Expand.prompt(request.prompt) }
         // One render, one plan: a measure that ends meanwhile applies to the next one (`EngineSettings.adopt`).
         EngineSettings.renderBegan()
         defer { EngineSettings.renderEnded() }
@@ -72,11 +77,13 @@ extension Engine {
         // `plan.startSigma`, untouched.
         let seededSigma = admitted.seededSigma
         // **The patch's crop decides the pixels** (`Admission.patch`): the plan's size, where the
-        // workflow's scaling leaves it. Every other path renders the request's own format.
+        // workflow's scaling leaves it. An expand's canvas decides them the same way
+        // (`Admission.expand`). Every other path renders the request's own format.
         let patchPlan = admitted.patch
-        let pixelWidth = patchPlan?.width ?? request.width
-        let pixelHeight = patchPlan?.height ?? request.height
-        let referenceCount = patchPlan == nil ? request.references.count : 1
+        let expandPlan = admitted.expand
+        let pixelWidth = expandPlan?.width ?? patchPlan?.width ?? request.width
+        let pixelHeight = expandPlan?.height ?? patchPlan?.height ?? request.height
+        let referenceCount = patchPlan == nil && expandPlan == nil ? request.references.count : 1
         // Installed, license, format, memory, no other render: the first that fails throws. The
         // lock is held until this function returns, the whole batch.
         // B, this Mac's budget (`MemoryBudget`): the preflight judges the floor against it, and the
@@ -93,6 +100,7 @@ extension Engine {
         var memoryRequest = model.card.memoryRequest(
             width: pixelWidth, height: pixelHeight,
             references: patchPlan.map { [($0.width, $0.height)] }
+                ?? expandPlan.map { [($0.width, $0.height)] }
                 ?? (request.image.map { [$0] } ?? request.references).map { ($0.width, $0.height) },
             promptTokens: MemoryNeed.Request.promptTokens(request.prompt, family: model.card.family,
                                                            references: referenceCount))
@@ -107,13 +115,16 @@ extension Engine {
             ? patchPlan.map { ($0.width, $0.height) } : nil
         memoryRequest.solver = request.solver
         memoryRequest.referenceResolution = request.referenceResolution
-        memoryRequest.referenceMatchesTarget = patchPlan?.primaryMatchesTarget ?? false
+        // An expand's canvas is the target's own pixels: the workflow's `拉伸` prepares it at the
+        // plan's size, to the pixel — the text encoder's image 1 is that copy.
+        memoryRequest.referenceMatchesTarget = patchPlan?.primaryMatchesTarget ?? (expandPlan != nil)
         memoryRequest.accelerators = admitted.accelerators
         memoryRequest.batch = seeds.count
         memoryRequest.library = model.library ?? .processWide
         let lock = try Preflight.run(model, width: pixelWidth, height: pixelHeight,
                                      references: referenceCount, ceiling: ceiling, memory: memoryRequest,
-                                     minimumSide: patchPlan == nil ? Format.minimumSide : Patch.minimumRenderSide)
+                                     minimumSide: patchPlan == nil && expandPlan == nil
+                                         ? Format.minimumSide : Patch.minimumRenderSide)
         defer { withExtendedLifetime(lock) {} }
         // The stack opens BEFORE any computation: an unreadable map throws here, not after a
         // minute — and so does a LoRA forged for another model. The DiTs apply a LoRA only to the
@@ -174,12 +185,17 @@ extension Engine {
             PhaseBoundary.mark("start")
             context.emit(.start(Plan(
                 denoising: plan, seeds: seeds,
-                stages: request.image != nil || request.seededStart != nil || request.patch != nil || !request.references.isEmpty
+                stages: request.image != nil || request.seededStart != nil || request.patch != nil
+                    || request.expand != nil || !request.references.isEmpty
                     ? [.text, .image, .denoising, .decoding] : [.text, .denoising, .decoding])))
 
             // ── The patch's crop, made once (`Patch.render`): the tinted green crop is the text
             //    encoder's image 1 **and** z₀ below — the same pixels, the workflow's `#204`. ──
             let patchCrop = patchPlan.flatMap { plan in request.patch.map { $0.render(plan) } }
+            // ── The expand's canvas, made once (`Expand.render`): the grey canvas stretched to the
+            //    plan's size is the text encoder's image 1 alone — no z₀, no noise-mask: the render
+            //    starts from pure noise and rebuilds the whole picture, grey border included. ──
+            let expandCanvas = expandPlan.flatMap { plan in request.expand.map { $0.render(plan) } }
             // ── The references at the denoiser's size, once: a text stage that reads images and the
             //    image encoder below receive this same copy. A patch has one — its crop. When the
             //    crop is the target's own pixels (`Patch.Plan.primaryMatchesTarget`), that copy is
@@ -190,6 +206,8 @@ extension Engine {
                 prepared = patchPlan?.primaryMatchesTarget == true
                     ? [patchCrop]
                     : try chain.denoising.preparedReferences([patchCrop], referenceResolution: request.referenceResolution)
+            } else if let expandCanvas {
+                prepared = [expandCanvas]
             } else if request.references.isEmpty {
                 prepared = []
             } else {
@@ -376,9 +394,14 @@ extension Engine {
                 // **The crop returns to its place** (`Patch.composited`, the workflow's
                 // `GH_CropRestore`): scaled back to the crop's pixels, feathered, colour-matched, and
                 // laid over a copy of the original — the image delivered is the original's size.
+                // **The expand's canvas comes back whole** (`Expand.composited`, the same node at
+                // 3 / 3 / 1): the original laid in at its offset over the scaled-back render — the
+                // image delivered is the **canvas's** size.
                 // `--crop-only` keeps the decoded crop, at the plan's size, to compare the two.
                 let image = !request.patchCropOnly
-                    ? patchPlan.flatMap { plan in request.patch.map { $0.composited(decoded, plan: plan) } } ?? decoded
+                    ? patchPlan.flatMap { plan in request.patch.map { $0.composited(decoded, plan: plan) } }
+                        ?? expandPlan.flatMap { plan in request.expand.map { $0.composited(decoded, plan: plan) } }
+                        ?? decoded
                     : decoded
                 guard FiniteImage.isFinite(image.pixels, "the image", image: n) else { refused = true; continue }
                 // An image's time: its own text, encoding and denoising, then its decoding.

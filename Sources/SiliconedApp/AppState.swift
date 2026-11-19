@@ -260,6 +260,10 @@ final class AppState {
     /// the crop's plan beside it. Taken as `render` queues its jobs and cleared there — a mask never outlives the
     /// click it was attached for (`a08e33f`). A redo reads its entry's own mask (`Entry.mask`), not this.
     var attachedMask: AttachedMask?
+    /// **The expand attached in the Prompt Lab, for the next render only** (`AppState+Expand.swift`): image 1,
+    /// the pads its canvas grows by, the plan beside them — the 「扩图」 entry, no mask to paint. Taken and
+    /// cleared as `render` queues its jobs, like the mask: one click, then an ordinary render again.
+    var attachedExpand: AttachedExpand?
     /// **The start's strength** (diffusers' `strength`, `StartImage`): how far the render moves from the image — retouched in the rack
     /// between two renders. In hundredths. The family's default (`StartImage.defaultStrength`) until one is chosen; forgotten
     /// when the rack changes family.
@@ -384,7 +388,7 @@ final class AppState {
     /// **An image against its image 1** (the bar's curtain button): the original under the output, at
     /// the output's size. Stays on from one such image to the next; an image made from none shows alone.
     var comparesOriginal = false { didSet { loadOriginal() } }
-    var original: (id: Entry.ID, image: CGImage)?
+    var original: (id: Entry.ID, image: CGImage, rect: (x: Int, y: Int, width: Int, height: Int)?)?
     var showsOriginal: Bool {
         comparesOriginal && marked.count <= 1 && original != nil && original?.id == selectedEntry?.id
     }
@@ -400,10 +404,12 @@ final class AppState {
                           || e.enlargedFrom != nil || comparisonStart(e) != nil)
     }
 
-    /// **A pasted patch's image 1**: the only start image the curtain reads. A plain img2img and a
-    /// text-to-image keep the bar they had — this is the patch path's original, not a new button.
+    /// **A pasted patch's image 1, and an expand's**: the only start images the curtain reads. A plain
+    /// img2img and a text-to-image keep the bar they had — this is the patch path's original, not a new
+    /// button. An expand's original is the image whose canvas grew: it sits inside the bigger picture,
+    /// the comparison the workflow's own Image Comparer draws.
     func comparisonStart(_ e: Entry) -> ReferenceImage? {
-        guard let start = e.start, let patch = e.settings.patch, patch.paste else { return nil }
+        guard let start = e.start, e.settings.patch?.paste == true || e.settings.expand != nil else { return nil }
         if case .remote = start.source { return nil }
         return start
     }
@@ -520,6 +526,9 @@ final class AppState {
     /// **The mask being painted** (`MaskPainter.swift`): image 1 under the brush, in the canvas's place.
     /// Its strokes become a white-on-black mask of image 1's size, attached like an imported PNG's.
     var paintingMask: MaskSession?
+    /// **The expand's pads form open** (`ExpandPadsSheet`, `LabImages.swift`): the four percents its
+    /// canvas grows by — no brush, no mask.
+    var expandingPads = false
     /// The session's finished jobs, their outcome, their images (even removed from the history
     /// since) and the engine's warnings during their render: `wait t3` afterwards still returns the answer.
     private(set) var completed: [Int: (job: Job, issue: Issue, images: [Int], warnings: [String])] = [:]

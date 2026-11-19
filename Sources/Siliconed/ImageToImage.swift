@@ -239,6 +239,31 @@ extension ImageRGB {
         return ImageRGB(pixels: output, height: H, width: L)
     }
 
+    /// **The image stretched to the format exactly** — no fill, no crop: the workflow's
+    /// `图像缩放V2_孤海` hands the padded canvas to the encoder stretched (`拉伸`), and the expand
+    /// path's paste-back stretches the decoded render the same way (`Expand.render`,
+    /// `Expand.composited`). The resampling is `fitted`'s (vImage's high quality, on floats), then
+    /// clamped to `[-1, 1]`; an image already at the format comes back as is, bit for bit.
+    package func stretched(width L: Int, height H: Int) -> ImageRGB {
+        if L == width && H == height { return self }
+        var output = [Float](repeating: 0, count: 3 * H * L)
+        pixels.withUnsafeBufferPointer { src in
+            output.withUnsafeMutableBufferPointer { dst in
+                for c in 0..<3 {
+                    var s = vImage_Buffer(data: UnsafeMutableRawPointer(mutating: src.baseAddress! + c * height * width),
+                                          height: vImagePixelCount(height),
+                                          width: vImagePixelCount(width), rowBytes: width * 4)
+                    var d = vImage_Buffer(data: dst.baseAddress! + c * H * L, height: vImagePixelCount(H),
+                                          width: vImagePixelCount(L), rowBytes: L * 4)
+                    let errorMessage = vImageScale_PlanarF(&s, &d, nil, vImage_Flags(kvImageHighQualityResampling))
+                    precondition(errorMessage == kvImageNoError, "stretch: vImageScale_PlanarF failed (\(errorMessage))")
+                }
+            }
+        }
+        for i in output.indices { output[i] = min(1, max(-1, output[i])) }
+        return ImageRGB(pixels: output, height: H, width: L)
+    }
+
     /// **`crop`'s frame, in source pixels**: the zone of the original image that covers the
     /// requested format, centered, at the target's proportions, at least one pixel per side.
     static func zoneSource(source: (width: Int, height: Int), target: (width: Int, height: Int))

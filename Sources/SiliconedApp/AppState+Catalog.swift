@@ -39,6 +39,8 @@ extension AppState {
         // **A mask's render is its crop's plan** (`Patch.plan`), not image 1's editing size: the memory
         // preflight and the job read the plan's crop, crop margins and all.
         if let plan = attachedMaskFormat { return plan }
+        // **An expand's render is its canvas's plan** (`Expand.plan`): the canvas, grey border included.
+        if let plan = attachedExpandFormat { return plan }
         // In a mirror, the other Mac's answer; the chosen format while it is asked (« Generate » waits).
         if let q = editQuote { return quoted(q).map { RecommendedFormat($0.width, $0.height) } ?? format }
         guard let first = references.first, let denoising = chain?.denoising else { return format }
@@ -80,7 +82,9 @@ extension AppState {
         if missing != nil { return String(localized: "This model isn’t installed.") }
         // **An empty prompt with a mask is the remove sentence** (`MaskPrompt.blocker`): the marked area
         // says what changes. A redraw cannot invent what the area becomes, so it asks for a sentence.
-        if let blocker = MaskPrompt.blocker(prompt: prompt, masked: attachedMask != nil,
+        // **An expand may stay empty too**: the workflow's fixed sentence leads (`Expand.promptPrefix`),
+        // the user's words appended after it.
+        if let blocker = MaskPrompt.blocker(prompt: prompt, masked: attachedMask != nil || attachedExpand != nil,
                                             mode: patchDecision(prompt: prompt).mode) {
             return blocker
         }
@@ -89,6 +93,8 @@ extension AppState {
         if case .failure(let refusal) = carried { return refusal.sentence }
         // **A mask edits image 1 alone** (`AppState+Mask.swift`): its crop is the request's only image.
         if let reason = maskBlocker { return reason }
+        // **An expand is image 1's canvas** (`AppState+Expand.swift`): the pads, no mask, no references.
+        if let reason = expandBlocker { return reason }
         // Three things varying, a bracket the library refuses (`Series.swift`).
         if let reason = seriesBlocker { return reason }
         if file.count >= Self.maxQueueLength { return String(localized: "The queue is full.") }

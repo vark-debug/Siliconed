@@ -116,6 +116,19 @@ struct PNGImage: Transferable {
     }
 }
 
+/// **The 「扩图」 path's pads and sampling ceiling** (`Request.expand`): what an expand history image
+/// keeps, so « Render Again (Same Seed) » and « Reuse These Settings » draw the same canvas — the
+/// GUI sets the pads alone; the ceiling is the workflow's own 2048 (`Expand.defaultMaximumSample`).
+struct ExpandSettings: Equatable {
+    var pads: Expand.Pads
+    var maximumSample: Int
+
+    init(pads: Expand.Pads = Expand.Pads(), maximumSample: Int = Expand.defaultMaximumSample) {
+        self.pads = pads
+        self.maximumSample = maximumSample
+    }
+}
+
 /// **What the Images box accepts**: a file (the Finder), or PNG bytes — a strip thumbnail, which leaves
 /// as data only (`PNGImage`). The file first: a Finder PNG is read from its place, not copied.
 enum DroppedImage: Transferable {
@@ -165,6 +178,9 @@ struct RenderSettings {
     /// **The 「移除」 path's margins and bounds** (`Request.patch`): set when the render carries a mask
     /// (`Job.patch`), `nil` otherwise. What « Redo » needs to draw the same crop.
     var patch: Patch.Settings? = nil
+    /// **The 「扩图」 path's pads and sampling ceiling** (`Request.expand`): set when the render grows a
+    /// canvas (`Job.expand`), `nil` otherwise. What « Redo » needs to draw the same canvas.
+    var expand: ExpandSettings? = nil
     var isVariation: Bool { !variations.isEmpty }
 }
 
@@ -189,7 +205,8 @@ struct Entry: Identifiable {
     /// The edit's references it was rendered with — what « Variations » renders again. Shared with
     /// its job's other images (the same sources), never decoded here.
     var references: [ReferenceImage] = []
-    /// **The image it started from** (img2img, `RenderSettings.strength`): what « Variations » and « Redo » render again.
+    /// **The image it started from** (img2img, `RenderSettings.strength`), a 「移除」 patch's image 1 or
+    /// an expand's: what « Variations » and « Redo » render again, and what the curtain compares against.
     var start: ReferenceImage? = nil
     /// **The 「移除」 path's mask** (`Request.patch`): the image it edits is `Job.patch.image`. What
     /// « Redo » hands the engine again.
@@ -320,6 +337,9 @@ struct Job: Identifiable {
     /// **The 「移除」 path's two sources** (`Request.patch`): the image to edit and its mask, the same
     /// size. `settings.patch` says the margins; the engine's plan decides the format.
     var patch: (image: ReferenceImage, mask: ReferenceImage)? = nil
+    /// **The 「扩图」 path's source** (`Request.expand`): the image whose canvas grows — the grey border,
+    /// the plan's size, the original laid back inside. `settings.expand` says the pads.
+    var expand: ReferenceImage? = nil
     let previews: Bool
     /// The model's default number of steps: `nil` in the request if it was not changed.
     let defaultSteps: Int?
@@ -337,7 +357,9 @@ struct Job: Identifiable {
     /// lengthens the sequence and every evaluation with it), with or without LoRA (the spectral turns off under a LoRA, and the LoRA weighs on
     /// every evaluation).
     var speedKey: String {
-        Speed.key(settings.identifier, settings.format, references: references.count + (start == nil ? 0 : 1) + (patch == nil ? 0 : 1), lora: !settings.loras.isEmpty)
+        Speed.key(settings.identifier, settings.format,
+                  references: references.count + (start == nil ? 0 : 1) + (patch == nil ? 0 : 1) + (expand == nil ? 0 : 1),
+                  lora: !settings.loras.isEmpty)
     }
 
     var name: String { "t\(ordinal)" }
