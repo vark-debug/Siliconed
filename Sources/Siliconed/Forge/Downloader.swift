@@ -11,14 +11,125 @@ import Synchronization
 /// **A Hugging Face file, at a pinned revision, verified.** The token (gated repos, like Krea 2)
 /// comes from `HF_TOKEN` or from `~/.cache/huggingface/token` — the one `huggingface-cli login`
 /// writes.
+// MARK: - The door
+
+/// **A door the Hub's files go through.** huggingface.co is the source of truth; hf-mirror.com
+/// mirrors it path for path, revision for revision, header for header (`X-Linked-Etag` and all);
+/// modelscope.cn (魔搭) serves the recipe repositories under their own names at `master` — its
+/// files' sha256 are the publishers' LFS objects, so the recipe's pins judge it the same way.
+/// Whichever door is chosen, the integrity does not move: `expectedSHA` refuses bytes the pin
+/// does not name (`downloadCorrupt`), a door is never trusted.
+package enum HubSource: String, Sendable {
+    case huggingface, mirror, modelscope
+}
+
+/// **The stored choice**: `automatic` (the default) probes the doors — huggingface first, then
+/// modelscope, then the mirror — and keeps the first that answers; the three others name their
+/// door outright. The GUI stores its picker's value (`Downloader.setChoice`, `UserDefaults`); a
+/// CLI or a mirror's engine takes `SILICONED_HUB_SOURCE=hf|mirror|modelscope|auto` from the
+/// environment, which wins over the GUI's.
+package enum HubChoice: String, Sendable, CaseIterable {
+    case automatic, huggingface, mirror, modelscope
+    package var source: HubSource? {
+        switch self {
+        case .automatic: return nil
+        case .huggingface: return .huggingface
+        case .mirror: return .mirror
+        case .modelscope: return .modelscope
+        }
+    }
+}
+
+/// Waits for an asynchronous task from synchronous code (the forge and the CLI are).
+private final class Box<T>: @unchecked Sendable { var r: Result<T, Error>? }
+
+func wait<T: Sendable>(_ task: @escaping @Sendable () async throws -> T) throws -> T {
+    let b = Box<T>(), s = DispatchSemaphore(value: 0)
+    Task.detached {
+        do { b.r = .success(try await task()) } catch { b.r = .failure(error) }
+        s.signal()
+    }
+    s.wait()
+    return try b.r!.get()
+}
+
 package enum Downloader {
-    static func url(_ repository: String, revision: String, path: String) -> URL {
-        URL(string: "https://huggingface.co/\(repository)/resolve/\(revision)/\(path.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)!)")!
+    /// The environment's override (`SILICONED_HUB_SOURCE`) and the GUI's `UserDefaults` key.
+    package static let sourceEnvironment = "SILICONED_HUB_SOURCE", sourceKey = "hubSource"
+    private static let state = Mutex<(stored: HubChoice?, door: HubSource?)>((nil, nil))
+
+    /// **The process's choice** — the environment's first (`SILICONED_HUB_SOURCE`), then the
+    /// value the GUI set (`setChoice`), then automatic.
+    package static var choice: HubChoice {
+        let env = ProcessInfo.processInfo.environment[sourceEnvironment].flatMap(HubChoice.init(rawValue:))
+        if let env { return env }
+        return state.withLock { $0.stored } ?? .automatic
     }
 
-    /// The file's page on the Hub (`blob/`), for a human to read — not the bytes (`resolve/`).
-    static func page(_ repository: String, revision: String, path: String) -> URL {
-        URL(string: "https://huggingface.co/\(repository)/blob/\(revision)/\(path.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)!)")!
+    /// The GUI's picker, at launch and when it changes: the stored value, and the answer the
+    /// process had already resolved (a change of choice re-asks the doors).
+    package static func setChoice(_ choice: HubChoice?) {
+        state.withLock { $0.stored = choice; $0.door = nil }
+    }
+
+    /// **The door in use, resolved once per process.** A named choice names it; an automatic one
+    /// asks the doors (`firstAnswering`). No probe is started by reading this — a sheet that only
+    /// displays the state reads `resolvedDoor`; the first download resolves.
+    package static var source: HubSource {
+        if let door = state.withLock({ $0.door }) { return door }
+        let resolved = choice.source ?? firstAnswering(answers)
+        state.withLock { $0.door = resolved }
+        return resolved
+    }
+
+    /// The door the process already resolved, without starting the probe — a sheet displays it.
+    package static var resolvedDoor: HubSource? { state.withLock { $0.door } }
+
+    /// **The automatic answer**: the doors in order, the first whose probe answers; none — the
+    /// Hub, and the download's own error will say why. Pure: the tests hand it their answers.
+    package static func firstAnswering(_ answers: (HubSource) -> Bool) -> HubSource {
+        let order: [HubSource] = [.huggingface, .modelscope, .mirror]
+        return order.first(where: answers) ?? .huggingface
+    }
+
+    /// The live probe: a small config file's HEAD, four seconds to answer.
+    static func answers(_ source: HubSource) -> Bool {
+        let u: URL? = switch source {
+        case .huggingface: URL(string: "https://huggingface.co/Qwen/Qwen-Image-2.1-Turbo/resolve/main/model_index.json")
+        case .mirror: URL(string: "https://hf-mirror.com/Qwen/Qwen-Image-2.1-Turbo/resolve/main/model_index.json")
+        case .modelscope: URL(string: "https://modelscope.cn/models/Qwen/Qwen-Image-2.1-Turbo/resolve/master/model_index.json")
+        }
+        guard let u else { return false }
+        var r = URLRequest(url: u)
+        r.httpMethod = "HEAD"
+        r.timeoutInterval = 4
+        let ask = r
+        let answer = try? wait { try await URLSession.shared.data(for: ask) }
+        guard let h = answer?.1 as? HTTPURLResponse else { return false }
+        return h.statusCode < 400
+    }
+    /// **Where a file lives on the chosen door.** huggingface.co and hf-mirror.com keep the
+    /// repository's name and the recipe's pinned revision; modelscope.cn answers at `master`,
+    /// under the name `Installer.modelscopeName` gives it — `nil` there (no copy on 魔搭): the
+    /// mirror, at the pinned revision. Every caller that builds a URL goes through this.
+    static func url(_ repository: String, revision: String, path: String, source: HubSource? = nil) -> URL {
+        let door = source ?? Downloader.source
+        if door == .modelscope, let mapped = Installer.modelscopeName(repository) {
+            return URL(string: "https://modelscope.cn/models/\(mapped)/resolve/master/\(path.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)!)")!
+        }
+        let host = door == .huggingface ? "huggingface.co" : "hf-mirror.com"
+        return URL(string: "https://\(host)/\(repository)/resolve/\(revision)/\(path.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)!)")!
+    }
+
+    /// The file's page for a human to read — on the Hub and the mirror (`blob/`, at the revision),
+    /// on ModelScope the repository's page (its file view is not a stable URL).
+    static func page(_ repository: String, revision: String, path: String, source: HubSource? = nil) -> URL {
+        let door = source ?? Downloader.source
+        if door == .modelscope, let mapped = Installer.modelscopeName(repository) {
+            return URL(string: "https://modelscope.cn/models/\(mapped)")!
+        }
+        let host = door == .huggingface ? "huggingface.co" : "hf-mirror.com"
+        return URL(string: "https://\(host)/\(repository)/blob/\(revision)/\(path.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)!)")!
     }
 
     static var token: String? {
@@ -54,9 +165,11 @@ package enum Downloader {
         guard data.count == end - begin + 1 else { throw EngineError.downloadInterrupted(file: file) }
     }
 
-    /// The sha256 (LFS files) and size announced by the Hub, read from the response **before**
-    /// redirection to the CDN.
+    /// The sha256 (LFS files) and size announced before the bytes: on the Hub and the mirror, the
+    /// response headers before the redirection to the CDN; on ModelScope, the repository's file
+    /// listing (`modelscopeFootprint`) — the same values, no headers of its own to read.
     static func announcedFootprint(_ url: URL) throws -> (sha256: String?, size: Int?, status: Int) {
+        if url.host == "modelscope.cn" { return try modelscopeFootprint(url) }
         final class NoRedirect: NSObject, URLSessionTaskDelegate {
             func urlSession(_ s: URLSession, task: URLSessionTask, willPerformHTTPRedirection r: HTTPURLResponse,
                             newRequest: URLRequest, completionHandler: @escaping @Sendable (URLRequest?) -> Void) {
@@ -74,6 +187,57 @@ package enum Downloader {
         let etag = (h.value(forHTTPHeaderField: "X-Linked-Etag") ?? "").trimmingCharacters(in: CharacterSet(charactersIn: "\"W/"))
         let size = h.value(forHTTPHeaderField: "X-Linked-Size").flatMap(Int.init)
         return (etag.count == 64 ? etag : nil, size, h.statusCode)
+    }
+
+    /// The listings of ModelScope's repositories, one fetch per repository per process
+    /// (`/api/v1/models/<id>/repo/files?Revision=master&Recursive=true`).
+    private static let listings = Mutex<[String: [String: (sha256: String?, size: Int?)]]>([:])
+
+    /// **ModelScope's answer**: the LFS object's sha256 and size of one file, read from its
+    /// repository's listing — the values the Hub announces in its `X-Linked-*` headers, so
+    /// `expectedSHA` judges a ModelScope download the same way. The file's path is the URL's, from
+    /// `models/<org>/<name>/resolve/master/<path>`; a file the listing does not name answers nothing
+    /// (`nil`), and the download's own refusal says why.
+    static func modelscopeFootprint(_ url: URL) throws -> (sha256: String?, size: Int?, status: Int) {
+        let parts = url.path.split(separator: "/").map(String.init)
+        guard parts.count > 5, parts[0] == "models" else {
+            throw EngineError.downloadRefused(file: url.lastPathComponent, status: 0)
+        }
+        let id = parts[1] + "/" + parts[2]
+        let listing = try modelscopeListing(id)
+        let file = parts.dropFirst(5).joined(separator: "/")
+        guard let x = listing[file] else { return (nil, nil, 0) }
+        return (x.sha256, x.size, 200)
+    }
+
+    /// The listing parsed: one entry per file (`Type: blob`), its `Sha256` kept when it names an
+    /// LFS object. A pure parse, so the tests hand it a fixture.
+    static func modelscopeListing(from data: Data) throws -> [String: (sha256: String?, size: Int?)] {
+        guard let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let files = (object["Data"] as? [String: Any])?["Files"] as? [[String: Any]] else {
+            throw EngineError.downloadInterrupted(file: "ModelScope's file listing")
+        }
+        var r: [String: (sha256: String?, size: Int?)] = [:]
+        for x in files where x["Type"] as? String == "blob" {
+            guard let path = x["Path"] as? String else { continue }
+            let sha = (x["Sha256"] as? String)?.lowercased()
+            r[path] = (sha?.count == 64 ? sha : nil, x["Size"] as? Int)
+        }
+        return r
+    }
+
+    static func modelscopeListing(_ id: String) throws -> [String: (sha256: String?, size: Int?)] {
+        if let cached = listings.withLock({ $0[id] }) { return cached }
+        guard let u = URL(string: "https://modelscope.cn/api/v1/models/\(id)/repo/files?Revision=master&Recursive=true") else {
+            throw EngineError.downloadRefused(file: id, status: 0)
+        }
+        let (data, response) = try wait { try await URLSession.shared.data(for: request(u)) }
+        guard let h = response as? HTTPURLResponse, h.statusCode == 200 else {
+            throw EngineError.downloadRefused(file: id, status: (response as? HTTPURLResponse)?.statusCode ?? 0)
+        }
+        let listing = try modelscopeListing(from: data)
+        listings.withLock { $0[id] = listing }
+        return listing
     }
 
     /// **The sha256 a download is checked against**: the recipe's when it pins one (a Hub that
@@ -494,17 +658,4 @@ package enum Downloader {
             if pc >= last + 20 { last = pc - pc % 20; journal("  … \(last) %") }
         }
     }
-}
-
-/// Waits for an asynchronous task from synchronous code (the forge and the CLI are).
-private final class Box<T>: @unchecked Sendable { var r: Result<T, Error>? }
-
-func wait<T: Sendable>(_ task: @escaping @Sendable () async throws -> T) throws -> T {
-    let b = Box<T>(), s = DispatchSemaphore(value: 0)
-    Task.detached {
-        do { b.r = .success(try await task()) } catch { b.r = .failure(error) }
-        s.signal()
-    }
-    s.wait()
-    return try b.r!.get()
 }

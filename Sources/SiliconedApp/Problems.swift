@@ -226,11 +226,11 @@ struct Problem: Equatable, Sendable {
         case .diskFull:
             return String(localized: "Make room — uninstall a model, or discard the interrupted downloads in the Models sheet — then start again: the files already downloaded are kept.")
         case .downloadInterrupted:
-            return String(localized: "Check the connection and start again: the files already downloaded are kept, the interrupted one starts over.")
+            return String(localized: "Check the connection and start again: the files already downloaded are kept, the interrupted one starts over. If huggingface.co stays out of reach, pick another download source in the Models sheet — ModelScope, or the mirror.")
         case let .downloadRefused(_, status) where status == 401 || status == 403:
             // No repository an installation reads is gated (`Installation.swift`), and the Hub serves
             // them even to an expired token: a refusal comes from the way to it, not from a license.
-            return String(localized: "Check that huggingface.co opens in a browser on this Mac — a proxy, a VPN or a firewall can refuse it — then install again: the files already downloaded are kept.")
+            return String(localized: "Check that huggingface.co opens in a browser on this Mac — a proxy, a VPN or a firewall can refuse it — or pick another download source in the Models sheet (ModelScope, a mirror), then install again: the files already downloaded are kept.")
         case .downloadRefused:
             return String(localized: "Try again later.")
         case .downloadCorrupt:

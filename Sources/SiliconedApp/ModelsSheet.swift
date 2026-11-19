@@ -57,6 +57,7 @@ struct ModelManagement: View {
                             .font(.callout).foregroundStyle(.secondary)
                     }
                 }
+                downloadSource
                 Section("LoRA") {
                     if !loras.isEmpty {
                         ForEach(loras, id: \.card.id) { loraLine($0.card, $0.bytes) }
@@ -96,6 +97,59 @@ struct ModelManagement: View {
     }
 
     // ── What the sheet lists: the visible families, and what belongs to them ──
+
+    /// **The Hub's door**: the picker stores its choice (`UserDefaults`, and the process's resolver
+    /// re-asks), the status line follows at once — `door` is the sheet's own state, set when the
+    /// picker turns (a named choice names its door straight away; automatic waits for the next
+    /// download's probe) and when the sheet opens. A probe only ever starts when a download does,
+    /// never from the sheet itself — and while a forge runs (an install, an import, an
+    /// enlargement's model) the picker rests: the door holds until it ends.
+    @State private var door: HubSource?
+
+    private var downloadSource: some View {
+        Section {
+            Picker("Download source", selection: Binding(
+                get: { Downloader.choice },
+                set: { choice in
+                    Downloader.setChoice(choice)
+                    UserDefaults.standard.set(choice.rawValue, forKey: Downloader.sourceKey)
+                    door = choice.source ?? Downloader.resolvedDoor
+                })) {
+                ForEach(HubChoice.allCases, id: \.self) { choice in
+                    Text(verbatim: Self.sourceLabel(choice)).tag(choice)
+                }
+            }
+            .disabled(app.forgeInProgress != nil)
+            .padding(.vertical, 2)
+            .onAppear { door = Downloader.resolvedDoor }
+            if let door {
+                Text("Downloading from \(Self.doorName(door)).")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+        } header: {
+            Text("Download source")
+        } footer: {
+            Text("Where the models download from. Automatic asks huggingface.co first, then ModelScope (魔搭), then a mirror, and keeps the first that answers — the picker says which, before the first download. Every file is checked against its pinned sha256, whatever the source.")
+                .font(.caption).foregroundStyle(.secondary)
+        }
+    }
+
+    private static func sourceLabel(_ choice: HubChoice) -> String {
+        switch choice {
+        case .automatic: return String(localized: "Automatic")
+        case .huggingface: return String(localized: "Hugging Face")
+        case .mirror: return String(localized: "hf-mirror.com (mirror)")
+        case .modelscope: return String(localized: "ModelScope (魔搭)")
+        }
+    }
+
+    private static func doorName(_ door: HubSource) -> String {
+        switch door {
+        case .huggingface: return "huggingface.co"
+        case .mirror: return "hf-mirror.com"
+        case .modelscope: return "ModelScope (魔搭)"
+        }
+    }
 
     private var families: [Library.Occupancy.FamilyPart] {
         AppState.inDisplayOrder(app.occupancy?.families ?? [], family: \.family)

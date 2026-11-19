@@ -81,6 +81,36 @@ package struct Installer {
     // Its Compact: Comfy-Org's int8 convrot of the SFT's DiT and of its encoder (the repository holds the Base's too).
     static let mossComfy = Repository(name: "Comfy-Org/MOSS-Image", revision: "530a4c94f92c35ef6818b1b035a983fe9dcf5f54")
 
+    // MARK: The other door: ModelScope (魔搭, modelscope.cn)
+
+    /// **ModelScope's own name for a recipe repository** — the door `Downloader.url` opens on it —
+    /// `nil`: no copy there, and the mirror answers at the pinned revision instead. Every entry was
+    /// probed on 2026-11-19 (the repository's API answers, and the resolve URL serves the same file
+    /// paths; see `docs/HUB-SOURCES.md`): fifteen of the sixteen recipe repositories keep their
+    /// name, one org renamed itself (`OpenMOSS-Team` publishes as `OpenMOSS` there), and
+    /// `vanes430/Anima-Turbo-V1.1-GGUF` (Anima's Compact and Light DiT) has no copy — a repository
+    /// the table does not name answers `nil` too, so an import's own pick falls back as well.
+    /// The revision ModelScope answers to is `master` (`Downloader.url`); the bytes are the
+    /// publishers' LFS objects, judged by the recipe's pins as anywhere else.
+    static let modelscopeNames: [String: String] = [
+        "Tongyi-MAI/Z-Image-Turbo": "Tongyi-MAI/Z-Image-Turbo",
+        "circlestone-labs/Anima-Base-v1.0-Diffusers": "circlestone-labs/Anima-Base-v1.0-Diffusers",
+        "circlestone-labs/Anima": "circlestone-labs/Anima",
+        "Comfy-Org/Krea-2": "Comfy-Org/Krea-2",
+        "Qwen/Qwen-Image": "Qwen/Qwen-Image",
+        "Qwen/Qwen-Image-2.1-Turbo": "Qwen/Qwen-Image-2.1-Turbo",
+        "unsloth/Z-Image-Turbo-GGUF": "unsloth/Z-Image-Turbo-GGUF",
+        "Disty0/Z-Image-Turbo-SDNQ-int8": "Disty0/Z-Image-Turbo-SDNQ-int8",
+        "Comfy-Org/Qwen-Image-2.1": "Comfy-Org/Qwen-Image-2.1",
+        "unsloth/Qwen-Image-2.1-FP8": "unsloth/Qwen-Image-2.1-FP8",
+        "unsloth/Qwen-Image-2.1-Turbo-GGUF": "unsloth/Qwen-Image-2.1-Turbo-GGUF",
+        "vantagewithai/Krea-2-Turbo-GGUF": "vantagewithai/Krea-2-Turbo-GGUF",
+        "OpenMOSS-Team/MOSS-Image-SFT": "OpenMOSS/MOSS-Image-SFT",
+        "lodestones/MOSS-Image-SFT-8-steps-dmd": "lodestones/MOSS-Image-SFT-8-steps-dmd",
+        "Comfy-Org/MOSS-Image": "Comfy-Org/MOSS-Image",
+    ]
+    static func modelscopeName(_ repository: String) -> String? { modelscopeNames[repository] }
+
     /// The small files read at render time, and their place under `store/composants/<famille>/`.
     static func components(_ f: Family) -> [File] {
         switch f {

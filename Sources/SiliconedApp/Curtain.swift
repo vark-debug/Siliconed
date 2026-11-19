@@ -445,11 +445,13 @@ enum Wheel {
     /// The zoom after a wheel's vertical event, `nil` for anything else: turned away from the hand, in; toward it, out — whatever
     /// the system's natural scrolling (`isDirectionInvertedFromDevice` undoes it). A notch is 15 %; a smooth-scrolling driver's
     /// precise deltas count about ten points to a notch.
-    static func zoom(_ z: CGFloat, by event: NSEvent) -> CGFloat? {
+    /// `floor` is the lowest it goes — the canvas's own never under its fit (1); the expand editor's
+    /// goes to the pads' cap (`AppState.minExpandZoom`), a large canvas seen whole.
+    static func zoom(_ z: CGFloat, by event: NSEvent, floor: CGFloat = 1) -> CGFloat? {
         guard isWheel(event), abs(event.scrollingDeltaY) > abs(event.scrollingDeltaX) else { return nil }
         let away = event.scrollingDeltaY * (event.isDirectionInvertedFromDevice ? -1 : 1)
         let notches = event.hasPreciseScrollingDeltas ? away / 10 : away
-        return min(max(z * pow(1.15, notches), 1), 8)
+        return min(max(z * pow(1.15, notches), floor), 8)
     }
 
     /// **A wheel event as the canvas and the curtain read it, the same way**: a wheel zooms (`app.zoom`), anything else

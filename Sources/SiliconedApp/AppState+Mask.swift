@@ -233,8 +233,12 @@ extension AppState {
         }
     }
 
-    /// **Esc**: leave without a mask — the strokes are not kept.
-    func cancelMaskPainting() { paintingMask = nil }
+    /// **Esc**: leave without a mask — the strokes are not kept. The brush tool goes with it: the
+    /// canvas comes back to the hand (`CanvasTools.swift`).
+    func cancelMaskPainting() {
+        if canvasTool == .brush { canvasTool = .pan }
+        paintingMask = nil
+    }
 
     func setMaskTool(_ tool: MaskSession.Tool) { paintingMask?.tool = tool }
 
@@ -255,6 +259,8 @@ extension AppState {
     /// the attachment every mask goes through — the size check, `ImageMask`, hole filling, the plan.
     func commitMaskPainting() {
         guard let session = paintingMask else { return }
+        // The brush tool's own way out too (« Use Mask », or leaving the tool): the hand comes back.
+        if canvasTool == .brush { canvasTool = .pan }
         guard !session.isEmpty else {
             flash(String(localized: "Paint the area to change first",
                          comment: "An empty painted mask: there is nothing to replace"))
