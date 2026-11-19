@@ -110,22 +110,25 @@ private struct AppCommands: Commands {
             Button(LabModel.shared.unfolded ? "Hide Prompt Lab" : "Show Prompt Lab") { LabModel.shared.toggle() }
                 .keyboardShortcut("l", modifiers: [.command, .option])
             Divider()
-            // On a series' grid, the cells' size; otherwise the image's zoom.
+            // On a series' grid, the cells' size; otherwise the image's zoom — the expand editor's
+            // own while its tool holds. The lab's image 1 zooms too: the canvas is the editor.
             Button("Zoom In") {
                 if app.showsExploration { app.exploreCellSide = AppState.clampedCellSide(app.exploreCellSide * 1.25) }
+                else if app.canvasTool == .expand { app.expandZoom = min(app.expandZoom * 1.5, 8) }
                 else { app.zoom = min(app.zoom * 1.5, 8) }
             }
                 .keyboardShortcut("+")
-                .disabled(app.selectedImage == nil && !app.showsExploration)
+                .disabled(app.selectedImage == nil && !app.showsExploration && app.editInputs.first?.shown == nil)
             Button("Zoom Out") {
                 if app.showsExploration { app.exploreCellSide = AppState.clampedCellSide(app.exploreCellSide / 1.25) }
+                else if app.canvasTool == .expand { app.expandZoom = max(app.expandZoom / 1.5, AppState.minExpandZoom) }
                 else { app.zoom = max(app.zoom / 1.5, 1) }
             }
                 .keyboardShortcut("-")
-                .disabled(app.zoom == 1 && !app.showsExploration)
-            Button("Zoom to Fit") { app.zoom = 1 }
+                .disabled(app.zoom == 1 && app.expandZoom <= AppState.minExpandZoom && !app.showsExploration)
+            Button("Zoom to Fit") { app.zoom = 1; app.expandZoom = 1 }
                 .keyboardShortcut("0")
-                .disabled(app.zoom == 1)
+                .disabled(app.zoom == 1 && app.expandZoom <= AppState.minExpandZoom)
             Divider()
         }
         CommandMenu("Render") {

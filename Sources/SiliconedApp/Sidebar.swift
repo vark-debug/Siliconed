@@ -111,18 +111,44 @@ struct CustomSize: View {
 
 // MARK: - Under the rack: the queue, what went wrong
 
+/// **The rack folded**: one strip with the model picker alone (`ModelPicker`), the chain's boxes
+/// away. A model to install is said and taken here; everything else waits for the canvas rail's
+/// fold button (`CanvasTools.swift`) to bring the whole rack back.
+struct CompactSidebar: View {
+    @Bindable var app: AppState
+
+    var body: some View {
+        VStack(spacing: 8) {
+            ModelPicker(app: app)
+            if app.missing != nil {
+                Button("Install…") { app.installSelectedModel() }
+                    .disabled(!app.managementPossible)
+                    .controlSize(.small)
+                    .padding(.horizontal, 2)
+            }
+            Spacer()
+        }
+        .padding(10)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .background(Palette.column)
+    }
+}
+
+extension AppState {
+    /// **The rack's footer has something to say**: read by the footer here and by the canvas's fold
+    /// button (`CanvasTools.swift`), which keeps a dot on itself while the rack is folded away.
+    var footerSpeaks: Bool {
+        if case .running = diagnostic { return true }
+        return busy || othersQueued > 0 || copying != nil || forgeInProgress != nil || problem != nil
+            || journalLine != nil || !settingsLines.isEmpty
+    }
+}
+
 private struct Footer: View {
     @Bindable var app: AppState
 
-    /// Something to say: an empty bar under the rack would be a band of nothing.
-    private var speaks: Bool {
-        if case .running = app.diagnostic { return true }
-        return app.busy || app.othersQueued > 0 || app.copying != nil || app.forgeInProgress != nil || app.problem != nil
-            || app.journalLine != nil || !app.settingsLines.isEmpty
-    }
-
     var body: some View {
-        if speaks {
+        if app.footerSpeaks {
             VStack(alignment: .leading, spacing: 10) {
                 // **No `fixedSize(vertical:)` on a text of this footer** (nor in `ProblemView`): a text of two lines held at its
                 // ideal height made the footer taller than the column: it left the window and the rack scrolled to its end,

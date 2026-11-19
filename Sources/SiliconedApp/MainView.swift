@@ -20,15 +20,32 @@ struct MainView: View {
     var toggleStatistics: () -> Void = {}
 
     var body: some View {
-        NavigationSplitView {
-            Sidebar(app: app)
-                .navigationSplitViewColumnWidth(min: 320, ideal: 380, max: 520)
+        NavigationSplitView(columnVisibility: $app.rackVisibility) {
+            if app.sidebarCompact {
+                CompactSidebar(app: app)
+                    .navigationSplitViewColumnWidth(min: 150, ideal: 170, max: 220)
+            } else {
+                Sidebar(app: app)
+                    .navigationSplitViewColumnWidth(min: 320, ideal: 380, max: 520)
+            }
         } detail: {
             GraphCanvas(app: app)
+                // The witness of the native fold (`AppState.rackHidden`): the canvas's leading edge
+                // in the split view — the rack's width while the column shows, zero once the divider
+                // is dragged past the edge.
+                .onGeometryChange(for: CGFloat.self) { $0.frame(in: .named("rack")).minX }
+                action: { app.rackLeading = $0 }
         }
+        .coordinateSpace(name: "rack")
+        // The rack's column is the app's to command as well: the fold button writes `.all` to
+        // `rackVisibility` and brings back the column the user folded away by dragging its divider
+        // past the edge — a fold the split view keeps to itself.
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
                 let group = app.targets
+                Button { LabModel.shared.chooseImages() } label: { Label("Import Images…", systemImage: "photo.badge.plus") }
+                    .help("Open images from the Finder: they go to the Prompt Lab, ready to be edited")
+                    .accessibilityLabel(Text("Import Images…"))
                 Button { app.copyImages(group) } label: { Label("Copy Image", systemImage: "doc.on.doc") }
                     .disabled(group.isEmpty)
                     .help(group.count > 1 ? "Copy the selected images (⇧⌘C)" : "Copy the image (PNG, with its metadata)")
@@ -158,6 +175,10 @@ private struct GraphCanvas: View {
             }
         }
         .animation(Motion.pick(.spring(duration: 0.3)), value: app.toast)
+        // The canvas's rail: the rack's fold above, the three tools under it — the hand, the brush,
+        // the expand. The editors (the mask, the expand) take the canvas while their tool holds.
+        .overlay(alignment: .topLeading) { toolRail(app).padding(.leading, 14).padding(.top, 14) }
+        .animation(Motion.pick(.spring(duration: 0.3)), value: app.canvasTool)
         // An image dropped on the canvas goes to the Prompt Lab, as any image: the role a newcomer takes there. A PNG
         // Siliconed wrote no longer brings its settings back by itself — « Reuse These Settings » is on its tile's menu.
         .dropDestination(for: DroppedImage.self) { items, _ in

@@ -5,6 +5,26 @@ import AppKit
 import Siliconed
 import SwiftUI
 
+/// **The model menu**, shared by the DiT's box and the folded sidebar (`CompactSidebar`): the cards
+/// in front, the ones not installed said so in the list.
+struct ModelPicker: View {
+    @Bindable var app: AppState
+
+    var body: some View {
+        Picker("Model", selection: $app.identifier) {
+            ForEach(app.visibleCards) { card in
+                if app.readySet.contains(card.id) {
+                    Text(card.name).tag(card.id)
+                } else {
+                    Text("\(card.name) (not installed)").tag(card.id)
+                }
+            }
+        }
+        .labelsHidden()
+        .help("The denoiser: the publisher’s model, or a fine-tune you imported")
+    }
+}
+
 // MARK: - The DiT: the stage with choices
 
 /// **The DiT and everything it is told**: the model, its license, the size, the seed, how many
@@ -16,17 +36,7 @@ struct DiTBox: View {
     var body: some View {
         StageBox(title: "DiT", symbol: "engine.combustion", kind: .latent, state: app.state(of: .denoising),
                  explanation: "The model that draws (a diffusion transformer): from noise, step by step, it makes the image the prompt describes") {
-            Picker("Model", selection: $app.identifier) {
-                ForEach(app.visibleCards) { card in
-                    if app.readySet.contains(card.id) {
-                        Text(card.name).tag(card.id)
-                    } else {
-                        Text("\(card.name) (not installed)").tag(card.id)
-                    }
-                }
-            }
-            .labelsHidden()
-            .help("The denoiser: the publisher’s model, or a fine-tune you imported")
+            ModelPicker(app: app)
             if let card = app.card {
                 if app.missing != nil {
                     HStack {

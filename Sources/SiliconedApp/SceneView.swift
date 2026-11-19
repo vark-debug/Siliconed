@@ -28,6 +28,19 @@ struct SceneView: View {
     /// The offset a pinch just settled, applied once its zoom lands (`onChange(of: app.zoom)`).
     @State private var settled: CGSize?
     @State private var scrollMonitor: Any?
+    /// The lab's image 1, decoded for the canvas (`decodeSubject`) — shown before any render, and
+    /// while the expand tool takes the canvas.
+    @State private var subjectImage: CGImage?
+
+    /// **The lab's image 1, decoded off the main thread** — the same decode the mask begins with
+    /// (`AppState+Mask.swift`); shown the moment an image enters the lab, before any render.
+    private func decodeSubject(_ subject: ReferenceImage) async {
+        let width = subject.width, height = subject.height
+        let decoded = await Task.detached(priority: .userInitiated) {
+            Decoded(subject.displayed(width: width, height: height))
+        }.value
+        if subject.id == app.editInputs.first?.shown.id { subjectImage = decoded.image }
+    }
 
     var body: some View {
         ZStack {
@@ -35,6 +48,8 @@ struct SceneView: View {
                 CropEditor(app: app, session: crop)
             } else if let painting = app.paintingMask {
                 MaskEditor(app: app, session: painting)
+            } else if app.canvasTool == .expand, let decoded = subjectImage {
+                ExpandEditor(app: app, image: decoded)
             } else if let job = app.currentJob, app.followsRender || app.history.isEmpty {
                 inProgress(job)
             } else if app.showsOriginal, let original = app.original, let selected = app.selectedImage,
@@ -65,6 +80,17 @@ struct SceneView: View {
                     bar(entry)
                 }
                 .padding(28)
+            } else if let subject = app.editInputs.first?.shown {
+                // The lab's image 1 before any render — what « Import » or a drop put there: the
+                // editor's subject, on the canvas, ready to be painted on or grown.
+                Group {
+                    if let decoded = subjectImage {
+                        image(decoded)
+                    } else {
+                        ProgressView().controlSize(.regular)
+                    }
+                }
+                .task(id: subject.id) { await decodeSubject(subject) }
             } else {
                 empty
             }
@@ -82,14 +108,30 @@ struct SceneView: View {
 
     /// **Two fingers move the image in its zone; a mouse's wheel zooms toward the pointer** (`Wheel`, issue #10), its horizontal
     /// wheel still moves it — caught while the pointer is over the image's zone; elsewhere (the rack's column) it scrolls as usual.
+    /// The lab's image 1 (before any render) and the expand editor catch the wheel too: the expand editor zooms its own
+    /// (`expandZoom`), the subject's the canvas's (`zoom`) as the chosen image's does.
     private func watchScroll() {
         guard scrollMonitor == nil else { return }
         scrollMonitor = NSEvent.addLocalMonitorForEvents(matching: .scrollWheel) { event in
-            guard hovering, app.currentJob == nil || !app.followsRender, app.selectedImage != nil else { return event }
+            // The expand editor's wheel is its own: a wheel zooms the editor, anything else pans it.
+            if app.canvasTool == .expand, app.canvasHover {
+                if let z = Wheel.zoom(app.expandZoom, by: event, floor: AppState.minExpandZoom) { app.expandZoom = z; return nil }
+                let k: CGFloat = event.hasPreciseScrollingDeltas ? 1 : 10
+                app.expandOffset.width += event.scrollingDeltaX * k
+                app.expandOffset.height += event.scrollingDeltaY * k
+                return nil
+            }
+            guard hovering, app.currentJob == nil || !app.followsRender,
+                  app.selectedImage != nil || showsSubject else { return event }
             guard let move = Wheel.zoomedOrMoved(event, app: app) else { return nil }
             offset = clamped(CGSize(width: offset.width + move.width, height: offset.height + move.height))
             return nil
         }
+    }
+
+    /// The lab's image 1 on the canvas, the hand tool holding: it zooms and pans as the chosen image's does.
+    private var showsSubject: Bool {
+        app.canvasTool == .pan && app.selectedImage == nil && app.editInputs.first?.shown != nil
     }
 
     /// The image may leave its place, never its zone: a quarter of the zone beyond its edges at most.
@@ -282,6 +324,16 @@ struct SceneView: View {
             } else {
                 Text("Describe an image, then press ⌘↩").font(.title3).foregroundStyle(.secondary)
                 if app.editingPossible {
+                    // The other way in: open images from the Finder, ready in the Prompt Lab — the
+                    // canvas then shows image 1, the brush paints on it, the expand grows it.
+                    Button { LabModel.shared.chooseImages() } label: {
+                        Label("Import Images…", systemImage: "photo.badge.plus")
+                            .font(.system(size: 15, weight: .medium))
+                    }
+                    .controlSize(.large)
+                    .buttonStyle(.borderedProminent)
+                    .tint(Palette.control)
+                    .padding(.top, 4)
                     Text("Drop an image here to edit it.").font(.callout).foregroundStyle(.secondary)
                 }
             }

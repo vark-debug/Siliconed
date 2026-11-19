@@ -62,10 +62,12 @@ struct GenerateControls: View {
         .help(Text(verbatim: "⌘↩"))
     }
 
-    /// The button's words: what the click makes — several images, an edit, a place in the queue.
+    /// The button's words: what the click makes — several images, an edit, a place in the queue. The
+    /// expand says « Expand » first: it is the pad's own word (the rack's tile, the tool's commit).
     static func title(_ app: AppState) -> String {
         let n = app.seriesRenders
         if app.busy { return n > 1 ? String(localized: "Add \(n) Renders to Queue") : String(localized: "Add to Queue") }
+        if app.attachedExpand != nil { return String(localized: "Expand") }
         if !app.references.isEmpty { return n > 1 ? String(localized: "Edit Image \(n) Ways") : String(localized: "Edit Image") }
         let images = app.seriesImages
         return images > 1 ? String(localized: "Generate \(images) Images") : String(localized: "Generate")

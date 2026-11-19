@@ -425,6 +425,17 @@ final class AppState {
     weak var undoManager: UndoManager?
     /// The canvas's zoom on the chosen image (1: fitted) — the pinch, and ⌘+ ⌘− ⌘0.
     var zoom: CGFloat = 1
+    /// **The expand editor's own zoom** (1: fitted) and pan — the wheel over the editor, the rail's
+    /// buttons while the expand tool holds. Reset when the tool leaves. Its floor is
+    /// `Self.minExpandZoom`: the pads' 200 % a side grows the canvas to five times the image at
+    /// most, and 100 % ÷ 5 shows that whole canvas — nothing larger the pads can make.
+    var expandZoom: CGFloat = 1
+    /// The expand editor's zoom floor, its `expandZoom` only (the canvas's own never goes under 1):
+    /// 100 % ÷ 5 — the canvas at the pads' cap fits whole.
+    static let minExpandZoom: CGFloat = 0.2
+    var expandOffset: CGSize = .zero
+    /// Whether the pointer is over the expand editor's canvas: the wheel's cue there.
+    var canvasHover = false
     /// **The canvas follows the running render** — its preview, then each image it makes —, until a
     /// history image is chosen during it (`show`): the history is browsed while the render goes on, its
     /// images join the strip without taking the canvas. « Generate » and the live thumbnail follow it
@@ -529,6 +540,26 @@ final class AppState {
     /// **The expand's pads form open** (`ExpandPadsSheet`, `LabImages.swift`): the four percents its
     /// canvas grows by — no brush, no mask.
     var expandingPads = false
+    /// **The tool the canvas holds** (`CanvasTool`, `CanvasTools.swift`): the hand pans and zooms, the
+    /// brush paints the mask on the image shown, the expand grows its canvas with handles. Choosing the
+    /// brush begins the mask at once — leaving the tool commits what was painted (PS-like: the image
+    /// on the canvas is the editor, there is no separate « Paint Mask… » step to go through).
+    var canvasTool = CanvasTool.pan
+    /// **The rack folded to its model picker** (`CompactSidebar`, `Sidebar.swift`): the chain's boxes
+    /// away, one strip with the model alone. The rail's fold button brings the whole rack back.
+    var sidebarCompact = false
+    /// **The rack's column itself**, as the split view holds it: the fold button writes `.all` here
+    /// to bring a folded-away column back. The divider dragged past the edge folds the column away
+    /// **with no word to this binding** — the witness of that fold is `rackLeading`.
+    var rackVisibility: NavigationSplitViewVisibility = .all
+    /// **The canvas's leading edge in the split view** (`MainView`): the rack's width while the
+    /// column shows, zero once the divider is dragged past the edge — the split view folds the
+    /// column on its own, and this is the one witness that sees it happen.
+    var rackLeading: CGFloat = 380
+    /// **The rack folded away entirely** by the divider dragged past the edge: the canvas has taken
+    /// the whole window. The fold button reads this to bring the column back **as it was** —
+    /// `sidebarCompact` is the drag's to leave alone, so the rack returns in the fold it had.
+    var rackHidden: Bool { rackLeading < 40 }
     /// The session's finished jobs, their outcome, their images (even removed from the history
     /// since) and the engine's warnings during their render: `wait t3` afterwards still returns the answer.
     private(set) var completed: [Int: (job: Job, issue: Issue, images: [Int], warnings: [String])] = [:]
