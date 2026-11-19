@@ -1255,6 +1255,47 @@
         }
       }
     },
+    "%@ has no expand workflow: an expand needs a model that edits by reference (Qwen-Image-2.1)." : {
+      "comment" : "The model refuses an expand: no additive start, or no image encoder",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ hat keinen Erweiterungsablauf: ein Erweitern braucht ein Modell, das per Referenz bearbeitet (Qwen-Image-2.1)."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ no tiene flujo de ampliación: una ampliación necesita un modelo que edite por referencia (Qwen-Image-2.1)."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ n’a pas de parcours d’extension : une extension demande un modèle qui édite par référence (Qwen-Image-2.1)."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ non ha un flusso di espansione: un'espansione richiede un modello che modifica per riferimento (Qwen-Image-2.1)."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ には拡張の手順がありません。拡張には、参照で編集するモデル（Qwen-Image-2.1）が必要です"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 没有扩图流程：扩图需要按参考图编辑的模型（Qwen-Image-2.1）。"
+          }
+        }
+      }
+    },
     "%@ has no mask workflow: a mask needs a model that edits by reference (Qwen-Image-2.1)." : {
       "comment" : "The model refuses a patch: no additive start, or no image encoder",
       "localizations" : {
@@ -6799,6 +6840,47 @@
         }
       }
     },
+    "A mask and an expand edit two ways: remove the mask first" : {
+      "comment" : "The « Expand… » entry's help beside an attached mask",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine Maske und ein Erweitern bearbeiten auf zwei Weisen: entferne zuerst die Maske"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una máscara y una ampliación editan de dos maneras: quita primero la máscara"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un masque et une extension éditent de deux façons : retirez d’abord le masque"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una maschera e un'espansione modificano in due modi: rimuovi prima la maschera"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マスクと拡張は2つの方法で編集します：先にマスクを削除してください"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "遮罩与扩图是两种编辑方式：请先移除遮罩"
+          }
+        }
+      }
+    },
     "A mask edits image 1 alone: one image in the lab, its size" : {
       "localizations" : {
         "de" : {
@@ -6917,6 +6999,47 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "遮罩只编辑图像 1：正文引用了具名主体——请去掉 @名称或移除遮罩。"
+          }
+        }
+      }
+    },
+    "A mask replaces a region and an expand grows the canvas: remove one of them." : {
+      "comment" : "A mask and an expand cannot edit one image two ways",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine Maske ersetzt einen Bereich, ein Erweitern macht die Leinwand größer: entferne eines von beiden."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una máscara reemplaza una región y una ampliación hace crecer el lienzo: quita una de las dos."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un masque remplace une région, une extension agrandit la toile : retirez l’un des deux."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una maschera sostituisce una regione e un'espansione ingrandisce la tela: rimuovine una delle due."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マスクは領域を置き換え、拡張はキャンバスを広げます：どちらか一方を削除してください。"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "遮罩替换区域，扩图扩大画布：请移除其中之一。"
           }
         }
       }
@@ -8728,6 +8851,170 @@
         }
       }
     },
+    "An expand edits image 1 alone: remove the other images." : {
+      "comment" : "The expand's canvas is the edit's only image",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Erweitern bearbeitet nur Bild 1: entferne die anderen Bilder."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una ampliación edita solo la imagen 1: quita las otras imágenes."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une extension édite l’image 1 seule : retirez les autres images."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un'espansione modifica solo l'immagine 1: rimuovi le altre immagini."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "拡張は画像 1 だけを編集します：ほかの画像を取り除いてください"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "扩图只编辑图像 1：请移除其他图像。"
+          }
+        }
+      }
+    },
+    "An expand edits image 1 alone: the text cites a named subject — remove the @name or the expand." : {
+      "comment" : "An expand is the edit's only image, subjects' pictures included",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Erweitern bearbeitet nur Bild 1: der Text nennt ein benanntes Motiv – entferne den @namen oder das Erweitern."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una ampliación edita solo la imagen 1: el texto cita un sujeto con nombre — quita el @nombre o la ampliación."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une extension édite l’image 1 seule : le texte cite un sujet nommé — retirez le @nom ou l’extension."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un'espansione modifica solo l'immagine 1: il testo cita un soggetto nominato — rimuovi il @nome o l'espansione."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "拡張は画像 1 だけを編集します：テキストが名前付き被写体を参照しています —— @名前か拡張を取り除いてください"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "扩图只编辑图像 1：文本引用了命名主体 —— 请移除 @名称或扩图。"
+          }
+        }
+      }
+    },
+    "An expand needs a model that edits by reference (Qwen-Image-2.1), image 1 alone" : {
+      "comment" : "The expand tile's caption help, where the model lacks the workflow",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Erweitern braucht ein Modell, das per Referenz bearbeitet (Qwen-Image-2.1), und nur Bild 1"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una ampliación necesita un modelo que edite por referencia (Qwen-Image-2.1), solo la imagen 1"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une extension demande un modèle qui édite par référence (Qwen-Image-2.1), l’image 1 seule"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un'espansione richiede un modello che modifica per riferimento (Qwen-Image-2.1), solo l'immagine 1"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "拡張には、参照で編集するモデル（Qwen-Image-2.1）と画像 1 だけが必要です"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "扩图需要按参考图编辑的模型（Qwen-Image-2.1），且只用图像 1"
+          }
+        }
+      }
+    },
+    "An expand stays on this Mac: stop following another Mac first." : {
+      "comment" : "An expand cannot cross a mirror: its canvas is this Mac's",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Erweitern bleibt auf diesem Mac: höre auf, einem anderen Mac zu folgen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una ampliación se queda en este Mac: deja de seguir a otro Mac primero."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une extension reste sur ce Mac : arrêtez d’abord de suivre un autre Mac."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un'espansione resta su questo Mac: smetti prima di seguire un altro Mac."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "拡張はこの Mac にとどまります：先に別の Mac のフォローを停止してください"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "扩图只在本机进行：请先停止跟随另一台 Mac。"
+          }
+        }
+      }
+    },
     "An image engine for Apple silicon, in Swift and Metal, verified stage by stage against the reference: the Neural Engine and the GPU’s tensor units (bf16) where this Mac’s measure chooses them, fp32 throughout when you turn them off.\n\nLibrary: %@" : {
       "localizations" : {
         "de" : {
@@ -9328,6 +9615,47 @@
         }
       }
     },
+    "Attach an image first: the canvas grows around it." : {
+      "comment" : "An expand without image 1: there is nothing to grow",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hänge zuerst ein Bild an: die Leinwand wächst um es herum."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adjunta primero una imagen: el lienzo crece a su alrededor."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Joignez d’abord une image : la toile grandit autour d’elle."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allega prima un'immagine: la tela cresce attorno a essa."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "先に画像を添付してください。キャンバスはその周囲に広がります"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请先附加一张图像：画布围绕它向外生长。"
+          }
+        }
+      }
+    },
     "Attach an image first: the mask must have the image’s size." : {
       "comment" : "A mask without image 1: there is nothing to patch",
       "localizations" : {
@@ -9605,6 +9933,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "注意力，分块三阶段，半精度操作数"
+          }
+        }
+      }
+    },
+    "Automatic" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatic"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自动"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatisch"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automático"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatique"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatica"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自動"
           }
         }
       }
@@ -10005,6 +10379,47 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "测试版：8 步配方是社区的蒸馏版本，而非发布方的。待发布方推出自己的快速版本后，将结束测试。"
+          }
+        }
+      }
+    },
+    "Bottom" : {
+      "comment" : "The pad the canvas grows by, at the image's bottom",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unten"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abajo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bas"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Basso"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下"
           }
         }
       }
@@ -10855,42 +11270,48 @@
         }
       }
     },
-    "Check that huggingface.co opens in a browser on this Mac — a proxy, a VPN or a firewall can refuse it — then install again: the files already downloaded are kept." : {
+    "Check that huggingface.co opens in a browser on this Mac — a proxy, a VPN or a firewall can refuse it — or pick another download source in the Models sheet (ModelScope, a mirror), then install again: the files already downloaded are kept." : {
       "localizations" : {
-        "de" : {
+        "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Prüfen Sie, ob sich huggingface.co auf diesem Mac im Browser öffnet – ein Proxy, ein VPN oder eine Firewall kann es blockieren –, und installieren Sie dann erneut: Bereits geladene Dateien bleiben erhalten."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Comprueba que huggingface.co se abre en un navegador en este Mac —un proxy, una VPN o un cortafuegos pueden bloquearlo— y vuelve a instalar: los archivos ya descargados se conservan."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vérifiez que huggingface.co s’ouvre dans un navigateur sur ce Mac — un proxy, un VPN ou un pare-feu peut le refuser — puis relancez l’installation : les fichiers déjà téléchargés sont gardés."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Verifica che huggingface.co si apra in un browser su questo Mac — un proxy, una VPN o un firewall possono bloccarlo — poi reinstalla: i file già scaricati vengono conservati."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "このMacのブラウザで huggingface.co が開くか確認してください — プロキシ、VPN、ファイアウォールが接続を拒否している可能性があります — そのあと、もう一度インストールしてください：ダウンロード済みのファイルは保持されます。"
+            "value" : "Check that huggingface.co opens in a browser on this Mac — a proxy, a VPN or a firewall can refuse it — or pick another download source in the Models sheet (ModelScope, a mirror), then install again: the files already downloaded are kept."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "请检查这台 Mac 上的浏览器能否打开 huggingface.co（代理、VPN 或防火墙可能会拒绝），然后重新安装：已下载的文件会保留。"
+            "value" : "请在这台 Mac 的浏览器里确认 huggingface.co 能否打开（代理、VPN 或防火墙可能会拒绝），或在「模型」面板里换一个下载源（魔搭、镜像），然后重新安装：已下载的文件会保留。"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prüfen Sie, ob sich huggingface.co auf diesem Mac im Browser öffnet – ein Proxy, ein VPN oder eine Firewall kann es blockieren –, oder wählen Sie im Modell-Fenster eine andere Download-Quelle (ModelScope, einen Spiegel) und installieren Sie dann erneut: Bereits geladene Dateien bleiben erhalten."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comprueba que huggingface.co se abre en un navegador en este Mac —un proxy, una VPN o un cortafuegos pueden bloquearlo— o elige otra fuente de descarga en el panel Modelos (ModelScope, un espejo) y vuelve a instalar: los archivos ya descargados se conservan."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vérifiez que huggingface.co s’ouvre dans un navigateur sur ce Mac — un proxy, un VPN ou un pare-feu peut le refuser — ou choisissez une autre source de téléchargement dans le panneau Modèles (ModelScope, un miroir), puis relancez l’installation : les fichiers déjà téléchargés sont gardés."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verifica che huggingface.co si apra in un browser su questo Mac — un proxy, una VPN o un firewall possono bloccarlo — oppure scegli un’altra sorgente di download nel pannello Modelli (ModelScope, un mirror), poi reinstalla: i file già scaricati vengono conservati."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このMacのブラウザで huggingface.co が開くか確認してください（プロキシ、VPN、ファイアウォールが接続を拒否している可能性があります）。または「モデル」パネルで別のダウンロード元（ModelScope、ミラー）を選んでから、もう一度インストールしてください：ダウンロード済みのファイルは保持されます。"
           }
         }
       }
@@ -10975,42 +11396,48 @@
         }
       }
     },
-    "Check the connection and start again: the files already downloaded are kept, the interrupted one starts over." : {
+    "Check the connection and start again: the files already downloaded are kept, the interrupted one starts over. If huggingface.co stays out of reach, pick another download source in the Models sheet — ModelScope, or the mirror." : {
       "localizations" : {
-        "de" : {
+        "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Prüfen Sie die Verbindung und beginnen Sie erneut: Bereits geladene Dateien bleiben erhalten, die unterbrochene beginnt von vorn."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Comprueba la conexión y vuelve a empezar: los archivos ya descargados se conservan; el que se interrumpió empieza de cero."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vérifiez la connexion et recommencez : les fichiers déjà téléchargés sont gardés, celui qui a été interrompu repart de zéro."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Controlla la connessione e ricomincia: i file già scaricati vengono conservati, quello interrotto riparte da zero."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "接続を確認してもう一度やり直してください：ダウンロード済みのファイルは保持され、中断されたファイルは最初からやり直します。"
+            "value" : "Check the connection and start again: the files already downloaded are kept, the interrupted one starts over. If huggingface.co stays out of reach, pick another download source in the Models sheet — ModelScope, or the mirror."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "请检查网络连接后重新开始：已下载的文件会保留，中断的那个文件将重新开始。"
+            "value" : "请检查网络连接后重新开始：已下载的文件会保留，被中断的那个会从头再来。如果 huggingface.co 一直无法访问，请在「模型」面板里换一个下载源——魔搭或镜像。"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prüfen Sie die Verbindung und beginnen Sie erneut: Bereits geladene Dateien bleiben erhalten, die unterbrochene beginnt von vorn. Wenn huggingface.co unerreichbar bleibt, wählen Sie im Modell-Fenster eine andere Download-Quelle – ModelScope oder den Spiegel."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comprueba la conexión y empieza de nuevo: los archivos ya descargados se conservan, el interrumpido vuelve a empezar. Si huggingface.co sigue fuera de alcance, elige otra fuente de descarga en el panel Modelos: ModelScope o el espejo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vérifiez la connexion et recommencez : les fichiers déjà téléchargés sont gardés, celui qui était interrompu recommence. Si huggingface.co reste inaccessible, choisissez une autre source de téléchargement dans le panneau Modèles — ModelScope, ou le miroir."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Controlla la connessione e ricomincia: i file già scaricati vengono conservati, quello interrotto ricomincia. Se huggingface.co resta irraggiungibile, scegli un’altra sorgente di download nel pannello Modelli: ModelScope o il mirror."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "接続を確認して、もう一度開始してください：ダウンロード済みのファイルは保持され、中断されたものは最初からやり直します。huggingface.co に届かない場合は、「モデル」パネルで別のダウンロード元（ModelScope、ミラー）を選んでください。"
           }
         }
       }
@@ -15535,6 +15962,52 @@
         }
       }
     },
+    "Download source" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Download source"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下载源"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Download-Quelle"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fuente de descarga"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Source de téléchargement"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sorgente di download"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ダウンロード元"
+          }
+        }
+      }
+    },
     "Downloaded at a pinned revision and verified (sha256), then forged without changing their precision. Installing takes a little more space while forging." : {
       "localizations" : {
         "de" : {
@@ -15789,6 +16262,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "正在下载 SeedVR2（约 4.4 GB）"
+          }
+        }
+      }
+    },
+    "Downloading from %@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Downloading from %@."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在从 %@ 下载。"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lädt von %@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descargando desde %@."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Téléchargement depuis %@."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scaricamento da %@."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ からダウンロードしています。"
           }
         }
       }
@@ -17399,6 +17918,47 @@
         }
       }
     },
+    "Expand" : {
+      "comment" : "The expand's tile, and the pads form's title",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erweitern"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ampliar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Étendre"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Espandi"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "拡張"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "扩图"
+          }
+        }
+      }
+    },
     "Expand preset (0.7)" : {
       "localizations" : {
         "de" : {
@@ -17435,6 +17995,47 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "“扩图预设（0.7）”"
+          }
+        }
+      }
+    },
+    "Expand…" : {
+      "comment" : "The 「扩图」 entry: the pads form (ExpandPadsSheet)",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erweitern…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ampliar…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Étendre…"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Espandi…"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "拡張…"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "扩图…"
           }
         }
       }
@@ -17555,1154 +18156,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "将 %lld 张图像导出到文件夹。每张图像的元数据中都保留其提示词、种子和模型。"
-          }
-        }
-      }
-    },
-    "An expand edits image 1 alone: remove the other images." : {
-      "comment" : "The expand's canvas is the edit's only image",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ein Erweitern bearbeitet nur Bild 1: entferne die anderen Bilder."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Una ampliación edita solo la imagen 1: quita las otras imágenes."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Une extension édite l’image 1 seule : retirez les autres images."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Un'espansione modifica solo l'immagine 1: rimuovi le altre immagini."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "拡張は画像 1 だけを編集します：ほかの画像を取り除いてください"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "扩图只编辑图像 1：请移除其他图像。"
-          }
-        }
-      }
-    },
-    "An expand edits image 1 alone: the text cites a named subject — remove the @name or the expand." : {
-      "comment" : "An expand is the edit's only image, subjects' pictures included",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ein Erweitern bearbeitet nur Bild 1: der Text nennt ein benanntes Motiv – entferne den @namen oder das Erweitern."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Una ampliación edita solo la imagen 1: el texto cita un sujeto con nombre — quita el @nombre o la ampliación."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Une extension édite l’image 1 seule : le texte cite un sujet nommé — retirez le @nom ou l’extension."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Un'espansione modifica solo l'immagine 1: il testo cita un soggetto nominato — rimuovi il @nome o l'espansione."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "拡張は画像 1 だけを編集します：テキストが名前付き被写体を参照しています —— @名前か拡張を取り除いてください"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "扩图只编辑图像 1：文本引用了命名主体 —— 请移除 @名称或扩图。"
-          }
-        }
-      }
-    },
-    "An expand needs a model that edits by reference (Qwen-Image-2.1), image 1 alone" : {
-      "comment" : "The expand tile's caption help, where the model lacks the workflow",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ein Erweitern braucht ein Modell, das per Referenz bearbeitet (Qwen-Image-2.1), und nur Bild 1"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Una ampliación necesita un modelo que edite por referencia (Qwen-Image-2.1), solo la imagen 1"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Une extension demande un modèle qui édite par référence (Qwen-Image-2.1), l’image 1 seule"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Un'espansione richiede un modello che modifica per riferimento (Qwen-Image-2.1), solo l'immagine 1"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "拡張には、参照で編集するモデル（Qwen-Image-2.1）と画像 1 だけが必要です"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "扩图需要按参考图编辑的模型（Qwen-Image-2.1），且只用图像 1"
-          }
-        }
-      }
-    },
-    "An expand stays on this Mac: stop following another Mac first." : {
-      "comment" : "An expand cannot cross a mirror: its canvas is this Mac's",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ein Erweitern bleibt auf diesem Mac: höre auf, einem anderen Mac zu folgen."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Una ampliación se queda en este Mac: deja de seguir a otro Mac primero."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Une extension reste sur ce Mac : arrêtez d’abord de suivre un autre Mac."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Un'espansione resta su questo Mac: smetti prima di seguire un altro Mac."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "拡張はこの Mac にとどまります：先に別の Mac のフォローを停止してください"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "扩图只在本机进行：请先停止跟随另一台 Mac。"
-          }
-        }
-      }
-    },
-    "A mask and an expand edit two ways: remove the mask first" : {
-      "comment" : "The « Expand… » entry's help beside an attached mask",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Eine Maske und ein Erweitern bearbeiten auf zwei Weisen: entferne zuerst die Maske"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Una máscara y una ampliación editan de dos maneras: quita primero la máscara"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Un masque et une extension éditent de deux façons : retirez d’abord le masque"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Una maschera e un'espansione modificano in due modi: rimuovi prima la maschera"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "マスクと拡張は2つの方法で編集します：先にマスクを削除してください"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "遮罩与扩图是两种编辑方式：请先移除遮罩"
-          }
-        }
-      }
-    },
-    "A mask replaces a region and an expand grows the canvas: remove one of them." : {
-      "comment" : "A mask and an expand cannot edit one image two ways",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Eine Maske ersetzt einen Bereich, ein Erweitern macht die Leinwand größer: entferne eines von beiden."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Una máscara reemplaza una región y una ampliación hace crecer el lienzo: quita una de las dos."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Un masque remplace une région, une extension agrandit la toile : retirez l’un des deux."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Una maschera sostituisce una regione e un'espansione ingrandisce la tela: rimuovine una delle due."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "マスクは領域を置き換え、拡張はキャンバスを広げます：どちらか一方を削除してください。"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "遮罩替换区域，扩图扩大画布：请移除其中之一。"
-          }
-        }
-      }
-    },
-    "Attach an image first: the canvas grows around it." : {
-      "comment" : "An expand without image 1: there is nothing to grow",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hänge zuerst ein Bild an: die Leinwand wächst um es herum."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Adjunta primero una imagen: el lienzo crece a su alrededor."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Joignez d’abord une image : la toile grandit autour d’elle."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Allega prima un'immagine: la tela cresce attorno a essa."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "先に画像を添付してください。キャンバスはその周囲に広がります"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "请先附加一张图像：画布围绕它向外生长。"
-          }
-        }
-      }
-    },
-    "Bottom" : {
-      "comment" : "The pad the canvas grows by, at the image's bottom",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unten"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Abajo"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bas"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Basso"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "下"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "下"
-          }
-        }
-      }
-    },
-    "Expand" : {
-      "comment" : "The expand's tile, and the pads form's title",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Erweitern"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ampliar"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Étendre"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Espandi"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "拡張"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "扩图"
-          }
-        }
-      }
-    },
-    "Expand…" : {
-      "comment" : "The 「扩图」 entry: the pads form (ExpandPadsSheet)",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Erweitern…"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ampliar…"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Étendre…"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Espandi…"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "拡張…"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "扩图…"
-          }
-        }
-      }
-    },
-    "%@ has no expand workflow: an expand needs a model that edits by reference (Qwen-Image-2.1)." : {
-      "comment" : "The model refuses an expand: no additive start, or no image encoder",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ hat keinen Erweiterungsablauf: ein Erweitern braucht ein Modell, das per Referenz bearbeitet (Qwen-Image-2.1)."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ no tiene flujo de ampliación: una ampliación necesita un modelo que edite por referencia (Qwen-Image-2.1)."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ n’a pas de parcours d’extension : une extension demande un modèle qui édite par référence (Qwen-Image-2.1)."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ non ha un flusso di espansione: un'espansione richiede un modello che modifica per riferimento (Qwen-Image-2.1)."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ には拡張の手順がありません。拡張には、参照で編集するモデル（Qwen-Image-2.1）が必要です"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ 没有扩图流程：扩图需要按参考图编辑的模型（Qwen-Image-2.1）。"
-          }
-        }
-      }
-    },
-    "Grow the canvas outward: four percents, no mask" : {
-      "comment" : "The « Expand… » button's help",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die Leinwand nach außen wachsen lassen: vier Prozente, keine Maske"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hacer crecer el lienzo hacia fuera: cuatro porcentajes, sin máscara"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Faire grandir la toile vers l’extérieur : quatre pourcentages, sans masque"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fai crescere la tela verso l'esterno: quattro percentuali, nessuna maschera"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "キャンバスを外へ広げる：4つの割合、マスクは不要"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "让画布向外生长：四个百分比，无需遮罩"
-          }
-        }
-      }
-    },
-    "Grow the canvas outward: the model draws the new border, and the original is laid back inside." : {
-      "comment" : "The pads form's introduction",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die Leinwand wächst nach außen: das Modell zeichnet die neue Grenze, und das Original wird darin zurückgelegt."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hace crecer el lienzo hacia fuera: el modelo dibuja el nuevo borde y la original vuelve a su sitio dentro."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Faites grandir la toile vers l’extérieur : le modèle dessine la nouvelle bordure, et l’original est reposé à l’intérieur."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fai crescere la tela verso l'esterno: il modello disegna il nuovo bordo e l'originale viene rimesso al suo interno."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "キャンバスを外へ広げます：モデルが新しい境界を描き、元の画像がその内側に戻されます。"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "让画布向外生长：模型绘制新的边界，原图放回其中。"
-          }
-        }
-      }
-    },
-    "Image 1 changed: remove the expand and commit the pads again." : {
-      "comment" : "The image the canvas was grown from was replaced under the attachment",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bild 1 hat sich geändert: entferne das Erweitern und lege die Ränder erneut an."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La imagen 1 cambió: quita la ampliación y vuelve a confirmar los márgenes."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "L’image 1 a changé : retirez l’extension et validez les marges à nouveau."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "L'immagine 1 è cambiata: rimuovi l'espansione e conferma di nuovo i margini."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "画像 1 が変わりました：拡張を削除して、余白を改めて設定してください"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "图像 1 已更换：请移除扩图并重新提交外扩百分比。"
-          }
-        }
-      }
-    },
-    "Left" : {
-      "comment" : "The pad the canvas grows by, on the image's left",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Links"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Izquierda"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gauche"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sinistra"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "左"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "左"
-          }
-        }
-      }
-    },
-    "No mask: four percents — the canvas grows outward, the original laid back inside." : {
-      "comment" : "The expand tile's caption, before the pads are attached",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Keine Maske: vier Prozente – die Leinwand wächst nach außen, das Original wird darin zurückgelegt."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sin máscara: cuatro porcentajes — el lienzo crece hacia fuera y la original vuelve a su sitio dentro."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sans masque : quatre pourcentages — la toile grandit vers l’extérieur, l’original reposé à l’intérieur."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nessuna maschera: quattro percentuali — la tela cresce verso l'esterno e l'originale viene rimesso al suo interno."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "マスクは不要：4つの割合でキャンバスが外へ広がり、元の画像がその内側に戻ります。"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "无需遮罩：四个百分比 —— 画布向外扩张，原图放回其中。"
-          }
-        }
-      }
-    },
-    "Open the pads again: what you commit replaces them" : {
-      "comment" : "The « Pads… » button's help",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die Ränder wieder öffnen: was du festlegst, ersetzt sie"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Abrir los márgenes otra vez: lo que confirmes los reemplaza"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rouvrir les marges : ce que vous validez les remplace"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Riapri i margini: quello che confermi li sostituisce"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "余白をもう一度開く：確定した内容が置き換わります"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "再次打开外扩设置：提交的内容将替换原设置"
-          }
-        }
-      }
-    },
-    "Pads…" : {
-      "comment" : "Reopening the pads of an expand already attached",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ränder…"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Márgenes…"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Marges…"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Margini…"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "余白…"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "外扩…"
-          }
-        }
-      }
-    },
-    "Remove Expand" : {
-      "comment" : "« Remove Expand »: the next render is ordinary again",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Erweitern entfernen"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Quitar la ampliación"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Retirer l’extension"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rimuovi espansione"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "拡張を削除"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "移除扩图"
-          }
-        }
-      }
-    },
-    "Right" : {
-      "comment" : "The pad the canvas grows by, on the image's right",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rechts"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Derecha"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Droite"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Destra"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "右"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "右"
-          }
-        }
-      }
-    },
-    "The canvas, then the size the render will have" : {
-      "comment" : "The attached expand's size line's help",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die Leinwand, dann die Größe, die das Rendern haben wird"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "El lienzo y después el tamaño que tendrá el render"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La toile, puis la taille que le rendu aura"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La tela, poi la dimensione che avrà il render"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "キャンバス、そしてレンダリングのサイズ"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "画布，随后是渲染的尺寸"
-          }
-        }
-      }
-    },
-    "The canvas grows by percents of the image's own sides; the model draws the new border" : {
-      "comment" : "The expand tile's caption help, where the workflow is",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die Leinwand wächst um Prozente der eigenen Seiten des Bildes; das Modell zeichnet die neue Grenze"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "El lienzo crece porcentajes de los lados de la propia imagen; el modelo dibuja el nuevo borde"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La toile grandit de pourcentages des côtés de l’image elle-même ; le modèle dessine la nouvelle bordure"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La tela cresce di percentuali dei lati dell'immagine stessa; il modello disegna il nuovo bordo"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "キャンバスは画像自身の辺に対する割合で広がり、モデルが新しい境界を描きます"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "画布按图像自身边长的百分比向外生长，模型绘制新的边界"
-          }
-        }
-      }
-    },
-    "The expand preset grows the canvas — it has no mask: turn the card off, or remove the mask." : {
-      "comment" : "The expand preset and a mask are two branches of one workflow",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die Erweitern-Voreinstellung macht die Leinwand größer – sie hat keine Maske: schalte die Karte aus, oder entferne die Maske."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "El preajuste de ampliación hace crecer el lienzo — no lleva máscara: apaga la tarjeta o quita la máscara."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Le préréglage d’extension agrandit la toile — il n’a pas de masque : éteignez la carte, ou retirez le masque."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Il preimpostato di espansione ingrandisce la tela — non ha maschera: spegni la scheda o rimuovi la maschera."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "拡張プリセットはキャンバスを広げます —— マスクは使えません：カードをオフにするか、マスクを削除してください。"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "扩图预置扩大画布 —— 它没有遮罩：请关闭卡片，或移除遮罩。"
-          }
-        }
-      }
-    },
-    "The image, the canvas it sits in, then the size the render will have" : {
-      "comment" : "The pads form's live plan's help",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Das Bild, die Leinwand, in der es liegt, dann die Größe des Renderns"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La imagen, el lienzo donde se sitúa y después el tamaño que tendrá el render"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "L’image, la toile où elle se pose, puis la taille que le rendu aura"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "L'immagine, la tela in cui si trova, poi la dimensione che avrà il render"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "画像、その周囲のキャンバス、そしてレンダリングのサイズ"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "图像、它所在的画布，随后是渲染的尺寸"
-          }
-        }
-      }
-    },
-    "The percents each side grows by: of the image's own sides, 0–200" : {
-      "comment" : "The attached pads' help",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die Prozente, um die jede Seite wächst: von den eigenen Seiten des Bildes, 0–200"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Los porcentajes que crece cada lado: de los lados de la propia imagen, 0–200"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Les pourcentages dont chaque côté grandit : des côtés de l’image elle-même, 0–200"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Le percentuali di cui cresce ogni lato: dei lati dell'immagine stessa, 0–200"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "各辺が広がる割合：画像自身の辺に対する割合、0〜200"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "每条边外扩的百分比：相对图像自身边长，0–200"
-          }
-        }
-      }
-    },
-    "The remove and redraw presets belong to the mask: turn them off to expand." : {
-      "comment" : "A mask branch's preset and an expand are two branches of one workflow",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die Voreinstellungen Entfernen und Neuzeichnen gehören zur Maske: schalte sie aus, um zu erweitern."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Los preajustes de eliminar y redibujar pertenecen a la máscara: apágalos para ampliar."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Les préréglages retirer et redessiner appartiennent au masque : éteignez-les pour étendre."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "I preimpostati rimuovi e ridisegna appartengono alla maschera: spegnili per espandere."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "削除と再描画のプリセットはマスクのものです：拡張するにはオフにしてください。"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "移除与重绘预置属于遮罩：扩图请将其关闭。"
-          }
-        }
-      }
-    },
-    "Top" : {
-      "comment" : "The pad the canvas grows by, above the image",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oben"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Arriba"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Haut"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Alto"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "上"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "上"
-          }
-        }
-      }
-    },
-    "Use Expand" : {
-      "comment" : "« Use Expand »: commit the pads form, like « Use Mask »",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Erweitern verwenden"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Usar la ampliación"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Utiliser l’extension"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Usa espansione"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "拡張を使用"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "使用扩图"
           }
         }
       }
@@ -20114,6 +19567,88 @@
         }
       }
     },
+    "Grow the canvas outward: four percents, no mask" : {
+      "comment" : "The « Expand… » button's help",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Leinwand nach außen wachsen lassen: vier Prozente, keine Maske"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hacer crecer el lienzo hacia fuera: cuatro porcentajes, sin máscara"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faire grandir la toile vers l’extérieur : quatre pourcentages, sans masque"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fai crescere la tela verso l'esterno: quattro percentuali, nessuna maschera"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "キャンバスを外へ広げる：4つの割合、マスクは不要"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "让画布向外生长：四个百分比，无需遮罩"
+          }
+        }
+      }
+    },
+    "Grow the canvas outward: the model draws the new border, and the original is laid back inside." : {
+      "comment" : "The pads form's introduction",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Leinwand wächst nach außen: das Modell zeichnet die neue Grenze, und das Original wird darin zurückgelegt."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hace crecer el lienzo hacia fuera: el modelo dibuja el nuevo borde y la original vuelve a su sitio dentro."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faites grandir la toile vers l’extérieur : le modèle dessine la nouvelle bordure, et l’original est reposé à l’intérieur."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fai crescere la tela verso l'esterno: il modello disegna il nuovo bordo e l'originale viene rimesso al suo interno."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "キャンバスを外へ広げます：モデルが新しい境界を描き、元の画像がその内側に戻されます。"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "让画布向外生长：模型绘制新的边界，原图放回其中。"
+          }
+        }
+      }
+    },
     "Hand the crop at the render’s format, or leave the seeded start out." : {
       "localizations" : {
         "de" : {
@@ -20360,6 +19895,52 @@
         }
       }
     },
+    "Hugging Face" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hugging Face"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hugging Face"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hugging Face"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hugging Face"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hugging Face"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hugging Face"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hugging Face"
+          }
+        }
+      }
+    },
     "Hugging Face doesn’t list %@ any more." : {
       "localizations" : {
         "de" : {
@@ -20602,6 +20183,47 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "图像 %lld 已裁剪为 %lld × %lld"
+          }
+        }
+      }
+    },
+    "Image 1 changed: remove the expand and commit the pads again." : {
+      "comment" : "The image the canvas was grown from was replaced under the attachment",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bild 1 hat sich geändert: entferne das Erweitern und lege die Ränder erneut an."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La imagen 1 cambió: quita la ampliación y vuelve a confirmar los márgenes."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’image 1 a changé : retirez l’extension et validez les marges à nouveau."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'immagine 1 è cambiata: rimuovi l'espansione e conferma di nuovo i margini."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "画像 1 が変わりました：拡張を削除して、余白を改めて設定してください"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "图像 1 已更换：请移除扩图并重新提交外扩百分比。"
           }
         }
       }
@@ -23328,6 +22950,47 @@
         }
       }
     },
+    "Left" : {
+      "comment" : "The pad the canvas grows by, on the image's left",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Links"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Izquierda"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gauche"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sinistra"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "左"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "左"
+          }
+        }
+      }
+    },
     "Lend This Mac" : {
       "localizations" : {
         "de" : {
@@ -25328,6 +24991,52 @@
         }
       }
     },
+    "ModelScope (魔搭)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ModelScope (魔搭)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ModelScope（魔搭）"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ModelScope (魔搭)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ModelScope (魔搭)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ModelScope (魔搭)"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ModelScope (魔搭)"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ModelScope（魔搭）"
+          }
+        }
+      }
+    },
     "Models" : {
       "localizations" : {
         "de" : {
@@ -26767,6 +26476,47 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "取消包围"
+          }
+        }
+      }
+    },
+    "No mask: four percents — the canvas grows outward, the original laid back inside." : {
+      "comment" : "The expand tile's caption, before the pads are attached",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Maske: vier Prozente – die Leinwand wächst nach außen, das Original wird darin zurückgelegt."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin máscara: cuatro porcentajes — el lienzo crece hacia fuera y la original vuelve a su sitio dentro."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sans masque : quatre pourcentages — la toile grandit vers l’extérieur, l’original reposé à l’intérieur."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nessuna maschera: quattro percentuali — la tela cresce verso l'esterno e l'originale viene rimesso al suo interno."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "マスクは不要：4つの割合でキャンバスが外へ広がり、元の画像がその内側に戻ります。"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无需遮罩：四个百分比 —— 画布向外扩张，原图放回其中。"
           }
         }
       }
@@ -29065,6 +28815,47 @@
         }
       }
     },
+    "Open the pads again: what you commit replaces them" : {
+      "comment" : "The « Pads… » button's help",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Ränder wieder öffnen: was du festlegst, ersetzt sie"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir los márgenes otra vez: lo que confirmes los reemplaza"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rouvrir les marges : ce que vous validez les remplace"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Riapri i margini: quello che confermi li sostituisce"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "余白をもう一度開く：確定した内容が置き換わります"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再次打开外扩设置：提交的内容将替换原设置"
+          }
+        }
+      }
+    },
     "Optional" : {
       "localizations" : {
         "de" : {
@@ -29461,6 +29252,47 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "PNG 或画笔：都是图像 1 的尺寸。白色是改动，黑色是保留。"
+          }
+        }
+      }
+    },
+    "Pads…" : {
+      "comment" : "Reopening the pads of an expand already attached",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ränder…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Márgenes…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marges…"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Margini…"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "余白…"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "外扩…"
           }
         }
       }
@@ -31917,6 +31749,47 @@
         }
       }
     },
+    "Remove Expand" : {
+      "comment" : "« Remove Expand »: the next render is ordinary again",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erweitern entfernen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quitar la ampliación"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retirer l’extension"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rimuovi espansione"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "拡張を削除"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除扩图"
+          }
+        }
+      }
+    },
     "Remove Image" : {
       "localizations" : {
         "de" : {
@@ -33818,6 +33691,47 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "“改写”遵循你为 %@ 编写的指令，而非 Siliconed 的指令。"
+          }
+        }
+      }
+    },
+    "Right" : {
+      "comment" : "The pad the canvas grows by, on the image's right",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rechts"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Derecha"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Droite"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Destra"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "右"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "右"
           }
         }
       }
@@ -39125,6 +39039,88 @@
         }
       }
     },
+    "The canvas grows by percents of the image's own sides; the model draws the new border" : {
+      "comment" : "The expand tile's caption help, where the workflow is",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Leinwand wächst um Prozente der eigenen Seiten des Bildes; das Modell zeichnet die neue Grenze"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El lienzo crece porcentajes de los lados de la propia imagen; el modelo dibuja el nuevo borde"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La toile grandit de pourcentages des côtés de l’image elle-même ; le modèle dessine la nouvelle bordure"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La tela cresce di percentuali dei lati dell'immagine stessa; il modello disegna il nuovo bordo"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "キャンバスは画像自身の辺に対する割合で広がり、モデルが新しい境界を描きます"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "画布按图像自身边长的百分比向外生长，模型绘制新的边界"
+          }
+        }
+      }
+    },
+    "The canvas, then the size the render will have" : {
+      "comment" : "The attached expand's size line's help",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Leinwand, dann die Größe, die das Rendern haben wird"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El lienzo y después el tamaño que tendrá el render"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La toile, puis la taille que le rendu aura"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La tela, poi la dimensione che avrà il render"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "キャンバス、そしてレンダリングのサイズ"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "画布，随后是渲染的尺寸"
+          }
+        }
+      }
+    },
     "The cells still waiting leave the queue; the running one stops" : {
       "localizations" : {
         "de" : {
@@ -39807,6 +39803,47 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "无法下载放大模型"
+          }
+        }
+      }
+    },
+    "The expand preset grows the canvas — it has no mask: turn the card off, or remove the mask." : {
+      "comment" : "The expand preset and a mask are two branches of one workflow",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Erweitern-Voreinstellung macht die Leinwand größer – sie hat keine Maske: schalte die Karte aus, oder entferne die Maske."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El preajuste de ampliación hace crecer el lienzo — no lleva máscara: apaga la tarjeta o quita la máscara."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le préréglage d’extension agrandit la toile — il n’a pas de masque : éteignez la carte, ou retirez le masque."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il preimpostato di espansione ingrandisce la tela — non ha maschera: spegni la scheda o rimuovi la maschera."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "拡張プリセットはキャンバスを広げます —— マスクは使えません：カードをオフにするか、マスクを削除してください。"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "扩图预置扩大画布 —— 它没有遮罩：请关闭卡片，或移除遮罩。"
           }
         }
       }
@@ -40687,6 +40724,47 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "像历史记录那样显示图像（双击单元格）"
+          }
+        }
+      }
+    },
+    "The image, the canvas it sits in, then the size the render will have" : {
+      "comment" : "The pads form's live plan's help",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Bild, die Leinwand, in der es liegt, dann die Größe des Renderns"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La imagen, el lienzo donde se sitúa y después el tamaño que tendrá el render"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’image, la toile où elle se pose, puis la taille que le rendu aura"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'immagine, la tela in cui si trova, poi la dimensione che avrà il render"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "画像、その周囲のキャンバス、そしてレンダリングのサイズ"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "图像、它所在的画布，随后是渲染的尺寸"
           }
         }
       }
@@ -41865,6 +41943,47 @@
         }
       }
     },
+    "The percents each side grows by: of the image's own sides, 0–200" : {
+      "comment" : "The attached pads' help",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Prozente, um die jede Seite wächst: von den eigenen Seiten des Bildes, 0–200"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los porcentajes que crece cada lado: de los lados de la propia imagen, 0–200"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les pourcentages dont chaque côté grandit : des côtés de l’image elle-même, 0–200"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le percentuali di cui cresce ogni lato: dei lati dell'immagine stessa, 0–200"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "各辺が広がる割合：画像自身の辺に対する割合、0〜200"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每条边外扩的百分比：相对图像自身边长，0–200"
+          }
+        }
+      }
+    },
     "The plan never arrived" : {
       "localizations" : {
         "de" : {
@@ -42502,6 +42621,47 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "remove 与 redraw 预设互斥：机架中只保留一个。"
+          }
+        }
+      }
+    },
+    "The remove and redraw presets belong to the mask: turn them off to expand." : {
+      "comment" : "A mask branch's preset and an expand are two branches of one workflow",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Voreinstellungen Entfernen und Neuzeichnen gehören zur Maske: schalte sie aus, um zu erweitern."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los preajustes de eliminar y redibujar pertenecen a la máscara: apágalos para ampliar."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les préréglages retirer et redessiner appartiennent au masque : éteignez-les pour étendre."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I preimpostati rimuovi e ridisegna appartengono alla maschera: spegnili per espandere."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "削除と再描画のプリセットはマスクのものです：拡張するにはオフにしてください。"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除与重绘预置属于遮罩：扩图请将其关闭。"
           }
         }
       }
@@ -47298,6 +47458,47 @@
         }
       }
     },
+    "Top" : {
+      "comment" : "The pad the canvas grows by, above the image",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oben"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arriba"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Haut"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alto"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上"
+          }
+        }
+      }
+    },
     "Total" : {
       "localizations" : {
         "de" : {
@@ -48556,6 +48757,47 @@
         }
       }
     },
+    "Use Expand" : {
+      "comment" : "« Use Expand »: commit the pads form, like « Use Mask »",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erweitern verwenden"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usar la ampliación"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Utiliser l’extension"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usa espansione"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "拡張を使用"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用扩图"
+          }
+        }
+      }
+    },
     "Use Mask" : {
       "localizations" : {
         "de" : {
@@ -49638,6 +49880,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已安装的模型和 LoRA 存放的位置。请在“模型”窗口中移除它们，而不是在访达中。"
+          }
+        }
+      }
+    },
+    "Where the models download from. Automatic asks huggingface.co first, then ModelScope (魔搭), then a mirror, and keeps the first that answers — the picker says which, before the first download. Every file is checked against its pinned sha256, whatever the source." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Where the models download from. Automatic asks huggingface.co first, then ModelScope (魔搭), then a mirror, and keeps the first that answers — the picker says which, before the first download. Every file is checked against its pinned sha256, whatever the source."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "模型的下载来源。「自动」会先询问 huggingface.co，再问魔搭（ModelScope），再问镜像，并记住第一个应答的——在第一次下载之前，选择器就会显示用的是哪个。无论来源是什么，每个文件都会按固定的 sha256 校验。"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wo die Modelle herkommen. «Automatisch» fragt zuerst huggingface.co, dann ModelScope (魔搭), dann einen Spiegel, und behält den ersten, der antwortet – der Picker sagt vor dem ersten Download, welcher es ist. Jede Datei wird, gleich welcher Quelle, gegen ihre feste sha256 geprüft."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De dónde se descargan los modelos. Automático pregunta primero a huggingface.co, luego a ModelScope (魔搭), luego a un espejo, y conserva el primero que responda; el selector dice cuál, antes de la primera descarga. Cada archivo se verifica contra su sha256 fijado, sea cual sea la fuente."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "D’où viennent les modèles. Automatique interroge d’abord huggingface.co, puis ModelScope (魔搭), puis un miroir, et garde le premier qui répond — le sélecteur le dit avant le premier téléchargement. Chaque fichier est vérifié contre son sha256 épinglé, quelle que soit la source."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Da dove scaricano i modelli. Automatica interroga prima huggingface.co, poi ModelScope (魔搭), poi un mirror, e tiene il primo che risponde: il selettore lo dice prima del primo scaricamento. Ogni file è verificato contro il suo sha256 fissato, qualunque sia la sorgente."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "モデルのダウンロード元。「自動」は最初に huggingface.co、次に ModelScope (魔搭)、次にミラーに問い合わせ、最初に応答したものを使います——初回のダウンロードの前に、ピッカーがどれかを表示します。ソースがどこであれ、各ファイルは固定された sha256 で検証されます。"
           }
         }
       }
@@ -52888,6 +53176,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "应为网格（g2），而不是“%@”"
+          }
+        }
+      }
+    },
+    "hf-mirror.com (mirror)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hf-mirror.com (mirror)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hf-mirror.com（镜像）"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hf-mirror.com (Spiegel)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hf-mirror.com (espejo)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hf-mirror.com (miroir)"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hf-mirror.com (mirror)"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hf-mirror.com（ミラー）"
           }
         }
       }

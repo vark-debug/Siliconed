@@ -279,15 +279,19 @@ final class MainWindow: NSObject, NSWindowDelegate {
     var app: AppState { carrier.mirror ?? local }
     let carrier = Carrier()
     /// This Mac's own state: the queue, the history and the library; untouched while a mirror is shown.
-    private(set) lazy var local = AppState(library: {
+    /// The Hub's door, from the picker the Models sheet stores (`Downloader.sourceKey`), is set first —
+    /// before any download (an installation, an enlargement's model) can start. The environment
+    /// (`SILICONED_HUB_SOURCE`) still wins over the picker's value.
+    private(set) lazy var local: AppState = {
+        Downloader.setChoice(UserDefaults.standard.string(forKey: Downloader.sourceKey).flatMap(HubChoice.init(rawValue:)))
         // `SILICONED_ROOT` names the app's space, as `Library.standard` does: a library moved
         // elsewhere is followed (`Library.placed`), and never made where its disk is absent.
         let space = ProcessInfo.processInfo.environment["SILICONED_ROOT"].flatMap { $0.isEmpty ? nil : $0 }
             .map { URL(fileURLWithPath: $0) } ?? Library.standard.root
         let b = Library.placed(in: space)
         try? FileManager.default.createDirectory(atPath: Library(root: space).map(""), withIntermediateDirectories: true)
-        return b
-    }())
+        return AppState(library: b)
+    }()
     private(set) lazy var remote = RemoteControl(app: local)
     /// The other Macs of the network (`OtherMacs.swift`).
     private(set) lazy var otherMacs = OtherMacs(local: local)
