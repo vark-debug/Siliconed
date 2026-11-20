@@ -20,11 +20,12 @@ Siliconed 是一款免费开源的 macOS 应用，可在 Apple 芯片 Mac（M1 �
 
 ## 下载（就是一个 .dmg，没有任何花哨的东西）
 
-应用以 `.dmg` 形式发布在 [Releases](https://github.com/gwenn-ha-dev/Siliconed/releases) 页面。系统要求：macOS 26 或更高版本，Apple 芯片。应用不预装任何模型：你在应用内挑选模型，阅读各自的许可证，然后才开始下载。若要自行构建：[从源码构建](docs/ENGINE.md#build-from-source)；需要 Xcode 26 或更高版本（仅靠 Command Line Tools 无法构建该应用）。
+应用以 `.dmg` 形式发布在 [Releases](https://github.com/gwenn-ha-dev/Siliconed/releases) 页面。系统要求：macOS 26 或更高版本，Apple 芯片。应用不预装任何模型：你在应用内挑选模型，阅读各自的许可证，然后才开始下载。模型的文件来自 huggingface.co；如果这个地址在你的网络上无法访问，应用会自动改问魔搭（ModelScope）和 hf-mirror.com 的镜像——也可以在模型面板里自己选择下载源。无论哪个来源，每个文件都按配方固定的 sha256 校验后才入库。若要自行构建：[从源码构建](docs/ENGINE.md#build-from-source)；需要 Xcode 26 或更高版本（仅靠 Command Line Tools 无法构建该应用）。
 
 ## 它能做什么
 
 - **文字作画，按指令编辑。** Qwen-Image-2.1 Turbo 接受 1 到 3 张图和一句话（“把阴天的天空换成蓝天”），并且只改动你点名的部分。哪个模型适合什么用途，以及许可证和体积：[模型](docs/APP.md#models)。
+- **向外扩图。** 画布按每一边的百分比向外延伸，模型补全新增的边缘，原图原样回到更大的画面里——对比视图会用黑白格标出原本没有内容的部分。
 - **像相机一样包围曝光。** 改变一个词、种子、某个 LoRA 的强度、LoRA 组合、Detail 或起始图像：每个格子出一张成品图，并排铺在画布上，每一张都是单次渲染能得到的那张图。
 - **替你写提示词**（beta）。Prompt Lab 会按每个模型偏好的风格改写一句短提示词，或者描述你拖进去的一张图。它使用你已安装的模型，且绝不会在图像渲染时运行。
 - **接受你自己的模型。** 从 Civitai 或 Hugging Face 导入 LoRA 和微调模型。

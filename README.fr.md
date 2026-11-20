@@ -20,11 +20,12 @@ Un développeur, un MacBook Pro de 16 Go et une règle têtue : un résultat qu
 
 ## Télécharger (un .dmg, rien d'exotique)
 
-L'app est distribuée en `.dmg` sur la page [Releases](https://github.com/gwenn-ha-dev/Siliconed/releases). Prérequis : macOS 26 ou plus, Apple silicon. Rien n'est préinstallé : vous choisissez les modèles depuis l'app, vous lisez chaque licence, et c'est seulement ensuite qu'un octet se télécharge. Pour la construire vous-même : [Construire depuis les sources](docs/ENGINE.fr.md#construire-depuis-les-sources) ; Xcode 26 ou plus est requis (les seuls Command Line Tools ne suffisent pas à construire l'app).
+L'app est distribuée en `.dmg` sur la page [Releases](https://github.com/gwenn-ha-dev/Siliconed/releases). Prérequis : macOS 26 ou plus, Apple silicon. Rien n'est préinstallé : vous choisissez les modèles depuis l'app, vous lisez chaque licence, et c'est seulement ensuite qu'un octet se télécharge. Les fichiers des modèles viennent de huggingface.co ; quand il est inaccessible, l'app interroge d'elle-même ModelScope (魔搭) et le miroir hf-mirror.com — ou vous choisissez la source de téléchargement dans le panneau Modèles. Quelle que soit la source, chaque fichier est vérifié contre le sha256 épinglé de sa recette. Pour la construire vous-même : [Construire depuis les sources](docs/ENGINE.fr.md#construire-depuis-les-sources) ; Xcode 26 ou plus est requis (les seuls Command Line Tools ne suffisent pas à construire l'app).
 
 ## Ce que fait l'app
 
 - **Dessine à partir de texte, et retouche sur instruction.** Qwen-Image-2.1 Turbo prend 1 à 3 images et une phrase (« remplace le ciel nuageux par un ciel bleu ») et ne change que ce que vous avez nommé. Quel modèle pour quoi, avec licences et tailles : [Les modèles](docs/APP.fr.md#les-modèles).
+- **Étendre l'image (outpainting).** Le canevas grandit d'un pourcentage de chaque côté, le modèle complète les bords nouveaux, et l'original se replace au centre du tableau élargi — la comparaison montre en damier ce qui n'avait pas de contenu.
 - **Bracketing, comme un appareil photo.** Faites varier un mot, la graine, la force d'une LoRA, des LoRA, le Détail ou l'image de départ : une image finie par case, côte à côte sur le canevas, chacune celle-là même que donne un rendu seul.
 - **Écrit vos prompts, si vous le demandez** (bêta). L'Atelier de prompts réécrit un prompt court dans le style que chaque modèle aime, ou décrit une image que vous y déposez. Il se sert d'un modèle déjà installé, et jamais pendant un rendu.
 - **Prend vos propres modèles.** Importez des LoRA et des fine-tunes depuis Civitai ou Hugging Face.

@@ -20,11 +20,12 @@ One developer, one MacBook Pro with 16 GB, and a stubborn rule: if a result cann
 
 ## Download (it is a .dmg, nothing exotic)
 
-The app ships as a `.dmg` on the [Releases](https://github.com/gwenn-ha-dev/Siliconed/releases) page. Requirements: macOS 26 or later, Apple silicon. Nothing comes preinstalled: you pick the models from inside the app, read each license, and only then does a byte download. To build it yourself: [Build from source](docs/ENGINE.md#build-from-source); Xcode 26 or later is required (the Command Line Tools alone cannot build the app).
+The app ships as a `.dmg` on the [Releases](https://github.com/gwenn-ha-dev/Siliconed/releases) page. Requirements: macOS 26 or later, Apple silicon. Nothing comes preinstalled: you pick the models from inside the app, read each license, and only then does a byte download. The models' files come from huggingface.co; where that is out of reach, the app asks ModelScope (魔搭) and the hf-mirror.com mirror on its own — or you pick the download source in the Models sheet. Whatever the door, every file is checked against its recipe's pinned sha256. To build it yourself: [Build from source](docs/ENGINE.md#build-from-source); Xcode 26 or later is required (the Command Line Tools alone cannot build the app).
 
 ## What it does
 
 - **Draws from text, and edits by instruction.** Qwen-Image-2.1 Turbo takes 1 to 3 images and a sentence (“replace the cloudy sky with a blue sky”) and changes only what you named. Which model for what, with licenses and sizes: [Models](docs/APP.md#models).
+- **Expands the picture (outpainting).** The canvas grows outward by a percent of each side, the model completes the new edges, and the original sits back inside the larger picture — the comparison shows what had no content as a checkerboard.
 - **Brackets, like a camera.** Vary a word, the seed, a LoRA's strength, LoRAs, Detail or the starting image: one finished image per cell, side by side on the canvas, each the very image a single render gives.
 - **Writes your prompts, if you ask** (beta). The Prompt Lab rewrites a short prompt in the style each model likes, or describes an image you drop on it. It uses a model you already have installed, and never while an image is rendering.
 - **Takes your own models.** Import LoRAs and fine-tunes from Civitai or Hugging Face.
