@@ -1,65 +1,62 @@
-English · [Français](README.fr.md) · [简体中文](README.zh.md)
+[English](README.md) · [Français](README.fr.md) · 简体中文
 
-# Siliconed
+# Siliconed (community edition)
 
-**Generate and edit images on your Mac, locally, with recent open-weight models: computed in full precision, checked against the original code, and never using more memory than a fixed budget.**
+**This is a community fork. The original project is by Gwenn ([gwenn-ha-dev](https://github.com/gwenn-ha-dev)): [gwenn-ha-dev/Siliconed](https://github.com/gwenn-ha-dev/Siliconed) — credit where it belongs, and thanks for the remarkable work.**
 
-Siliconed is a free, open-source macOS app for **local text-to-image generation and image editing** on Apple silicon Macs (M1 and later). It runs recent diffusion models — [Krea 2 Turbo](https://huggingface.co/krea/Krea-2-Turbo), [Z-Image Turbo](https://huggingface.co/Tongyi-MAI/Z-Image-Turbo), [Qwen-Image-2.1 Turbo](https://huggingface.co/Qwen/Qwen-Image-2.1-Turbo), [Anima Turbo](https://huggingface.co/circlestone-labs/Anima) and [MOSS-Image](https://huggingface.co/OpenMOSS-Team/MOSS-Image-SFT) (beta: its 8-step recipe is the community's) — natively in Swift and Metal: no Python, no server, no cloud, nothing leaves your Mac. It works offline once a model is installed.
+The original app runs recent open-weight diffusion models natively in Swift and Metal on Apple silicon Macs (M1 and later) — [Krea 2 Turbo](https://huggingface.co/krea/Krea-2-Turbo), [Z-Image Turbo](https://huggingface.co/Tongyi-MAI/Z-Image-Turbo), [Qwen-Image-2.1 Turbo](https://huggingface.co/Qwen/Qwen-Image-2.1-Turbo), [Anima Turbo](https://huggingface.co/circlestone-labs/Anima) and [MOSS-Image](https://huggingface.co/OpenMOSS-Team/MOSS-Image-SFT) — no Python, no cloud, no data leaving the Mac, every stage checked channel by channel against reference implementations. The original app's documentation lives in its repository and here in [docs/](docs/).
 
-One developer, one MacBook Pro with 16 GB, and a stubborn rule: if a result cannot be checked against the original code, it does not ship. The rest is the plain joy of watching a 12.9-billion-parameter model run on a laptop that, on paper, has no business doing it.
+This repository continues from the original (version 0.20); every change here is open source under the same [Apache License 2.0](LICENSE) — the original copyright and license notices are kept as they are, and this fork's work is offered under the same license.
 
-![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue)
-![macOS 26+](https://img.shields.io/badge/macOS-26%2B-black)
-![Apple silicon](https://img.shields.io/badge/Apple%20silicon-M1%20and%20later-black)
-[![unit tests](https://img.shields.io/github/actions/workflow/status/gwenn-ha-dev/Siliconed/test.yml?branch=main&label=unit%20tests)](https://github.com/gwenn-ha-dev/Siliconed/actions/workflows/test.yml)
-[![kernels checked, CPU stages](https://img.shields.io/github/actions/workflow/status/gwenn-ha-dev/Siliconed/kernels.yml?branch=main&label=kernels%20checked%2C%20CPU%20stages)](https://github.com/gwenn-ha-dev/Siliconed/actions/workflows/kernels.yml)
+## What this fork does
 
-![A sunny Krea 2 Turbo photo — a laughing red-haired Irish woman in a shorty wetsuit wading out of the shore break, her surfboard under her arm, backlit by a low sun — and its cel-shaded western comic-book edit by Qwen-Image-2.1, under a sliding curtain](docs/images/curtain.gif)
+### 1. Qwen-Image-2.1 workflows, node for node against ComfyUI
 
-*A photo from Krea 2 Turbo, edited by Qwen-Image-2.1 with one sentence (“Convert this photo to a western comic book style with cel shading”, seed 42), compared under the curtain.*
+- **Remove and inpaint (redraw)**: the masked crop, the green fill or a prompt-driven replacement, the feathered paste-back — σ table and 9-step ManualSigmas, the reference resolution, the crop's start, all equivalent to ComfyUI's Qwen-Image-2.1 remove/redraw workflow ([docs](docs/MASK-WORKFLOW.md)).
+- **Outpaint (expand)**: the canvas grows outward by a percent of each side, filled in grey, sampled at sizes rounded to the nearest 32, pasted back as GH_CropRestore does — equivalent to ComfyUI's “Qwen Image 2.1 expand” workflow, with no stretch and no edge ghosting ([docs](docs/EXPAND-WORKFLOW.md)).
+- **The workflows' preset LoRAs**: remove (1.0), redraw (0.48), expand (0.7) — the community's qwen2-1-gh series from Civitai, wired automatically per branch.
+- **The comparison curtain**: the original and the result under a sliding curtain, the expand's empty areas shown as a checkerboard.
 
-## Download (it is a .dmg, nothing exotic)
+### 2. SeedVR2 upscaling
 
-The app ships as a `.dmg` on the [Releases](https://github.com/gwenn-ha-dev/Siliconed/releases) page. Requirements: macOS 26 or later, Apple silicon. Nothing comes preinstalled: you pick the models from inside the app, read each license, and only then does a byte download. The models' files come from huggingface.co; where that is out of reach, the app asks ModelScope (魔搭) and the hf-mirror.com mirror on its own — or you pick the download source in the Models sheet. Whatever the door, every file is checked against its recipe's pinned sha256. To build it yourself: [Build from source](docs/ENGINE.md#build-from-source); Xcode 26 or later is required (the Command Line Tools alone cannot build the app).
+A Swift/MLX port of SeedVR2: ×N refinement of an image, 1:1. In the app (with a window and a remote mirror on another Mac), and from the CLI directly on a file, without the app.
 
-## What it does
+### 3. Download sources (China-reachable)
 
-- **Draws from text, and edits by instruction.** Qwen-Image-2.1 Turbo takes 1 to 3 images and a sentence (“replace the cloudy sky with a blue sky”) and changes only what you named. Which model for what, with licenses and sizes: [Models](docs/APP.md#models).
-- **Expands the picture (outpainting).** The canvas grows outward by a percent of each side, the model completes the new edges, and the original sits back inside the larger picture — the comparison shows what had no content as a checkerboard.
-- **Brackets, like a camera.** Vary a word, the seed, a LoRA's strength, LoRAs, Detail or the starting image: one finished image per cell, side by side on the canvas, each the very image a single render gives.
-- **Writes your prompts, if you ask** (beta). The Prompt Lab rewrites a short prompt in the style each model likes, or describes an image you drop on it. It uses a model you already have installed, and never while an image is rendering.
-- **Takes your own models.** Import LoRAs and fine-tunes from Civitai or Hugging Face.
-- **Local and private.** Rendering happens on your Mac, with no content filter added by the app and no history sent anywhere. It follows the system language (English, French, German, Spanish, Italian, Japanese or Simplified Chinese).
-- **Renders on another Mac.** A MacBook computes on the Mac mini of the next room, paired once with a code, encrypted ([how](docs/APP.md#render-on-another-mac)).
-- **Scriptable.** `silicontrol` drives the running app from a terminal, for scripts and coding agents ([details](docs/REMOTE-CONTROL.md)).
+The models' files come from huggingface.co; where that is out of reach, the app asks ModelScope (魔搭) and the hf-mirror.com mirror on its own — or you pick the source in the Models sheet, locked while an install runs. Whatever the door, every file is checked against its recipe's pinned sha256 ([docs](docs/HUB-SOURCES.md)).
+
+### 4. The new abilities exposed to the CLI (`silicontrol`)
+
+The original's `silicontrol` already drives renders from a terminal ([docs](docs/REMOTE-CONTROL.md)); this fork exposes the new editing branches to it:
+
+- `add --mask MASK --mode remove|redraw` — remove and inpaint;
+- `add --lora expand --pad L,R,T,B --image IMAGE` — expand (the 0.7 preset wired, a mask refused);
+- `upscale FILE [DEST] [--scale N]` — SeedVR2 on a file, no app needed.
+
+## Download
+
+The original ships as a `.dmg` on the upstream [Releases](https://github.com/gwenn-ha-dev/Siliconed/releases) page; this fork's work is built from source for now ([Build from source](docs/ENGINE.md#build-from-source), Xcode 26 or later). Requirements: macOS 26 or later, Apple silicon. Nothing comes preinstalled: you pick the models inside the app, read each license, and only then does a byte download.
+
+## What the original app does (a summary)
+
+- **Draws from text, edits by instruction**; **bracketing grids** (one finished image per cell); **the Prompt Lab** (prompts rewritten in each model's style, images described — beta); **your own models** (LoRAs and fine-tunes from Civitai / Hugging Face); **local and private** (no content filter, no history leaves the machine); **renders on another Mac** (paired once, encrypted); **scriptable** (`silicontrol`). The app's tour: [docs/APP.md](docs/APP.md).
 
 ![The Siliconed window: the rack on the left (text, text encoder, DiT, VAE decoder, each with its settings and time), the Krea 2 Turbo surf photo in the middle, the Prompt Lab folded to one line beneath it, the history on the right](docs/images/window.jpg)
 
-The tour of the app: [docs/APP.md](docs/APP.md).
-
-## Why bother, then
-
-- **Fast, without cutting corners.** On the M1 Pro with 16 GB that did all the testing, at 1024², with all 8 evaluations (passes of the model) their recipes call for at full size: Qwen-Image-2.1 Turbo in 85.8 s, Z-Image Turbo in 101.9 s, Krea 2 Turbo in 140.9 s, in the Compact the app recommends (the model in 8-bit weights, half the disk; [the three versions](docs/APP.md#model-management)). Each computation goes to the GPU, the CPU's matrix unit or the Neural Engine as this Mac measured them. In full precision, the publisher's bf16 weights computed in fp32: 135.6 s, 113.1 s and 213.3 s. [All the numbers](docs/ENGINE.md#numbers).
-- **Big models, small Mac.** 34 GB of model on a 16 GB Mac sounds like a bad idea. Weights are read from disk as they are needed, and Siliconed never takes more than ¾ of the Mac's memory minus 2 GB, a budget it does not exceed, ever. Each render works out what it needs before it starts; one beyond the budget is politely refused up front. [How it is measured](docs/ENGINE.md#memory-and-the-budget).
-- **Even on an 8 GB MacBook Neo.** The one with an iPhone chip (A18 Pro): with 0.19, Anima Turbo makes a 1024² square in under a minute on it, in the Compact, every evaluation at full size. We no longer have a Neo to time it properly: if you have one, or a Mac we have never seen, [send us your numbers](docs/ENGINE.md#on-a-macbook-neo).
-- **Checked against the original models, a bit obsessively.** Every stage is compared, channel by channel, with the reference implementation (diffusers / transformers in fp32 on CPU), and what cannot be checked does not ship. Run the checks yourself: [VERIFY.md](docs/VERIFY.md). The CI runs the kernels' CPU stages each time the engine changes; its GPU is virtual, so the GPU stages run on your Mac.
-- **Knows your Mac.** Before the first render, in about a minute (five at most) and without any model, it measures what each engine of your Mac — the GPU, the CPU's matrix unit, the Neural Engine — computes, alone and together, and checks every result against the exact one; it then works out, for every product and every attention of a render, how to share the rows among the engines that computed right. [How](docs/ENGINE.md#an-engine-measured-on-your-mac).
-- **Measured next to Draw Things' engine**, on the same Mac. The method and every figure are in [Next to Draw Things](docs/ENGINE.md#next-to-draw-things).
-
 ## Documentation
 
-- [docs/APP.md](docs/APP.md): the app in detail: creating, editing, writing prompts, series, managing models, settings, privacy.
-- [docs/ENGINE.md](docs/ENGINE.md): the engine: measuring the Mac, the Neural Engine, numbers, Faster Rendering, Draw Things, memory, the community diagnostic, verification, building from source.
-- [docs/VERIFY.md](docs/VERIFY.md): checking the results against the reference on your Mac.
-- [docs/REMOTE-CONTROL.md](docs/REMOTE-CONTROL.md): `silicontrol`, protocol and internals.
-- [docs/MASK-WORKFLOW.md](docs/MASK-WORKFLOW.md): the mask workflow (mask → crop → paste) from the command line: `--mode`, `--paste`, the two LoRA presets, limits and error codes.
-- [docs/RELEASE-NOTES.md](docs/RELEASE-NOTES.md): what changed in each version.
-- Issues: [diagnostic report, bug, idea](https://github.com/gwenn-ha-dev/Siliconed/issues/new/choose).
+The original project's docs (maintained here):
 
-## Credits
+- [docs/APP.md](docs/APP.md) — the app; [docs/ENGINE.md](docs/ENGINE.md) — the engine, the numbers, the memory budget; [docs/VERIFY.md](docs/VERIFY.md) — verify on your Mac; [docs/REMOTE-CONTROL.md](docs/REMOTE-CONTROL.md) — `silicontrol` and the protocol; [docs/RELEASE-NOTES.md](docs/RELEASE-NOTES.md) — what each version changes.
 
-The models belong to their publishers (listed under [Models](docs/APP.md#models)), each under its own license. The reference implementations are [diffusers](https://github.com/huggingface/diffusers) and [transformers](https://github.com/huggingface/transformers) by Hugging Face; the image resampling reproduces [Pillow](https://github.com/python-pillow/Pillow)'s Lanczos to the bit. LoRAs and fine-tunes come from the community, on [Civitai](https://civitai.com) and [Hugging Face](https://huggingface.co); MOSS-Image's 8-step recipe is lodestones' [DMD LoRA](https://huggingface.co/lodestones/MOSS-Image-SFT-8-steps-dmd).
+This fork's additions:
+
+- [docs/MASK-WORKFLOW.md](docs/MASK-WORKFLOW.md) — the remove/redraw workflow read from its sources; [docs/EXPAND-WORKFLOW.md](docs/EXPAND-WORKFLOW.md) — the expand workflow; [docs/HUB-SOURCES.md](docs/HUB-SOURCES.md) — the download sources.
+
+## Acknowledgements
+
+Siliconed was created by Gwenn — everything this fork adds stands on that foundation. The models belong to their publishers, each under its own license; the reference implementations are Hugging Face's [diffusers](https://github.com/huggingface/diffusers) and [transformers](https://github.com/huggingface/transformers), and the image resampling reproduces [Pillow](https://github.com/python-pillow/Pillow)'s Lanczos bit for bit. The remove/redraw/expand alignment uses Goohai's ComfyUI workflow nodes as its reference; the workflows' LoRAs come from Civitai's community; MOSS-Image's 8-step recipe comes from lodestones' [DMD LoRA](https://huggingface.co/lodestones/MOSS-Image-SFT-8-steps-dmd); the upscaler is based on SeedVR2 (ByteDance's Seed team).
 
 ## License
 
-The code is under the [Apache License 2.0](LICENSE). The model weights are not part of this repository: each is downloaded by you, under its own license, which the app shows before installing it.
+The code is [Apache License 2.0](LICENSE): the original project is its author Gwenn's, this fork's changes are offered under the same license, and the original copyright and license notices are preserved. Model weights are not part of this repository: you download each model yourself, under its own license, shown by the app before it installs.
