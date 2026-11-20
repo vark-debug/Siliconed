@@ -33,6 +33,19 @@ SeedVR2 的 Swift/MLX 移植：图像 ×N 的 1:1 精修放大。应用内有窗
 - `add --lora expand --pad L,R,T,B --image 图片`：扩图（预设 0.7 自动接线，掩码被拒）；
 - `upscale 文件 [目标] [--scale N]`：SeedVR2 放大，直接处理文件，无需应用。
 
+## 与 ComfyUI 工作流的速度对比
+
+同一台 Apple M1 Ultra（64 GB）、同一张图、同一个任务、同样的工作流参数（9 步 ManualSigmas），随机种子多轮计时：
+
+| 指标 | ComfyUI 工作流 | Siliconed | 差异 |
+|---|---|---|---|
+| 移除 · 冷启动 | 155.94 s | **45–49 s** | 快约 3.2 倍 |
+| 移除 · 热运行 | 61.02 s | **34.62 s** | 快约 1.76 倍 |
+| 扩图 · 冷启动 | ~267 s | **153.1 s** | 快约 1.7 倍 |
+| 扩图 · 热运行 | 225.98 s | **128.09 s** | 快约 1.76 倍 |
+
+质量并排肉眼对比：移除与扩图的重建效果均相当。[方法、明细与复现](docs/SPEED-COMPARISON.md)。
+
 ## 下载
 
 原版应用以 `.dmg` 发布于上游的 [Releases](https://github.com/gwenn-ha-dev/Siliconed/releases) 页面；本仓库的改动目前需要自行构建（[从源码构建](docs/ENGINE.md#build-from-source)，需要 Xcode 26 或更高版本）。系统要求：macOS 26 或更高版本，Apple 芯片。应用不预装任何模型：你在应用内挑选模型，阅读各自的许可证，然后才开始下载。

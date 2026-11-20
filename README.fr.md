@@ -33,6 +33,19 @@ Le `silicontrol` de l'originale pilote déjà les rendus depuis un terminal ([do
 - `add --lora expand --pad G,D,H,B --image IMAGE` — étendre (la préréglée 0.7 câblée, un masque refusé) ;
 - `upscale FICHIER [DEST] [--scale N]` — SeedVR2 sur un fichier, sans l'app.
 
+## La vitesse, face aux workflows ComfyUI
+
+Sur le même Apple M1 Ultra (64 Go), la même image, la même tâche, les paramètres propres au workflow (9 étapes ManualSigmas), graines aléatoires, plusieurs tours chronométrés :
+
+| Mesure | Workflow ComfyUI | Siliconed | Écart |
+|---|---|---|---|
+| Retrait · démarrage à froid | 155,94 s | **45–49 s** | ~3,2× plus vite |
+| Retrait · à chaud | 61,02 s | **34,62 s** | ~1,76× plus vite |
+| Extension · démarrage à froid | ~267 s | **153,1 s** | ~1,7× plus vite |
+| Extension · à chaud | 225,98 s | **128,09 s** | ~1,76× plus vite |
+
+La qualité, comparée côte à côte : les reconstructions du retrait et de l'extension sont équivalentes. [Méthode, détails, reproduction](docs/SPEED-COMPARISON.md).
+
 ## Téléchargement
 
 L'originale est distribuée en `.dmg` sur la page [Releases](https://github.com/gwenn-ha-dev/Siliconed/releases) de l'amont ; le travail de ce fork se construit depuis les sources pour l'instant ([Construire depuis les sources](docs/ENGINE.fr.md#construire-depuis-les-sources), Xcode 26 ou plus). Prérequis : macOS 26 ou plus, Apple silicon. Rien n'est préinstallé : vous choisissez les modèles depuis l'app, vous lisez chaque licence, et c'est seulement ensuite qu'un octet se télécharge.

@@ -33,6 +33,19 @@ The original's `silicontrol` already drives renders from a terminal ([docs](docs
 - `add --lora expand --pad L,R,T,B --image IMAGE` — expand (the 0.7 preset wired, a mask refused);
 - `upscale FILE [DEST] [--scale N]` — SeedVR2 on a file, no app needed.
 
+## Speed, next to the ComfyUI workflows
+
+On the same Apple M1 Ultra (64 GB), the same image, the same task, the workflow's own parameters (9-step ManualSigmas), random seeds, several timed rounds:
+
+| Metric | ComfyUI workflow | Siliconed | Difference |
+|---|---|---|---|
+| Remove · cold start | 155.94 s | **45–49 s** | ~3.2× faster |
+| Remove · warm | 61.02 s | **34.62 s** | ~1.76× faster |
+| Expand · cold start | ~267 s | **153.1 s** | ~1.7× faster |
+| Expand · warm | 225.98 s | **128.09 s** | ~1.76× faster |
+
+Quality, compared side by side: the remove and expand reconstructions are equivalent. [Method, detail, reproduction](docs/SPEED-COMPARISON.md).
+
 ## Download
 
 The original ships as a `.dmg` on the upstream [Releases](https://github.com/gwenn-ha-dev/Siliconed/releases) page; this fork's work is built from source for now ([Build from source](docs/ENGINE.md#build-from-source), Xcode 26 or later). Requirements: macOS 26 or later, Apple silicon. Nothing comes preinstalled: you pick the models inside the app, read each license, and only then does a byte download.
