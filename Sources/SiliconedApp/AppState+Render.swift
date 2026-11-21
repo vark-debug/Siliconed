@@ -546,6 +546,7 @@ extension AppState {
                     lastImage += 1
                     let entry = Entry(ordinal: lastImage, job: job.ordinal, png: finished.png, vignette: finished.vignette,
                                         width: renderResult.image.width, height: renderResult.image.height,
+                                        transparent: finished.transparent,
                                         seed: renderResult.seed, timings: renderResult.timings, footprints: renderResult.footprints,
                                         evaluations: renderResult.evaluations,
                                         settings: { var s = settings; s.offer = renderResult.offer; s.fasterRendering = renderResult.fasterRendering; return s }(),

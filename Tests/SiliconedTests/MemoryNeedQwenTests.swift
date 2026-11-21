@@ -329,7 +329,7 @@ final class MemoryNeedQwenTests: XCTestCase {
             let need = Self.shapes(Self.request(w, h, references: [(w, h), (640, 640)]))
             let decoder = QwenImage21VAEDecoder.plan(config: need.vae, latentHeight: h / 16, latentWidth: w / 16)
             XCTAssertEqual(need.decodingPhase.bytes,
-                           max(decoder.bytes, decoder.host + 3 * w * h * 4) + decoder.outside, "\(w)×\(h)")
+                           max(decoder.bytes, decoder.host + (3 * 4 + 4) * w * h) + decoder.outside, "\(w)×\(h)")
             let largest = need.references.map(\.prepared).max { $0.width * $0.height < $1.width * $1.height }!
             XCTAssertEqual(need.referencesPhase!.bytes,
                            4 * largest.width * largest.height * 4

@@ -799,8 +799,10 @@ package final class QwenImage21VAEEncoder {
 
 // ── the modules ─────────────────────────────────────────────────────────────────────────────
 
-/// Qwen-Image-2.1's decoder: the RGBA it decodes, **alpha dropped without compositing** — what the
-/// oracle's `pil.convert("RGB")` writes.
+/// Qwen-Image-2.1's decoder: the RGBA it decodes — **the alpha kept**, as straight bytes on the
+/// `ImageRGB` (`rgba`) when some pixel is transparent, dropped (`nil`) when the image is opaque, so
+/// an opaque render is bit for bit what `pil.convert("RGB")`'s oracle writes. `pixels` stay the RGB
+/// planes alone, as the oracle reads them.
 package struct QwenImage21DecodingModule: DecodingModule {
     package var path: String
     package var space: LatentSpace { .qwenImage21 }
@@ -812,7 +814,28 @@ package struct QwenImage21DecodingModule: DecodingModule {
         let (rgba, seconds) = try vae.decode(latent: latent.values)
         context.timings.decoding = seconds
         return ImageRGB(pixels: Array(rgba.prefix(3 * vae.imageHeight * vae.imageWidth)),
-                        height: vae.imageHeight, width: vae.imageWidth)
+                        height: vae.imageHeight, width: vae.imageWidth,
+                        rgba: QwenImage21DecodingModule.rgba8(rgba, height: vae.imageHeight, width: vae.imageWidth))
+    }
+
+    /// The decoded planes `[4, h, w]` in `[-1, 1]` as **straight** interleaved 8-bit RGBA, the same
+    /// rounding as `ImageRGB.rgba8()` on the RGB (`(x/2 + 0.5)` clamped, ×255, rounded) and the same
+    /// on the alpha — `nil` when every alpha rounds to 255: an opaque image carries no `rgba`.
+    /// The RGB is the decoder's own, unpremultiplied (the model paints straight RGBA), so the bytes
+    /// of a rendered transparency match its planes.
+    package static func rgba8(_ rgba: [Float], height: Int, width: Int) -> [UInt8]? {
+        let plane = height * width
+        var bytes = [UInt8](repeating: 255, count: 4 * plane)
+        var transparent = false
+        for p in 0..<plane {
+            for c in 0..<4 {
+                let value = rgba[c * plane + p] / 2 + 0.5
+                let byte = UInt8(max(0, min(1, value)) * 255 + 0.5)
+                bytes[p * 4 + c] = byte
+                if c == 3 && byte < 255 { transparent = true }
+            }
+        }
+        return transparent ? bytes : nil
     }
 }
 

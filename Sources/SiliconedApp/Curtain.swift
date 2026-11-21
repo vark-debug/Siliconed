@@ -226,20 +226,7 @@ struct CurtainView: View {
                     // canvas carries pixels the original never had, and a transparency checkerboard —
                     // the editor's own sign for「no content here」— fills them instead of a colour that
                     // would read as part of the picture.
-                    Canvas { context, size in
-                        let s: CGFloat = 14
-                        context.fill(Path(CGRect(origin: .zero, size: size)),
-                                     with: .color(Color(white: 0.72)))
-                        let columns = Int((size.width / s).rounded(.up))
-                        let rows = Int((size.height / s).rounded(.up))
-                        for row in 0..<rows {
-                            for column in 0..<columns where (row + column).isMultiple(of: 2) {
-                                context.fill(Path(CGRect(x: CGFloat(column) * s, y: CGFloat(row) * s,
-                                                         width: s, height: s)),
-                                             with: .color(Color(white: 0.92)))
-                            }
-                        }
-                    }
+                    TransparencyCheckerboard()
                 }
                 .overlay(alignment: .topLeading) {
                     Image(decorative: image, scale: 1)
@@ -254,6 +241,7 @@ struct CurtainView: View {
             Image(decorative: image, scale: 1)
                 .resizable()
                 .interpolation(.high)
+                .background { if ImageRGB.hasAlpha(image) { TransparencyCheckerboard() } }
                 .scaleEffect(zoom)
                 .offset(o)
         }
@@ -473,5 +461,28 @@ enum ZoomAnchor {
         let k = z2 / z1
         let q = pointer.map { CGSize(width: $0.x - size.width / 2, height: $0.y - size.height / 2) } ?? .zero
         return CGSize(width: q.width - (q.width - o.width) * k, height: q.height - (q.height - o.height) * k)
+    }
+}
+
+/// **The transparency checkerboard** — the editor's own sign for「no content here」: a grey and
+/// white grid laid behind an image that carries alpha, where a solid colour would read as part of
+/// the picture. Fills whatever frame it is proposed, square by square (the curtain's expand
+/// canvas, the canvas's image, a history tile).
+struct TransparencyCheckerboard: View {
+    var body: some View {
+        Canvas { context, size in
+            let s: CGFloat = 14
+            context.fill(Path(CGRect(origin: .zero, size: size)),
+                         with: .color(Color(white: 0.72)))
+            let columns = Int((size.width / s).rounded(.up))
+            let rows = Int((size.height / s).rounded(.up))
+            for row in 0..<rows {
+                for column in 0..<columns where (row + column).isMultiple(of: 2) {
+                    context.fill(Path(CGRect(x: CGFloat(column) * s, y: CGFloat(row) * s,
+                                             width: s, height: s)),
+                                 with: .color(Color(white: 0.92)))
+                }
+            }
+        }
     }
 }

@@ -196,6 +196,10 @@ struct Entry: Identifiable {
     let png: Data
     let vignette: CGImage
     let width: Int, height: Int
+    /// **The image is transparent somewhere** (the render's `ImageRGB.rgba`): the tile shows its
+    /// checkerboard. What the render path sets; the derived images (a crop, an enlargement) say
+    /// nothing yet and default to `false`.
+    var transparent: Bool = false
     let seed: UInt64
     let timings: Engine.Timings
     let footprints: Engine.Footprints
@@ -296,17 +300,22 @@ struct Decoded: @unchecked Sendable {
 }
 
 /// What the detached task makes of a `Render`: the PNG, the image for immediate display, the
-/// thumbnail. `@unchecked Sendable`: three immutable values, built then only read.
+/// thumbnail. `@unchecked Sendable`: four immutable values, built then only read.
 struct FinishedImage: @unchecked Sendable {
     let png: Data
     let image: CGImage
     let vignette: CGImage
+    /// **The image is transparent somewhere** (`ImageRGB.rgba` kept by the decode): the history
+    /// tile lays its checkerboard under the vignette — the reduced image keeps the alpha but its
+    /// premultiplied context says nothing about whether it shows.
+    let transparent: Bool
 
     /// `metadata`: the render's own unless named subjects rewrote its prompt (`NamedSubjects.metadata`).
     init(_ renderResult: Engine.Render, metadata: [String: String]? = nil) throws {
         png = try metadata.map { try renderResult.image.png(metadata: $0) } ?? renderResult.png()
         image = renderResult.image.cgImage()
         vignette = Self.reduce(image, side: 240) ?? image
+        transparent = ImageRGB.hasAlpha(image)
     }
 
     /// Reduced for the strip (240 px on the longest side, ×2 for the Retina screen).

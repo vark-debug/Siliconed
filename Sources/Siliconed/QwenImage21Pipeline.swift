@@ -49,7 +49,9 @@ import Foundation
 ///     ceiling; an explicit size wins. The checks pass the oracle's sizes explicitly;
 ///   - an explicit size is **floored to 32** without a word (`multiple_of = vae_scale_factor · 2`); the
 ///     product refuses a side not a multiple of 32 at the preflight instead (`Format.multiple(for:)`);
-///   - the VAE returns RGBA; the product writes the RGB planes, alpha dropped (`QwenImage21DecodingModule`).
+///   - the VAE returns RGBA; the product keeps it (`QwenImage21DecodingModule`): the alpha as straight
+///     bytes on the `ImageRGB` when some pixel is transparent, `nil` (the oracle's `convert("RGB")`)
+///     when opaque — the PNG export and the display carry the transparency, `pixels` the RGB planes.
 ///     The Turbo publishes its VAE in bf16, exactly the base's fp32 rounded to nearest: the product
 ///     reads that file as published, widened to fp32 at load (never below the precision published).
 ///     Its encoder is the base's to the bit, its `processor/` another set of files with the same tokens.

@@ -175,6 +175,9 @@ struct SceneView: View {
             .resizable()
             .interpolation(.high)
             .scaledToFit()
+            // A transparent render shows its nothing: the checkerboard, not a colour that would
+            // read as part of the picture.
+            .background { if ImageRGB.hasAlpha(cg) { TransparencyCheckerboard() } }
             .clipShape(RoundedRectangle(cornerRadius: 6))
             .shadow(color: .black.opacity(0.35), radius: 18, y: 6)
             .frame(maxWidth: CGFloat(cg.width), maxHeight: CGFloat(cg.height))

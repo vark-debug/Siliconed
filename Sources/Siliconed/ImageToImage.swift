@@ -134,7 +134,9 @@ extension ImageRGB {
     // MARK: the straight RGBA of an image with transparency
 
     /// Whether the image declares an alpha channel at all (an opaque one never gets `rgba`).
-    static func hasAlpha(_ image: CGImage) -> Bool {
+    /// The app reads it too — a displayed image carries one only when it is transparent somewhere
+    /// (`ImageRGB.cgImage`, a transparent PNG read back), the checkerboard's cue.
+    package static func hasAlpha(_ image: CGImage) -> Bool {
         switch image.alphaInfo {
         case .first, .last, .premultipliedFirst, .premultipliedLast: return true
         default: return false

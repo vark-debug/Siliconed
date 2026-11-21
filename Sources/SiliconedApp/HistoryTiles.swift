@@ -75,6 +75,7 @@ private struct Thumbnail: View {
         Image(decorative: entry.vignette, scale: 1)
             .resizable()
             .interpolation(.medium)
+            .background { if entry.transparent { TransparencyCheckerboard() } }
             .scaledToFill()
             .frame(width: side * min(1, l / h), height: side * min(1, h / l))
             .clipShape(RoundedRectangle(cornerRadius: 5))

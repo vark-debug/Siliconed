@@ -127,4 +127,33 @@ final class QwenAlphaTests: XCTestCase {
         var reference = RenderCache.KeyBuilder("i"); reference.add(4); reference.add(1); reference.add(floats: white)
         XCTAssertEqual(key(opaque), reference.finish(), "an opaque image's key is unchanged")
     }
+
+    // ── the decoded render keeps its alpha ───────────────────────────────────────────────────
+
+    /// An opaque decode — every alpha plane at +1 — carries no `rgba`: bit for bit what the
+    /// oracle's `pil.convert("RGB")` writes, nothing attached.
+    func testAnOpaqueDecodeCarriesNoRGBA() {
+        let plane = [Float](repeating: 1, count: 4)
+        XCTAssertNil(QwenImage21DecodingModule.rgba8(plane + plane + plane + plane, height: 2, width: 2))
+    }
+
+    /// A transparent decode: **straight** interleaved bytes, each plane at the same rounding as
+    /// `rgba8()` (`(x/2 + 0.5)` clamped, ×255, rounded), the alpha real — and `rgba8()` hands
+    /// these bytes back as they are, the `CGImage` straight, the PNG read back with its alpha.
+    func testATransparentDecodeKeepsItsAlpha() throws {
+        let width = 3, plane = width
+        let planes: [[Float]] = [[1, 0, -1], [0.5, -1, 1], [-1, 1, 0.5], [-1, 0, 1]]   // R, G, B, A
+        let rgba = planes.flatMap { $0 }
+        let bytes = QwenImage21DecodingModule.rgba8(rgba, height: 1, width: width)!
+        XCTAssertEqual(bytes, [255, 191, 0, 0, 128, 0, 255, 128, 0, 255, 191, 255])
+        let image = ImageRGB(pixels: Array(rgba.prefix(3 * plane)), height: 1, width: width, rgba: bytes)
+        XCTAssertEqual(image.rgba8(), bytes, "the bytes as they were written")
+        XCTAssertEqual(image.cgImage().alphaInfo, .last, "a straight image, not RGBX")
+        let round = try ImageRGB(data: try image.png(), name: "render")
+        XCTAssertEqual(round.rgba, bytes, "the PNG keeps the transparency")
+        let opaque = ImageRGB(pixels: Array(rgba.prefix(3 * plane)), height: 1, width: width)
+        XCTAssertEqual(stride(from: 3, to: 4 * plane, by: 4).map { opaque.rgba8()[$0] },
+                       [UInt8](repeating: 255, count: plane), "an opaque image stays opaque")
+        XCTAssertEqual(opaque.cgImage().alphaInfo, .noneSkipLast)
+    }
 }

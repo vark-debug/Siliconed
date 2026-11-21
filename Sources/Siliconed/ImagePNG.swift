@@ -15,7 +15,13 @@ extension ImageRGB {
     /// rather than 12 MB of floats per image. The reference's post-processing: `(x/2 + 0.5)`,
     /// clamped to `[0, 1]`, ×255, rounded. The clamping is not cosmetic — the decoder outputs up
     /// to ±1.14, so without it the values overflow.
+    ///
+    /// An image with transparency (`ImageRGB.rgba`) returns **its straight bytes as they are**:
+    /// the alpha is the image's, not the opaque 255 — the `CGImage`, the PNG and the display keep
+    /// the transparency. The rounding matches `QwenImage21DecodingModule.rgba8`'s, which wrote
+    /// these bytes from the same planes.
     package func rgba8() -> [UInt8] {
+        if let rgba { return rgba }
         var bytes = [UInt8](repeating: 255, count: height * width * 4)
         let plane = height * width
         for p in 0..<plane {
@@ -27,9 +33,10 @@ extension ImageRGB {
         return bytes
     }
 
-    /// The image as an **sRGB** `CGImage`, 8 bits, RGBX.
+    /// The image as an **sRGB** `CGImage`, 8 bits — straight RGBA when the image is transparent,
+    /// RGBX when it is not.
     package func cgImage() -> CGImage {
-        PNG.cgImage(rgba: rgba8(), height: height, width: width)
+        PNG.cgImage(rgba: rgba8(), height: height, width: width, alpha: rgba != nil)
     }
 
     /// **The PNG, in memory**: sRGB, no timestamp, and the generation metadata in `iTXt` text
@@ -45,12 +52,14 @@ extension ImageRGB {
 package enum PNG {
     package static let srgb = CGColorSpace(name: CGColorSpace.sRGB)!
 
-    /// 8-bit RGBX bytes → sRGB `CGImage`.
-    static func cgImage(rgba: [UInt8], height: Int, width: Int) -> CGImage {
+    /// 8-bit RGBA bytes → sRGB `CGImage`: **straight** RGBA (`alpha`, a transparent pixel keeps its
+    /// colour) or RGBX (opaque, the byte always 255) — the image's alpha written to the PNG as it is.
+    static func cgImage(rgba: [UInt8], height: Int, width: Int, alpha: Bool = false) -> CGImage {
         let provider = CGDataProvider(data: Data(rgba) as CFData)!
         return CGImage(width: width, height: height, bitsPerComponent: 8, bitsPerPixel: 32,
                        bytesPerRow: width * 4, space: srgb,
-                       bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.noneSkipLast.rawValue),
+                       bitmapInfo: CGBitmapInfo(rawValue: (alpha ? CGImageAlphaInfo.last
+                                                             : CGImageAlphaInfo.noneSkipLast).rawValue),
                        provider: provider, decode: nil, shouldInterpolate: false,
                        intent: .defaultIntent)!
     }

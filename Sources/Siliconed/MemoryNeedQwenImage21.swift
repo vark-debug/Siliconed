@@ -381,7 +381,9 @@ package struct QwenImage21Need {
 
     /// The decoder's two heaps and the RGBA it returns (`QwenImage21VAEDecoder.plan`); then, its heaps
     /// handed back, the RGB copy `QwenImage21DecodingModule` takes of the RGBA (`Array(rgba.prefix(3·H·W))`)
-    /// — the larger of the two moments; and a batch's images already decoded.
+    /// and the straight RGBA bytes it writes when the decode is transparent (`rgba8`, 4 bytes a pixel,
+    /// charged always — the decode does not say whether some alpha is under 255) — the larger of the
+    /// two moments; and a batch's images already decoded.
     package var decodingPhase: MemoryNeed.Phase {
         let (H, W) = (vae.factor * target.height, vae.factor * target.width)
         let band = request.minimumBands ? min(QwenImage21VAEDecoder.bandPixels, MemoryPlan.qwenMinimumBand)
@@ -389,8 +391,9 @@ package struct QwenImage21Need {
         let plan = QwenImage21VAEDecoder.plan(config: vae, latentHeight: target.height, latentWidth: target.width,
                                               bandPixels: band)
         let rgb = 3 * H * W * 4
+        let rgba = 4 * H * W
         return .init(kind: .decoding, terms: MemoryNeed.vae("Qwen decoder", plan)
-            + [Term("RGB copy beyond the heaps", max(0, rgb - plan.registers - plan.workspace)),
+            + [Term("RGB copy and the RGBA bytes beyond the heaps", max(0, rgb + rgba - plan.registers - plan.workspace)),
                MemoryNeed.batchImages(request)])
     }
 
