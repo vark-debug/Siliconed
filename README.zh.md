@@ -22,7 +22,7 @@
 
 - **移除与局部重绘**：遮罩区域裁剪、绿色填充或按提示词重绘、羽化回贴——σ 表与 9 步 ManualSigmas、参考分辨率、裁剪起点，全部与 ComfyUI 的「Qwen-Image-2.1 移除/局部重绘」工作流等效（[文档](docs/MASK-WORKFLOW.md)）。
 - **扩图（outpainting）**：画布按每边百分比向外延伸、灰边填充、就近 32 取整的采样尺寸、GH_CropRestore 等效回贴——与 ComfyUI 的「Qwen Image 2.1 扩图」工作流等效，且无拉伸、无边缘拖影（[文档](docs/EXPAND-WORKFLOW.md)）。
-- **工作流预设 LoRA**：remove (1.0) / redraw (0.48) / expand (0.7)，取自 Civitai 社区的 qwen2-1-gh 系列，随分支自动接线。
+- **工作流预设 LoRA**：remove (1.0) / redraw (0.48) / expand (0.7)，孤海（Goohai）的 qwen2-1-gh 系列，发布于 Civitai，随分支自动接线。
 - **对比幕帘**：原图与结果拉幕对比，扩图结果以黑白格标注原本没有内容的区域。
 
 ### 2. SeedVR2 放大
@@ -78,7 +78,7 @@ SeedVR2 的 Swift/MLX 移植：图像 ×N 的 1:1 精修放大。应用内有窗
 
 ## 致谢
 
-原项目 Siliconed 由 Gwenn 开发——本仓库的全部新增工作都站在它的地基上。模型归其发布方所有，各自遵循自己的许可证；参考实现是 Hugging Face 的 [diffusers](https://github.com/huggingface/diffusers) 和 [transformers](https://github.com/huggingface/transformers)，图像重采样逐比特复刻了 [Pillow](https://github.com/python-pillow/Pillow) 的 Lanczos。Qwen-Image-2.1 的移除/重绘/扩图对齐，特别感谢孤海（[Goohai](https://github.com/goohai/Goohaitools-comfyui)）开源的 ComfyUI 工作流「Qwen-2.1 移除、局部重绘、扩图」——它们是本项目的参考实现源；工作流 LoRA 来自 Civitai 社区；MOSS-Image 的 8 步配方来自 lodestones 的 [DMD LoRA](https://huggingface.co/lodestones/MOSS-Image-SFT-8-steps-dmd)；放大功能基于 SeedVR2（字节跳动 Seed 团队）。
+原项目 Siliconed 由 Gwenn 开发——本仓库的全部新增工作都站在它的地基上。模型归其发布方所有，各自遵循自己的许可证；参考实现是 Hugging Face 的 [diffusers](https://github.com/huggingface/diffusers) 和 [transformers](https://github.com/huggingface/transformers)，图像重采样逐比特复刻了 [Pillow](https://github.com/python-pillow/Pillow) 的 Lanczos。Qwen-Image-2.1 的移除/重绘/扩图对齐，特别感谢孤海（[Goohai](https://github.com/goohai/Goohaitools-comfyui)）开源的 ComfyUI 工作流「Qwen-2.1 移除、局部重绘、扩图」——它们是本项目的参考实现源；工作流 LoRA 是孤海（Goohai）的作品，发布于 Civitai；MOSS-Image 的 8 步配方来自 lodestones 的 [DMD LoRA](https://huggingface.co/lodestones/MOSS-Image-SFT-8-steps-dmd)；放大功能基于 SeedVR2（字节跳动 Seed 团队）。
 
 ## 许可证
 
