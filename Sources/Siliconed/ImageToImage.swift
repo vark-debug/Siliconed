@@ -242,10 +242,12 @@ extension ImageRGB {
     }
 
     /// **The image stretched to the format exactly** — no fill, no crop: the workflow's
-    /// `图像缩放V2_孤海` hands the padded canvas to the encoder stretched (`拉伸`), and the expand
+    /// `图像缩放V2_孤海` hands the padded canvas to the encoder stretched (`拉伸`), the expand
     /// path's paste-back stretches the decoded render the same way (`Expand.render`,
-    /// `Expand.composited`). The resampling is `fitted`'s (vImage's high quality, on floats), then
-    /// clamped to `[-1, 1]`; an image already at the format comes back as is, bit for bit.
+    /// `Expand.composited`), and the patch path's crop goes to the plan stretched too
+    /// (`Patch.render`, the workflow's node 209 `缩放模式: 拉伸`). The resampling is `fitted`'s
+    /// (vImage's high quality, on floats), then clamped to `[-1, 1]`; an image already at the
+    /// format comes back as is, bit for bit.
     package func stretched(width L: Int, height H: Int) -> ImageRGB {
         if L == width && H == height { return self }
         var output = [Float](repeating: 0, count: 3 * H * L)

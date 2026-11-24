@@ -33,6 +33,45 @@ final class PatchTests: XCTestCase {
         XCTAssertEqual(mask.filled().values[0 * size + 10], 0)
     }
 
+    /// **A carried alpha falls back to brightness**: an opaque white-on-black mask whose PNG
+    /// carries antialiased alpha edges (here an edge line at 220 — nothing transparent, as the
+    /// editor-exported file that made the whole image the mask) reads as what it shows: the white
+    /// shape is the mask, not the alpha.
+    func testACarriedAlphaFallsBackToBrightness() throws {
+        let width = 64, height = 64, count = width * height
+        var pixels = [Float](repeating: -1, count: 3 * count) // black
+        for y in 16..<48 { for x in 16..<48 { for c in 0..<3 { pixels[c * count + y * width + x] = 1 } } }
+        var rgba = [UInt8](repeating: 255, count: 4 * count) // carried: alpha 255 everywhere…
+        for y in 16..<48 { rgba[4 * (y * width + 16) + 3] = 220 } // …with an antialiased edge, none transparent
+        let mask = ImageMask(image: ImageRGB(pixels: pixels, height: height, width: width, rgba: rgba))
+        let bounds = try XCTUnwrap(mask.bounds())
+        XCTAssertEqual(bounds.x, 16); XCTAssertEqual(bounds.y, 16)
+        XCTAssertEqual(bounds.width, 32); XCTAssertEqual(bounds.height, 32,
+                       "the white shape, not the whole image")
+        XCTAssertEqual(mask.effectivePixels, 32 * 32)
+    }
+
+    /// **A shape genuinely in the alpha is the mask**: a white shape on a transparent background —
+    /// some pixel below half opacity — reads the alpha, opaque being the area to change.
+    func testAShapeInTheAlphaIsTheMask() throws {
+        let width = 64, height = 64, count = width * height
+        var rgba = [UInt8](repeating: 0, count: 4 * count) // transparent background
+        for y in 16..<48 {
+            for x in 16..<48 {
+                let i = 4 * (y * width + x)
+                rgba[i] = 255; rgba[i + 1] = 255; rgba[i + 2] = 255; rgba[i + 3] = 255
+            }
+        }
+        let image = ImageRGB(pixels: [Float](repeating: 0.5, count: 3 * count), height: height, width: width, rgba: rgba)
+        let mask = ImageMask(image: image)
+        let bounds = try XCTUnwrap(mask.bounds())
+        XCTAssertEqual(bounds.x, 16); XCTAssertEqual(bounds.y, 16)
+        XCTAssertEqual(bounds.width, 32); XCTAssertEqual(bounds.height, 32)
+        XCTAssertEqual(mask.effectivePixels, 32 * 32)
+        XCTAssertEqual(mask.values[16 * width + 16], 1, "opaque: the area to change")
+        XCTAssertEqual(mask.values[0], 0, "transparent: kept")
+    }
+
     /// **The crop `遮罩裁剪V2` then `图像缩放（范围）` make**: 200 px of mask in a 1000×700 image grow
     /// by 0.3 × 200 above and 0.4 × 200 on the other sides — `int(200 × 0.399…)` = **79**, not 80: the
     /// workflow's `1.4 − 1` in binary floating point, kept as it is — then the long side is scaled to 768

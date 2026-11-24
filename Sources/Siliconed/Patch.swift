@@ -9,8 +9,9 @@ import Foundation
 
 /// **The region an edit replaces**: one value per pixel, 0 (kept) to 1 (replaced).
 ///
-/// `白=改，黑=留`: a white-on-black mask, or the alpha channel of a bitmap mask (a pixel map keeps
-/// its shape in the alpha). The workflow reads the mask at `> 0.1` once, for the holes and the box.
+/// `白=改，黑=留`: a white-on-black mask, or the alpha channel of a bitmap mask whose alpha
+/// keeps the shape (a real transparent region). The workflow reads the mask at `> 0.1` once,
+/// for the holes and the box.
 package struct ImageMask: Sendable, Equatable {
     package static let threshold: Float = 0.1
 
@@ -24,11 +25,19 @@ package struct ImageMask: Sendable, Equatable {
         self.width = width; self.height = height; self.values = values
     }
 
-    /// The mask of an image: its alpha when it has one (a bitmap's shape), else its brightness,
+    /// The mask of an image: its alpha when the alpha **carries a real transparent region**
+    /// (a bitmap's shape kept in the alpha — some pixel below half opacity), else its brightness,
     /// `max(r, g, b)` — white substitutes.
+    ///
+    /// An alpha channel that is merely carried — every pixel nearly opaque, as an editor's
+    /// antialiased edges make on an opaque white-on-black mask — carries no shape: reading it
+    /// would make the whole image the mask, so the brightness decides. **White / opaque is the
+    /// area to change**, the app's own convention (`MaskPainter`, « Attach Mask… »). The
+    /// workflow's `LoadImageGoohai` reads `1 − alpha` (transparent = change) and never reads
+    /// brightness at all — a deliberate divergence, said in `docs/MASK-WORKFLOW.md`.
     package init(image: ImageRGB) {
         let count = image.width * image.height
-        if let rgba = image.rgba {
+        if let rgba = image.rgba, (0..<count).contains(where: { rgba[4 * $0 + 3] < 128 }) {
             self.init(width: image.width, height: image.height,
                       values: (0..<count).map { Float(rgba[4 * $0 + 3]) / 255 })
             return
@@ -311,7 +320,11 @@ package struct Patch: Sendable, Equatable {
     }
 
     /// **The crop the model sees**: the original at the crop's pixels, tinted green where the filled
-    /// mask is, then scaled to the plan's size. The workflow tints before it scales (`#204` then `#207`).
+    /// mask is, then scaled to the plan's size. The workflow tints before it scales (`#204` then
+    /// `#209`), and node 209's `缩放模式` is **`拉伸`** — the crop stretched to the plan's size
+    /// exactly, no pixel cut — so `stretched` here, never `fitted`'s cover: a cover would break the
+    /// roundtrip, and the noise_mask's kept ring (`KSamplerX0Inpaint`'s `latent_image`) would come
+    /// back through `composited`'s stretch rescaled, pasted a few pixels off its place.
     ///
     /// A pixel the mask leaves alone is returned untouched; inside it, `0.4` of `#00FF00` substitutes,
     /// as `图像合并（遮罩）` does (its mask is quantized to 102/255, which is exactly 0.4).
@@ -349,7 +362,7 @@ package struct Patch: Sendable, Equatable {
             }
         }
         return ImageRGB(pixels: pixels, height: crop.height, width: crop.width)
-            .fitted(width: plan.width, height: plan.height)
+            .stretched(width: plan.width, height: plan.height)
     }
 
     /// **The workflow's `noise_mask`** (`Text Encode Qwen Image 2.1 GH`: `_expand_and_feather_mask`,

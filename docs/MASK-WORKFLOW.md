@@ -291,9 +291,10 @@ long side 768–2560, ÷32) → `Get Image Size`(248) → `图像缩放V2`(250, 
 
 | item | workflow | this app (`--mode redraw`) | alignment |
 |---|---|---|---|
+| mask input | `LoadImageGoohai`(193): the mask is `1 − alpha` whenever the file has an alpha band (the mask editor stores the effective mask in the alpha), an all-zero mask without one — **brightness is never read** | white-on-black brightness (white = change), or the alpha when it carries a real transparent region (opaque = change) | **not aligned, deliberate** — see below |
 | start | `latent_image` = 255's latent output (empty latent) + `RandomNoise`(267) | `Latent.noise` at the plan's size; `seededStart` off by default | **aligned** — pure noise |
 | `noise_mask` | 250 and 255 take the crop's mask (`249[2]`); there is no separate mask node | `Patch.Settings.noiseMask` = true, applied in both modes (`EngineRender` → `Context.Inpaint`) | **aligned by design**; the JSON proves the mask enters 250, the hand-off inside the encode node is not inspectable here |
-| reference size | `image_01` = 250[0]: the crop stretched exactly to the 247 size (250's «将边缩放到 1024» is superseded by 248's width/height) | the same plan size; `Patch.render` → `fitted` is **cover + centre crop**; `primaryMatchesTarget` (≤64 px cut) passes it as is, otherwise `--ref-res` (768–2560, ÷32) | **near** — the size agrees; resampling differs (cover vs stretch, ≤16 px a side from the ÷32 rounding), and a crop whose cover cut exceeds 64 px gets a different encoder size |
+| reference size | `image_01` = 250[0]: the crop stretched exactly to the 247 size (250's «将边缩放到 1024» is superseded by 248's width/height; `缩放模式` = **`拉伸`**) | the same plan size; `Patch.render` → `stretched`, the crop stretched to the plan exactly; `primaryMatchesTarget` passes it as is, otherwise `--ref-res` (768–2560, ÷32) | **aligned** — the stretch is what keeps the `noise_mask` ring's roundtrip exact: cover + centre crop here rescaled the kept ring through `composited`'s stretch-back, pasting it a few pixels off its place (the intermittent paste misalignment, fixed) |
 | steps | `ManualSigmas` 9 steps (10 σ: 1.0 … 0) | `Patch.defaultSteps` = 9; `sigmas(steps: 9)` = the same table | **aligned** |
 | LoRA | 258 consistency, 0.48 | `--lora redraw` preset 0.48 | **aligned** |
 | crop geometry | 249 at 原像素, expansion 1.3/1.4/1.4/1.4, 倍数取整 0; 247 long side 768–2560, ÷32 | `Patch.plan`: margins from the box's shortest side, same long-side bounds, same ÷32 scheme | **aligned** |
@@ -303,13 +304,25 @@ long side 768–2560, ÷32) → `Get Image Size`(248) → `图像缩放V2`(250, 
 
 **What the two unaligned items look like**:
 
+- **Mask input**: the workflow reads a mask only out of the **alpha channel, inverted**
+  (`1 − alpha`: the mask editor's transparent area is what changes), and a file without an
+  alpha band comes back as an all-zero mask — its `纯白像素 < 10` guard then replaces the whole
+  image. A plain white-on-black PNG — this app's own mask format, painted or imported — is not
+  a format the workflow supports at all. The app reads the brightness first (white = change)
+  and the alpha only when it carries a real transparent region (opaque = change, its own
+  convention). The divergence is deliberate: it keeps white-on-black masks working, and the
+  carried-alpha case — an opaque mask whose editor wrote antialiased alpha edges — would
+  otherwise read the whole image as the mask.
 - **Prompt optimizer**: the same sentence reaches the model as the workflow's rewritten prompt
   (usually longer, often English, staged from the crop's content) versus the sentence as typed.
   The redraw follows the typed wording literally and less predictably.
-- **Cover vs stretch**: at most a few pixels of scale/shift when the ÷32 plan rounds the crop —
-  sub-pixel at 9 steps, no visible change of content. For an elongated crop (cover cut > 64 px)
-  the encoder reads it at `--ref-res`, where the workflow stretches it to the plan: fine
-  texture/geometry of the reference can differ; the paste itself is unaffected.
+
+*(A former second item — `Patch.render`'s cover + centre crop where node 250 stretches — was
+aligned to the workflow's `拉伸` mode after the intermittent paste misalignment was traced to it:
+with `noise_mask` on, the ring the sampler keeps at the crop's own latent came back through the
+paste-back's stretch rescaled by the cover cut, a few pixels off its place. The crop now goes to
+the plan stretched, and the roundtrip — stretch, render, stretch back — is exact, as the
+workflow's is.)*
 
 One more difference, on the other branch: node 118's prompt is the fixed
 « 移除图像中的绿色区域 », so the workflow's remove ignores a user sentence; here
