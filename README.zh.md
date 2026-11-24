@@ -8,6 +8,14 @@
 
 本仓库在原项目（0.20 版）基础上继续开发，全部改动同样以 [Apache License 2.0](LICENSE) 开源；原项目的版权与许可证声明原样保留，本仓库的修改按同一许可证提供。
 
+## 以 Photoshop 为画布：rocxps 插件
+
+**本仓库的目标**：让 Siliconed 成为 Photoshop 的外置生成工具。Photoshop 侧是 [rocxps](https://github.com/vark-debug/rocxps) —— 一个 UXP 面板（Photoshop 24.2+）：框选一块区域，面板按 32px 对齐抓取选区与蒙版，交给本地的 Siliconed（或已配对的另一台 Mac）渲染，走的正是终端用的同一套 `silicontrol`。结果按原尺寸贴回画布：整块替换、图层蒙版或像素蒙版。
+
+- **提示词留空，或选「强制移除」，即移除选区内容**；填写句子则重绘——分支由提示词决定，面板与应用一致。
+- **面板的任务队列**落盘持久化，可暂停恢复、重试；默认自动贴回，关闭后先预览再一键贴回。
+- 同一面板也接火山方舟（Seedream）、RunningHub 和 IOPaint；Siliconed 是其中本地、私密的那个后端。
+
 ## 本仓库做了什么
 
 ### 1. Qwen-Image-2.1 工作流强化（与 ComfyUI 工作流逐节点对齐）
@@ -33,6 +41,8 @@ SeedVR2 的 Swift/MLX 移植：图像 ×N 的 1:1 精修放大。应用内有窗
 - `add --lora expand --pad L,R,T,B --image 图片`：扩图（预设 0.7 自动接线，掩码被拒）；
 - `upscale 文件 [目标] [--scale N]`：SeedVR2 放大，直接处理文件，无需应用。
 
+[rocxps 插件](https://github.com/vark-debug/rocxps)正是通过这些命令驱动应用的。
+
 ## 与 ComfyUI 工作流的速度对比
 
 同一台 Apple M1 Ultra（64 GB）、同一张图、同一个任务、同样的工作流参数（9 步 ManualSigmas），随机种子多轮计时：
@@ -48,7 +58,7 @@ SeedVR2 的 Swift/MLX 移植：图像 ×N 的 1:1 精修放大。应用内有窗
 
 ## 下载
 
-原版应用以 `.dmg` 发布于上游的 [Releases](https://github.com/gwenn-ha-dev/Siliconed/releases) 页面；本仓库的改动目前需要自行构建（[从源码构建](docs/ENGINE.md#build-from-source)，需要 Xcode 26 或更高版本）。系统要求：macOS 26 或更高版本，Apple 芯片。应用不预装任何模型：你在应用内挑选模型，阅读各自的许可证，然后才开始下载。
+原版应用以 `.dmg` 发布于上游的 [Releases](https://github.com/gwenn-ha-dev/Siliconed/releases) 页面；本仓库自己发布 [Releases](https://github.com/vark-debug/Siliconed/releases)（自 0.21 起），也可以从源码构建（[从源码构建](docs/ENGINE.md#build-from-source)，需要 Xcode 26 或更高版本）。系统要求：macOS 26 或更高版本，Apple 芯片。应用不预装任何模型：你在应用内挑选模型，阅读各自的许可证，然后才开始下载。
 
 ## 原应用能做什么（概览）
 

@@ -8,6 +8,14 @@ L'app originale fait tourner nativement, en Swift et Metal, de récents modèles
 
 Ce dépôt continue depuis l'original (version 0.20) ; tout ce qui y est ajouté est ouvert sous la même [licence Apache 2.0](LICENSE) — les mentions de copyright et de licence originales sont conservées telles quelles, et le travail de ce fork est offert sous la même licence.
 
+## Photoshop pour toile : le plugin rocxps
+
+**Le but de ce fork** : Siliconed comme outil de génération externe de Photoshop. Le côté Photoshop est [rocxps](https://github.com/vark-debug/rocxps) — un panneau UXP (Photoshop 24.2+) : vous cernez une sélection, le panneau la capture avec un masque aligné au 32, et le Siliconed local — ou un Mac appairé — fait le rendu, par le même `silicontrol` que le terminal. Le résultat est recollé sur le canevas à sa taille exacte : un remplacement entier, un masque de calque, ou un masque de pixels.
+
+- **Un prompt vide, ou « forcer le retrait », enlève le contenu de la sélection** ; une phrase le repeint — la branche se lit dans le prompt, dans le panneau comme dans l'app.
+- **La file du panneau** se persiste sur disque, se suspend et reprend, réessaie une tâche ; le recollage est automatique, ou d'un clic quand vous voulez d'abord regarder.
+- Le même panneau parle aussi à Volcengine (Seedream), RunningHub et IOPaint ; Siliconed en est le backend local et privé.
+
 ## Ce que fait ce fork
 
 ### 1. Les workflows de Qwen-Image-2.1, nœud par nœud contre ComfyUI
@@ -33,6 +41,8 @@ Le `silicontrol` de l'originale pilote déjà les rendus depuis un terminal ([do
 - `add --lora expand --pad G,D,H,B --image IMAGE` — étendre (la préréglée 0.7 câblée, un masque refusé) ;
 - `upscale FICHIER [DEST] [--scale N]` — SeedVR2 sur un fichier, sans l'app.
 
+Le plugin [rocxps](https://github.com/vark-debug/rocxps) pilote l'app par ces commandes.
+
 ## La vitesse, face aux workflows ComfyUI
 
 Sur le même Apple M1 Ultra (64 Go), la même image, la même tâche, les paramètres propres au workflow (9 étapes ManualSigmas), graines aléatoires, plusieurs tours chronométrés :
@@ -48,7 +58,7 @@ La qualité, comparée côte à côte : les reconstructions du retrait et de l'e
 
 ## Téléchargement
 
-L'originale est distribuée en `.dmg` sur la page [Releases](https://github.com/gwenn-ha-dev/Siliconed/releases) de l'amont ; le travail de ce fork se construit depuis les sources pour l'instant ([Construire depuis les sources](docs/ENGINE.fr.md#construire-depuis-les-sources), Xcode 26 ou plus). Prérequis : macOS 26 ou plus, Apple silicon. Rien n'est préinstallé : vous choisissez les modèles depuis l'app, vous lisez chaque licence, et c'est seulement ensuite qu'un octet se télécharge.
+L'originale est distribuée en `.dmg` sur la page [Releases](https://github.com/gwenn-ha-dev/Siliconed/releases) de l'amont ; ce fork publie ses propres [Releases](https://github.com/vark-debug/Siliconed/releases) — à partir de 0.21 — et se construit aussi depuis les sources ([Construire depuis les sources](docs/ENGINE.fr.md#construire-depuis-les-sources), Xcode 26 ou plus). Prérequis : macOS 26 ou plus, Apple silicon. Rien n'est préinstallé : vous choisissez les modèles depuis l'app, vous lisez chaque licence, et c'est seulement ensuite qu'un octet se télécharge.
 
 ## Ce que fait l'app originale (en bref)
 

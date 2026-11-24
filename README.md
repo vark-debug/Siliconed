@@ -8,6 +8,14 @@ The original app runs recent open-weight diffusion models natively in Swift and 
 
 This repository continues from the original (version 0.20); every change here is open source under the same [Apache License 2.0](LICENSE) — the original copyright and license notices are kept as they are, and this fork's work is offered under the same license.
 
+## Photoshop as the canvas: the rocxps plugin
+
+**The goal of this fork**: Siliconed as Photoshop's external generation tool. The Photoshop side is [rocxps](https://github.com/vark-debug/rocxps) — a UXP panel (Photoshop 24.2+): you frame a selection, the panel captures it with a 32-px-aligned mask, and the local Siliconed — or a paired Mac — does the render, through the same `silicontrol` the terminal uses. The result is laid back on the canvas at its exact size: a whole replacement, a layer mask, or a pixel mask.
+
+- **An empty prompt, or “force remove”, takes the selection's contents away**; a sentence redraws them — the branch is read from the prompt, in the panel as in the app.
+- **The panel's queue** persists on disk, pauses and resumes, retries a task; the paste-back is automatic, or one click when you want to look first.
+- The same panel also speaks to Volcengine (Seedream), RunningHub and IOPaint; Siliconed is its local, private backend.
+
 ## What this fork does
 
 ### 1. Qwen-Image-2.1 workflows, node for node against ComfyUI
@@ -33,6 +41,8 @@ The original's `silicontrol` already drives renders from a terminal ([docs](docs
 - `add --lora expand --pad L,R,T,B --image IMAGE` — expand (the 0.7 preset wired, a mask refused);
 - `upscale FILE [DEST] [--scale N]` — SeedVR2 on a file, no app needed.
 
+The [rocxps plugin](https://github.com/vark-debug/rocxps) drives the app through these commands.
+
 ## Speed, next to the ComfyUI workflows
 
 On the same Apple M1 Ultra (64 GB), the same image, the same task, the workflow's own parameters (9-step ManualSigmas), random seeds, several timed rounds:
@@ -48,7 +58,7 @@ Quality, compared side by side: the remove and expand reconstructions are equiva
 
 ## Download
 
-The original ships as a `.dmg` on the upstream [Releases](https://github.com/gwenn-ha-dev/Siliconed/releases) page; this fork's work is built from source for now ([Build from source](docs/ENGINE.md#build-from-source), Xcode 26 or later). Requirements: macOS 26 or later, Apple silicon. Nothing comes preinstalled: you pick the models inside the app, read each license, and only then does a byte download.
+The original ships as a `.dmg` on the upstream [Releases](https://github.com/gwenn-ha-dev/Siliconed/releases) page; this fork publishes its own [Releases](https://github.com/vark-debug/Siliconed/releases) — 0.21 onward — and can also be built from source ([Build from source](docs/ENGINE.md#build-from-source), Xcode 26 or later). Requirements: macOS 26 or later, Apple silicon. Nothing comes preinstalled: you pick the models inside the app, read each license, and only then does a byte download.
 
 ## What the original app does (a summary)
 
