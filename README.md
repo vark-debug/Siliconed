@@ -22,7 +22,7 @@ This repository continues from the original (version 0.20); every change here is
 
 - **Remove and inpaint (redraw)**: the masked crop, the green fill or a prompt-driven replacement, the feathered paste-back — σ table and 9-step ManualSigmas, the reference resolution, the crop's start, all equivalent to ComfyUI's Qwen-Image-2.1 remove/redraw workflow ([docs](docs/MASK-WORKFLOW.md)).
 - **Outpaint (expand)**: the canvas grows outward by a percent of each side, filled in grey, sampled at sizes rounded to the nearest 32, pasted back as GH_CropRestore does — equivalent to ComfyUI's “Qwen Image 2.1 expand” workflow, with no stretch and no edge ghosting ([docs](docs/EXPAND-WORKFLOW.md)).
-- **The workflows' preset LoRAs**: remove (1.0), redraw (0.48), expand (0.7) — Goohai's qwen2-1-gh series, published on Civitai, wired automatically per branch.
+- **The workflows' preset LoRAs**: remove (1.0), redraw (0.48), expand (0.7) — Goohai's qwen2-1-gh series, shared on Bilibili, wired automatically per branch.
 - **The comparison curtain**: the original and the result under a sliding curtain, the expand's empty areas shown as a checkerboard.
 
 ### 2. SeedVR2 upscaling
@@ -78,7 +78,7 @@ This fork's additions:
 
 ## Acknowledgements
 
-Siliconed was created by Gwenn — everything this fork adds stands on that foundation. The models belong to their publishers, each under its own license; the reference implementations are Hugging Face's [diffusers](https://github.com/huggingface/diffusers) and [transformers](https://github.com/huggingface/transformers), and the image resampling reproduces [Pillow](https://github.com/python-pillow/Pillow)'s Lanczos bit for bit. The remove/redraw/expand alignment of Qwen-Image-2.1 owes special thanks to Goohai ([Goohaitools-comfyui](https://github.com/goohai/Goohaitools-comfyui)) for open-sourcing the ComfyUI workflows “Qwen-2.1 remove, redraw, expand” — the reference implementations this project was read from; the workflows' LoRAs are Goohai's, published on Civitai; MOSS-Image's 8-step recipe comes from lodestones' [DMD LoRA](https://huggingface.co/lodestones/MOSS-Image-SFT-8-steps-dmd); the upscaler is based on SeedVR2 (ByteDance's Seed team).
+Siliconed was created by Gwenn — everything this fork adds stands on that foundation. The models belong to their publishers, each under its own license; the reference implementations are Hugging Face's [diffusers](https://github.com/huggingface/diffusers) and [transformers](https://github.com/huggingface/transformers), and the image resampling reproduces [Pillow](https://github.com/python-pillow/Pillow)'s Lanczos bit for bit. The remove/redraw/expand alignment of Qwen-Image-2.1 owes special thanks to Goohai ([Goohaitools-comfyui](https://github.com/goohai/Goohaitools-comfyui)) for open-sourcing the ComfyUI workflows “Qwen-2.1 remove, redraw, expand” — the reference implementations this project was read from; the workflows' LoRAs are Goohai's, shared on Bilibili; MOSS-Image's 8-step recipe comes from lodestones' [DMD LoRA](https://huggingface.co/lodestones/MOSS-Image-SFT-8-steps-dmd); the upscaler is based on SeedVR2 (ByteDance's Seed team).
 
 ## License
 
