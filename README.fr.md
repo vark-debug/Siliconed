@@ -1,4 +1,4 @@
-[English](README.md) · [Français](README.fr.md) · 简体中文
+[English](README.md) · Français · [简体中文](README.zh.md)
 
 # Siliconed (édition communautaire)
 
